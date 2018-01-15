@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.LffwVoucherPriceDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.LffwVoucherPriceEntity" id="lffwVoucherPriceMap">
+        <result property="id" column="id"/>
+        <result property="voucherprice" column="voucherprice"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.LffwVoucherPriceEntity">
+		select * from t_lffw_voucher_price where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.LffwVoucherPriceEntity">
+		select * from t_lffw_voucher_price
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_lffw_voucher_price 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.LffwVoucherPriceEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_lffw_voucher_price
+		(
+			`voucherprice`
+		)
+		values
+		(
+			#{voucherprice}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.LffwVoucherPriceEntity">
+		update t_lffw_voucher_price 
+		<set>
+			<if test="voucherprice != null">`voucherprice` = #{voucherprice}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_lffw_voucher_price where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_lffw_voucher_price where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.BgypfwCartDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.BgypfwCartEntity" id="bgypfwCartMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="skuid" column="skuid"/>
+        <result property="productid" column="productid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="count" column="count"/>
+        <association property="sku" column="skuid" javaType="com.lcworld.entity.BgypfwSkuidEntity" >
+        	<id property="id" column="skuid"/>
+        	<result property="skuname" column="skuname"/>
+        	<result property="mainimg" column="mainimg"/>
+        	<result property="price" column="price"/>
+        	<result property="cataName" column="cataName"/>
+        	<result property="store" column="store"/>
+        </association>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.BgypfwCartEntity">
+		select * from t_bgypfw_cart where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="bgypfwCartMap">
+		select *,(select skuc.skucataname from t_bgypfw_skufirstcata skuc where skuc.id = sku.firstcataid) cataName from t_bgypfw_cart c left join t_bgypfw_skuid sku on sku.id = c.skuid
+		<where>
+			<if test="uid != null">c.uid = #{uid}</if>
+			<if test="skuid != null">and c.skuid = #{skuid}</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by c.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_bgypfw_cart c
+		<where>
+			<if test="uid != null">c.uid = #{uid}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.BgypfwCartEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_bgypfw_cart
+		(
+			`uid`, 
+			`skuid`, 
+			`productid`, 
+			`createtime`, 
+			`count`
+		)
+		values
+		(
+			#{uid}, 
+			#{skuid}, 
+			#{productid}, 
+			#{createtime}, 
+			#{count}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.BgypfwCartEntity">
+		update t_bgypfw_cart 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="skuid != null">`skuid` = #{skuid}, </if>
+			<if test="productid != null">`productid` = #{productid}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="count != null">`count` = #{count}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_bgypfw_cart where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_bgypfw_cart where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<delete id="deleteBatchBySkuids" parameterType="java.util.Map" >
+		delete from t_bgypfw_cart where uid=#{uid} and skuid in 
+		<foreach item="id" collection="skuids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

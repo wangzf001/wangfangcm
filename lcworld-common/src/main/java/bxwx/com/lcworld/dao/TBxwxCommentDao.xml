@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TBxwxCommentDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TBxwxCommentEntity" id="tBxwxCommentMap">
+        <result property="id" column="id"/>
+        <result property="imgs" column="imgs"/>
+        <result property="content" column="content"/>
+        <result property="orderid" column="orderid"/>
+        <result property="uid" column="uid"/>
+        <result property="menderid" column="menderid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="score" column="score"/>
+        <result property="anonymous" column="anonymous"/>
+        <result property="servicescore" column="servicescore"/>
+        <result property="productscore" column="productscore"/>
+        <result property="type" column="type"/>
+        <result property="replyname" column="replyname"/>
+        <result property="replyphoto" column="replyphoto"/>
+    </resultMap>
+ 
+    <select id="queryObject" resultType="com.lcworld.entity.TBxwxCommentEntity">
+        select * from t_bxwx_comment where id = #{value}
+    </select>
+
+    <select id="queryList" resultType="com.lcworld.entity.TBxwxCommentEntity">
+        select * from t_bxwx_comment where 1=1 
+        <if test="orderid != null and orderid != ''">
+            and orderid =#{orderid}
+        </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    
+    <select id="queryTotal" resultType="int">
+        select count(*) from t_bxwx_comment where 1=1
+         <if test="orderid != null and orderid != ''">
+            and orderid =#{orderid}
+        </if>
+    </select>
+    
+    <select id="queryCommentTotal" resultType="int">
+         select  count(*) 
+		from t_bxwx_comment t
+  	    LEFT JOIN t_bxwx_mender m
+		on t.menderid = m.id
+		LEFT JOIN  t_user u
+		ON t.uid = u.id
+ 		where 1=1
+        <if test="uid != null and uid != ''">
+            and t.menderid  =#{uid}
+        </if>
+        <if test="scoretype == 1 ">
+            and t.score &lt;2
+        </if>
+         <if test="scoretype == 2 ">
+            and t.score between 2 and 4
+        </if>
+         <if test="scoretype == 3 ">
+            and t.score &gt;=4
+        </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by t.id desc
+            </otherwise>
+        </choose>
+    </select>
+    
+     
+    <insert id="save" parameterType="com.lcworld.entity.TBxwxCommentEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into t_bxwx_comment
+        (
+            `imgs`, 
+            `content`, 
+            `orderid`, 
+            `uid`, 
+            `menderid`, 
+            `createtime`, 
+            `score`, 
+            `anonymous`,
+            `servicescore`,
+            `productscore`,
+            `type`
+        )
+        values
+        (
+            #{imgs}, 
+            #{content}, 
+            #{orderid}, 
+            #{uid}, 
+            #{menderid}, 
+            #{createtime}, 
+            #{score}, 
+            #{anonymous},
+            #{servicescore},
+            #{productscore},
+            #{type}
+        )
+    </insert>
+     
+    <update id="update" parameterType="com.lcworld.entity.TBxwxCommentEntity">
+        update t_bxwx_comment 
+        <set>
+            <if test="imgs != null">`imgs` = #{imgs}, </if>
+            <if test="content != null">`content` = #{content}, </if>
+            <if test="orderid != null">`orderid` = #{orderid}, </if>
+            <if test="uid != null">`uid` = #{uid}, </if>
+            <if test="menderid != null">`menderid` = #{menderid}, </if>
+            <if test="createtime != null">`createtime` = #{createtime}, </if>
+            <if test="score != null">`score` = #{score}, </if>
+            <if test="anonymous != null">`anonymous` = #{anonymous},</if>
+            <if test="servicescore != null">`servicescore` = #{servicescore},</if>
+            <if test="productscore != null">`productscore` = #{productscore}</if>
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="delete">
+        delete from t_bxwx_comment where id = #{value}
+    </delete>
+    
+    <delete id="deleteBatch">
+        delete from t_bxwx_comment where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+     <select id="queryScore" resultType="java.lang.Double">
+        select AVG(score)  from t_bxwx_comment   where menderid =#{menderid} group by menderid
+    </select>
+     
+      <select id="queryListByScore" resultType="com.lcworld.entity.TBxwxCommentEntity">
+        select * from t_bxwx_comment where 1=1 
+        <if test="orderid != null and orderid != ''">
+            and orderid =#{orderid}
+        </if>
+        <if test="score != 1 ">
+            and score =5
+        </if>
+         <if test="score != 2 ">
+            and score between 3 and 4
+        </if>
+         <if test="score != 3 ">
+            and score &lt;=2
+        </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+     <select id="queryListByScoretype" resultMap="tBxwxCommentMap">
+         select t.*,u.realname  as 'replyname',u.photo as 'replyphoto'
+		from t_bxwx_comment t
+  	    LEFT JOIN t_bxwx_mender m
+		on t.menderid = m.id
+		LEFT JOIN  t_user u
+		ON t.uid = u.id
+ 		where 1=1 
+        <if test="uid != null and uid != ''">
+            and t.menderid  =#{uid}
+        </if>
+        <if test="scoretype == 1 ">
+            and t.score &lt;2
+        </if>
+         <if test="scoretype == 2 ">
+            and t.score between 2 and 4
+        </if>
+         <if test="scoretype == 3 ">
+            and t.score &gt;=4
+        </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+</mapper>

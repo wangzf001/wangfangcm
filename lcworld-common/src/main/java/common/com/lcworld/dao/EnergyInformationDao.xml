@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.EnergyInformationDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.EnergyInformationEntity" id="energyInformationMap">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="abstracts" column="abstracts"/>
+        <result property="content" column="content"/>
+        <result property="img" column="img"/>
+        <result property="favorNum" column="favor_num"/>
+        <result property="isRecommend" column="is_recommend"/>
+        <result property="sourceName" column="source_name"/>
+        <result property="sourceUrl" column="source_url"/>
+        <result property="creatTime" column="creat_time"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.EnergyInformationEntity">
+		select * from t_energy_information where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.EnergyInformationEntity">
+		select * from t_energy_information
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by is_recommend,creat_time desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_energy_information 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.EnergyInformationEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_energy_information
+		(
+			`title`, 
+			`abstracts`, 
+			`content`, 
+			`img`, 
+			`favor_num`, 
+			`is_recommend`, 
+			`source_name`, 
+			`source_url`, 
+			`creat_time`
+		)
+		values
+		(
+			#{title}, 
+			#{abstracts}, 
+			#{content}, 
+			#{img}, 
+			#{favorNum}, 
+			#{isRecommend}, 
+			#{sourceName}, 
+			#{sourceUrl}, 
+			#{creatTime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.EnergyInformationEntity">
+		update t_energy_information 
+		<set>
+			<if test="title != null">`title` = #{title}, </if>
+			<if test="abstracts != null">`abstracts` = #{abstracts}, </if>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="img != null">`img` = #{img}, </if>
+			<if test="favorNum != null">`favor_num` = #{favorNum}, </if>
+			<if test="isRecommend != null">`is_recommend` = #{isRecommend}, </if>
+			<if test="sourceName != null">`source_name` = #{sourceName}, </if>
+			<if test="sourceUrl != null">`source_url` = #{sourceUrl}, </if>
+			<if test="creatTime != null">`creat_time` = #{creatTime}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_energy_information where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_energy_information where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

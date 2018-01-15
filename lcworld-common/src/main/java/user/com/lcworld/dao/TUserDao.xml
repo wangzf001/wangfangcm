@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TUserDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TUserEntity" id="tUserMap">
+        <result property="id" column="id"/>
+        <result property="userName" column="user_name"/>
+        <result property="password" column="password"/>
+        <result property="createtime" column="createtime"/>
+        <result property="updatetime" column="updatetime"/>
+        <result property="wxnum" column="wxnum"/>
+        <result property="wbnum" column="wbnum"/>
+        <result property="qqnum" column="qqnum"/>
+        <result property="mobile" column="mobile"/>
+        <result property="nickname" column="nickname"/>
+        <result property="valid" column="valid"/>
+        <result property="tel" column="tel"/>
+        <result property="roomnum" column="roomnum"/>
+        <result property="sex" column="sex"/>
+        <result property="photo" column="photo"/>
+        <result property="positionid" column="positionid"/>
+        <result property="loginstatus" column="loginstatus"/>
+        <result property="signid" column="signid"/>
+        <result property="realname" column="realname"/>
+        <result property="nation" column="nation"/>
+        <result property="buildnum" column="buildnum"/>
+        <result property="buildname" column="build_name"/>
+        <result property="departid" column="departid"/>
+        <result property="officeid" column="officeid"/>
+        <result property="authStatus" column="authstatus"/>
+        <result property="deadline" column="deadline"/>
+    </resultMap>
+
+    <select id="queryObject" resultType="com.lcworld.entity.TUserEntity">
+        select *,(select name from t_user_position p where u.positionid = p.id) position from t_user u where id = #{value}
+    </select>
+    <select id="queryPositionList" resultType="java.util.Map">
+        select * from t_user_position
+    </select>
+
+    <select id="queryList" resultType="com.lcworld.entity.TUserEntity">
+        select u.*,tb.build_name from t_user u LEFT JOIN t_building tb ON tb.id = u.buildnum
+         where 1=1 
+        <if test="userName != null and userName != ''">
+          and user_name =#{userName} 
+        </if>
+        <if test="logintype != null and logintype != '' and  thirdNum != null and thirdNum != ''">
+             <choose>
+                <when test="logintype == 1">
+                   and qqnum = #{thirdNum}
+                </when>
+                <when test="logintype == 2">
+                     and wbnum = #{thirdNum}
+                </when>
+                <when test="logintype == 3">
+                     and wxnum = #{thirdNum}
+                </when>
+        	</choose>
+        </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryTotal" resultType="int">
+        select count(*) from t_user 
+    </select>
+     
+    <insert id="save" parameterType="com.lcworld.entity.TUserEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into t_user
+        (
+            `user_name`, 
+            `password`, 
+            `createtime`, 
+            `updatetime`, 
+            `wxnum`, 
+            `wbnum`, 
+            `qqnum`, 
+            `mobile`, 
+            `nickname`, 
+            `valid`, 
+            `tel`, 
+            `roomnum`, 
+            `sex`, 
+            `photo`, 
+            `positionid`, 
+            `loginstatus`, 
+            `signid`, 
+            `realname`, 
+            `nation`,
+            `buildnum`,
+            `departid`,
+            `officeid`,
+            `authstatus`,
+            `deadline`
+        )
+        values
+        (
+            #{userName}, 
+            #{password}, 
+            #{createtime}, 
+            #{updatetime}, 
+            #{wxnum}, 
+            #{wbnum}, 
+            #{qqnum}, 
+            #{mobile}, 
+            #{nickname}, 
+            #{valid}, 
+            #{tel}, 
+            #{roomnum}, 
+            #{sex}, 
+            #{photo}, 
+            #{positionid}, 
+            #{loginstatus}, 
+            #{signid}, 
+            #{realname}, 
+            #{nation},
+            #{buildnum},
+            #{departid},
+            #{officeid},
+            #{authStatus},
+            #{deadline}
+        )
+    </insert>
+     
+    <update id="update" parameterType="com.lcworld.entity.TUserEntity">
+        update t_user 
+        <set>
+            <if test="userName != null">`user_name` = #{userName}, </if>
+            <if test="password != null">`password` = #{password}, </if>
+            <if test="createtime != null">`createtime` = #{createtime}, </if>
+            <if test="updatetime != null">`updatetime` = #{updatetime}, </if>
+            <if test="wxnum != null">`wxnum` = #{wxnum}, </if>
+            <if test="wbnum != null">`wbnum` = #{wbnum}, </if>
+            <if test="qqnum != null">`qqnum` = #{qqnum}, </if>
+            <if test="mobile != null">`mobile` = #{mobile}, </if>
+            <if test="nickname != null">`nickname` = #{nickname}, </if>
+            <if test="valid != null">`valid` = #{valid}, </if>
+            <if test="tel != null">`tel` = #{tel}, </if>
+            <if test="roomnum != null">`roomnum` = #{roomnum}, </if>
+            <if test="sex != null">`sex` = #{sex}, </if>
+            <if test="photo != null">`photo` = #{photo}, </if>
+            <if test="positionid != null">`positionid` = #{positionid}, </if>
+            <if test="loginstatus != null">`loginstatus` = #{loginstatus}, </if>
+            <if test="signid != null">`signid` = #{signid}, </if>
+            <if test="realname != null">`realname` = #{realname}, </if>
+            <if test="nation != null">`nation` = #{nation},</if>
+            <if test="buildnum != null">`buildnum` = #{buildnum},</if>
+            <if test="departid != null">`departid` = #{departid},</if>
+            <if test="officeid != null">`officeid` = #{officeid},</if>
+            <if test="authStatus != null">`authstatus` = #{authStatus},</if>
+            <if test="deadline != null">`deadline` = #{deadline}</if>
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="delete">
+        delete from t_user where id = #{value}
+    </delete>
+    
+    <delete id="deleteBatch">
+        delete from t_user where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+      <select id="queryUserList" resultType="com.lcworld.dto.UserDTO">
+       SELECT
+		    a.createtime,
+		    a.id,
+		    a.mobile,
+		    a.photo,
+		    a.positionid,
+		    c.`name` positionName,
+		    a.realname,
+		    a.sex,
+		    a.valid,
+		    b.idcard,
+		    b.officetel tel,
+		    a.roomnum,
+		    a.buildnum,
+            tb.build_name,
+		    b.`status`,
+		    a.departid,
+		    a.officeid,
+		    e.name officename,
+		    d.name departname,
+		    a.user_name username,
+		    a.deadline
+		FROM
+		    t_user a
+		LEFT JOIN t_user_auth b ON a.id = b.uid
+		LEFT JOIN t_user_position c ON a.positionid = c.id
+		left join t_depart d on d.id = a.departid
+		left join t_office e on e.id = a.officeid
+        LEFT JOIN  t_building tb ON tb.id = a.buildnum
+         where 1=1 
+        <if test="departid != null and departid != ''">
+          and a.departid =#{departid} 
+        </if>
+        <if test="officeid != null and officeid != ''">
+          and a.officeid =#{officeid} 
+        </if>
+        <if test="realname != null and realname != ''">
+          and a.realname  like '%${realname}%' 
+        </if>
+        <if test="username != null and username != ''">
+          and a.user_name  like '%${username}%' 
+        </if>
+        <if test="starttime != null and starttime != ''">
+          and a.createtime &lt;= #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+          and a.createtime &gt;= #{endtime}
+        </if>
+        
+       
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    
+      <select id="queryUserTotal" resultType="java.lang.Integer">
+       SELECT
+		   count(*)
+		FROM
+		    t_user a
+		Left JOIN t_user_auth b ON a.id = b.uid
+         where 1=1 
+        <if test="realname != null and realname != ''">
+          and a.realname =#{realname} 
+        </if>
+        <if test="username != null and username != ''">
+          and a.user_name =#{username} 
+        </if>
+        <if test="starttime != null and starttime != ''">
+          and a.createtime &lt;= #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+          and a.createtime &gt;= #{endtime}
+        </if>
+         <if test="departid != null and departid != ''">
+          and a.departid =#{departid} 
+        </if>
+        <if test="officeid != null and officeid != ''">
+          and a.officeid =#{officeid} 
+        </if>
+        
+    </select>
+    
+    <select id="queryUserList1" resultType="com.lcworld.dto.UserDTO">
+       SELECT DISTINCT
+            a.*, c.`name` positionName,b.`status`, e.name officename,
+                    d.name departname
+        FROM
+            t_user a
+        LEFT JOIN t_user_auth b ON a.id = b.uid
+                LEFT JOIN t_user_position c ON a.positionid = c.id
+                left join t_depart d on d.id = a.departid
+                left join t_office e on e.id = a.officeid
+        INNER JOIN (
+            SELECT DISTINCT
+                min(rolesort) min,
+                c.departid,
+                c.officeid
+            FROM
+                sys_user_role a
+            INNER JOIN sys_role b ON a.role_id = b.role_id
+            AND a.user_id = #{uid}
+            AND b.type = 1
+            INNER JOIN sys_user c ON c.user_id = a.user_id
+        ) M ON (
+            (
+                M.min = 1
+                AND a.departid = M.departid
+            )
+            OR (
+                M.min = 2
+                AND a.departid = M.departid
+                AND a.officeid = M.officeid
+            )
+        )
+        where 1=1 
+         <if test="departid != null and departid != ''">
+          and a.departid =#{departid} 
+        </if>
+        <if test="officeid != null and officeid != ''">
+          and a.officeid =#{officeid} 
+        </if>
+         <if test="realname != null and realname != ''">
+          and a.realname  like '%${realname}%' 
+        </if>
+        <if test="username != null and username != ''">
+          and a.user_name  like '%${username}%' 
+        </if>
+        <if test="starttime != null and starttime != ''">
+          and a.createtime &lt;= #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+          and a.createtime &gt;= #{endtime}
+        </if>
+        UNION
+        (   SELECT DISTINCT
+                a.*, h.`name` positionName,g.`status`, e.name officename,
+                    d.name departname
+            FROM
+                t_user a
+            INNER JOIN t_base_user_role b ON a.id = b.uid
+            INNER JOIN t_purchase_type c ON c.id = b.roleid
+        LEFT JOIN t_user_auth g ON a.id = g.uid
+                LEFT JOIN t_user_position h ON a.positionid = h.id
+                left join t_depart d on d.id = a.departid
+                left join t_office e on e.id = a.officeid
+            INNER JOIN (
+                SELECT
+                    min(rolesort) min,
+                    c.departid,
+                    c.officeid,
+                    roletype
+                FROM
+                    sys_user_role a
+                INNER JOIN sys_role b ON a.role_id = b.role_id
+                AND a.user_id = #{uid}
+                AND b.type = 2
+                INNER JOIN sys_user c ON c.user_id = a.user_id
+                GROUP BY
+                    b.roletype
+            ) M ON (
+                (
+                    M.min = 1
+                    AND a.departid = M.departid
+                )
+                OR (
+                    M.min = 2
+                    AND a.departid = M.departid
+                    AND a.officeid = M.officeid
+                )
+                AND c.servicecode = M.roletype
+            )
+            where 1=1 
+        <if test="realname != null and realname != ''">
+          and a.realname  like '%${realname}%' 
+        </if>
+        <if test="username != null and username != ''">
+          and a.user_name  like '%${username}%' 
+        </if>
+        <if test="starttime != null and starttime != ''">
+          and a.createtime &lt;= #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+          and a.createtime &gt;= #{endtime}
+        </if>
+        )
+        order by id desc 
+        
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    
+      <select id="queryUserTotal1" resultType="java.lang.Integer">
+       
+       select count(*) from (
+         SELECT DISTINCT
+            a.*, c.`name` positionName,b.`status`, e.name officename,
+                    d.name departname
+        FROM
+            t_user a
+        LEFT JOIN t_user_auth b ON a.id = b.uid
+                LEFT JOIN t_user_position c ON a.positionid = c.id
+                left join t_depart d on d.id = a.departid
+                left join t_office e on e.id = a.officeid
+        INNER JOIN (
+            SELECT DISTINCT
+                min(rolesort) min,
+                c.departid,
+                c.officeid
+            FROM
+                sys_user_role a
+            INNER JOIN sys_role b ON a.role_id = b.role_id
+            AND a.user_id = #{uid}
+            AND b.type = 1
+            INNER JOIN sys_user c ON c.user_id = a.user_id
+        ) M ON (
+            (
+                M.min = 1
+                AND a.departid = M.departid
+            )
+            OR (
+                M.min = 2
+                AND a.departid = M.departid
+                AND a.officeid = M.officeid
+            )
+        )
+        where 1=1 
+         <if test="departid != null and departid != ''">
+          and a.departid =#{departid} 
+        </if>
+        <if test="officeid != null and officeid != ''">
+          and a.officeid =#{officeid} 
+        </if>
+         <if test="realname != null and realname != ''">
+          and a.realname  like '%${realname}%' 
+        </if>
+        <if test="username != null and username != ''">
+          and a.user_name  like '%${username}%' 
+        </if>
+        <if test="starttime != null and starttime != ''">
+          and a.createtime &lt;= #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+          and a.createtime &gt;= #{endtime}
+        </if>
+        UNION
+        (   SELECT DISTINCT
+                a.*, h.`name` positionName,g.`status`, e.name officename,
+                    d.name departname
+            FROM
+                t_user a
+            INNER JOIN t_base_user_role b ON a.id = b.uid
+            INNER JOIN t_purchase_type c ON c.id = b.roleid
+        LEFT JOIN t_user_auth g ON a.id = g.uid
+                LEFT JOIN t_user_position h ON a.positionid = h.id
+                left join t_depart d on d.id = a.departid
+                left join t_office e on e.id = a.officeid
+            INNER JOIN (
+                SELECT
+                    min(rolesort) min,
+                    c.departid,
+                    c.officeid,
+                    roletype
+                FROM
+                    sys_user_role a
+                INNER JOIN sys_role b ON a.role_id = b.role_id
+                AND a.user_id = #{uid}
+                AND b.type = 2
+                INNER JOIN sys_user c ON c.user_id = a.user_id
+                GROUP BY
+                    b.roletype
+            ) M ON (
+                (
+                    M.min = 1
+                    AND a.departid = M.departid
+                )
+                OR (
+                    M.min = 2
+                    AND a.departid = M.departid
+                    AND a.officeid = M.officeid
+                )
+                AND c.servicecode = M.roletype
+            )
+            where 1=1 
+             <if test="departid != null and departid != ''">
+          and a.departid =#{departid} 
+        </if>
+        <if test="officeid != null and officeid != ''">
+          and a.officeid =#{officeid} 
+        </if>
+        <if test="realname != null and realname != ''">
+          and a.realname  like '%${realname}%' 
+        </if>
+        <if test="username != null and username != ''">
+          and a.user_name  like '%${username}%' 
+        </if>
+        <if test="starttime != null and starttime != ''">
+          and a.createtime &lt;= #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+          and a.createtime &gt;= #{endtime}
+        </if>
+        )
+       )N where 1=1
+        
+    </select>
+    
+    <select id="queryByAvaliableUid" resultType="com.lcworld.entity.TUserEntity">
+        select * from t_user where valid =1 and deadline > now() and id=#{uid}
+    </select>
+    
+
+</mapper>

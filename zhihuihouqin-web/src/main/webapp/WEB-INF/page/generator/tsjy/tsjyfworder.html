@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>图书借阅服务--借阅图书</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			 <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.order.ordercode" @keyup.enter="query" placeholder="订单号">
+            </div>
+             <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.order.username" @keyup.enter="query" placeholder="用户名">
+            </div>
+             <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.order.mobile" @keyup.enter="query" placeholder="手机号">
+            </div>
+             <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.order.bookname" @keyup.enter="query" placeholder="图书名称">
+            </div>
+            
+              <div class="form-group col-sm-3">
+                <select class="form-control" v-model="q.order.status">
+                  <option value="">----借阅状态----</option>
+                  <option value="1">已预订</option>
+                  <option value="3">已归还</option>
+                  <option value="4">待评价</option>
+                  <option value="5">已取消</option>
+                  <option value="2">已借阅</option>
+                </select>
+                </div>
+                
+            
+                <div class="form-group col-sm-3">
+                    <div class="input-group date form_datetime" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input1">
+                        <input class="form-control" id="dtp_input1"  size="25" type="text" value="" readonly placeholder="创建时间开始">
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-3">
+                    <div class="input-group date form_datetime2" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input2" >
+                        <input class="form-control" size="25" id="dtp_input2" type="text" value="" readonly placeholder="创建时间截止" >
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                
+                <script type="text/javascript">
+                   $(function(){
+                       $('.form_datetime').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                       $('.form_datetime2').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                   });
+                </script>
+                <a class="btn btn-default" @click="query">查询</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+			 <div class="form-group">
+                <div class="col-sm-2 control-label">订单号</div>
+                <div class="col-sm-10">
+                  <input readOnly="true" type="text" class="form-control" v-model="tsjyfwOrder.ordercode" placeholder="订单号"/>
+                </div>
+            </div>	
+              <div class="form-group">
+                <div class="col-sm-2 control-label">借阅人电话</div>
+                <div class="col-sm-10">
+                  <input  readOnly="true" type="text" class="form-control" v-model="tsjyfwOrder.umobile" placeholder="借阅人电话"/>
+                </div>
+            </div>
+                <div class="form-group">
+                <div class="col-sm-2 control-label">借阅人姓名</div>
+                <div class="col-sm-10">
+                  <input  readOnly="true" type="text" class="form-control" v-model="tsjyfwOrder.uname" placeholder="借阅人姓名"/>
+                </div>
+            </div>
+                        					
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">图书名称</div>
+			   	<div class="col-sm-10">
+			      <input  readOnly="true" type="text" class="form-control" v-model="bookname" placeholder="图书名称"/>
+			    </div>
+			</div>
+									
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">下单时间</div>
+			   	<div class="col-sm-10">
+			      <input  readOnly="true" type="text" class="form-control" v-model="tsjyfwOrder.createtime" placeholder="下单时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">预约取书时间</div>
+			   	<div class="col-sm-10">
+			      <input  readOnly="true" type="text" class="form-control" v-model="tsjyfwOrder.invitegetbooktime" placeholder="预约取书时间"/>
+			    </div>
+			</div>
+								
+			<div class="form-group">
+                <div class="col-sm-2 control-label">借阅状态</div>
+                <div class="col-sm-10">
+                 <select class="form-control" v-model="tsjyfwOrder.status">
+                  <option value="">----借阅状态----</option>
+                 <option value="1">已预订</option>
+                  <option value="3">已归还</option>
+                  <option value="4">待评价</option>
+                  <option value="5">已取消</option>
+                  <option value="2">已借阅</option>
+                </select>
+                </div>
+            </div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+	
+	 <div id="CommentDiv"  style="display:none;padding:10px;">
+       <div class="grid-btn">
+            <a class="btn btn-primary" @click="updateComment"><i class="fa fa-pencil-square-o"></i>&nbsp;查看</a>
+        </div>
+        <div  v-show="showComment" class="panel panel-default">
+            <table id="jqGridComment"></table>
+            <div id="jqGridCommentPager"></div>
+        </div>
+        
+         <div v-show="!showComment" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-2 control-label">图片</div>
+                  <div class="col-sm-10">
+                   <img v-for="cata in tsjyfwComment.imglist" alt="" :src="cata" style="width:100px;height:100px"/>  
+                </div> 
+            </div>
+             <div class="form-group">
+                <div class="col-sm-2 control-label">评价内容</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwComment.content" placeholder="评价内容"/>
+                </div>
+            </div> 
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">订单编号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwComment.orderid" placeholder="订单编号"/>
+                </div>
+            </div>
+                                   
+                                  
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">创建时间</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwComment.createtime" placeholder="创建时间"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">服务评价</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwComment.servicescore" placeholder="服务分"/>
+                </div>
+            </div> 
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">图书评价</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwComment.productscore" placeholder="服务分"/>
+                </div>
+            </div> 
+            <div class="form-group">
+                <div class="col-sm-2 control-label">总分</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwComment.score" placeholder="总分"/>
+                </div>
+            </div>
+                            
+            </div>
+                           
+        </form>
+    </div>
+     </div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/tsjy/tsjyfworder.js?_${date.systemTime}"></script>
+</body>
+</html>

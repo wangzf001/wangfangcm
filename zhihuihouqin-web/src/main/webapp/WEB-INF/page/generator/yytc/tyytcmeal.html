@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.mTitle" @keyup.enter="query" placeholder="商品类别名称">
+			</div>
+			<div class="form-group col-sm-3">
+				<select class="form-control" v-model="q.mType">
+				  <option value="">----菜单类型----</option>
+				  <option value="1">今日菜谱</option>
+				  <option value="2">营养套餐</option>
+				</select>
+			</div>
+			<div class="form-group col-sm-3">
+				<select class="form-control" v-model="q.mTimeType">
+				  <option value="">----时间类型----</option>
+				  <option value="1">早餐</option>
+				  <option value="2">午餐</option>
+				  <option value="3">晚餐</option>
+				</select>
+			</div>
+			<a class="btn btn-default" @click="query">查询</a>
+			#if($shiro.hasPermission("tyytcmeal:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("tyytcmeal:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("tyytcmeal:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+			<a class="btn btn-primary" @click="recommend"><i class="fa fa-pencil-square-o"></i>&nbsp;设为推荐</a>
+			<a class="btn btn-primary" @click="exportExcel"><i class="fa fa-pencil-square-o"></i>&nbsp;导出到Excel</a>
+			<a class="btn btn-primary" id="uploadExcel"><i class="fa fa-plus"></i>&nbsp;导入Excel</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">题目</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tYytcMeal.mTitle" placeholder="题目"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">来源</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tYytcMeal.mSource" placeholder="来源"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">菜单类型</div>
+			   	<div class="col-sm-10">
+				  <select class="form-control" v-model="tYytcMeal.mType">
+					  <option value="">----菜单类型----</option>
+					  <option value="1">今日菜谱</option>
+					  <option value="2">营养套餐</option>
+					</select>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">时间类型</div>
+			   	<div class="col-sm-10">
+				  <select class="form-control" v-model="tYytcMeal.mTimeType">
+					  <option value="">----时间类型----</option>
+					  <option value="1">早餐</option>
+					  <option value="2">午餐</option>
+					  <option value="3">晚餐</option>
+					</select>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">菜单配图</div>
+			   	<div class="col-sm-2">
+			      <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;上传配图</a>
+			    </div>
+			   	<div class="col-sm-2">
+			      <input type="text" class="form-control" v-model="tYytcMeal.mImg" placeholder="配图地址"/>
+			    </div>
+			   	<div class="col-sm-3">
+			      <img alt="" :src="tYytcMeal.mImg" style="width:100px;height:100px"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">菜单简介</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tYytcMeal.mContent" placeholder="菜单简介"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">摄入热量</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tYytcMeal.mCalories" placeholder="例如:1000CAL"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">消耗方式</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tYytcMeal.mConsumeWay" placeholder="消耗方式"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">功效</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tYytcMeal.mHealthyFunction" placeholder="功效"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">原料名称(包括用量)</div>
+			   	<div class="col-sm-8" id="MyIngredient">
+			      <a class="btn btn-primary " @click="addIngredient"><i class="fa fa-plus"></i>&nbsp;新增原料</a>
+			      <a class="btn btn-primary " @click="delIngredient"><i class="fa fa-minus"></i>&nbsp;删除原料</a>
+			      <ul style="list-style: none;padding-left: 0px">
+			      	<li v-for="(item,index) in tYytcMeal.ingredientList">
+			      		<input type="text" class="form-control" v-model="tYytcMeal.ingredientList[index].iNameNum" placeholder="原料名称(包括用量)"/>
+			      	</li>
+			      </ul>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">步骤</div>
+			   	<div class="col-sm-8" id="MyIngredient">
+			      <a class="btn btn-primary " @click="addStep"><i class="fa fa-plus"></i>&nbsp;新增步骤</a>
+			      <a class="btn btn-primary " @click="delStep"><i class="fa fa-minus"></i>&nbsp;删除步骤</a>
+			      <ul style="list-style: none;padding-left: 0px">
+			      	<li v-for="(item,index) in tYytcMeal.stepList">
+			      		<input type="text" class="form-control" v-model="tYytcMeal.stepList[index].sContent" placeholder="步骤说明"/>
+			      		<input type="text" class="form-control" v-model="tYytcMeal.stepList[index].sImg" placeholder="配图地址"/>
+			      		<img alt="" :src="tYytcMeal.stepList[index].sImg" style="width:100px;height:100px"/>
+			      		<a @click="upload" :value="index" class="btn btn-primary" class="uploadSimg"><i class="fa fa-plus"></i>&nbsp;上传配图</a>
+			      		<input type="text" class="form-control" v-model="tYytcMeal.stepList[index].sSort" value="123" placeholder="步骤排序"/>
+			      	</li>
+			      </ul>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/yytc/tyytcmeal.js?_${date.systemTime}"></script>
+</body>
+</html>

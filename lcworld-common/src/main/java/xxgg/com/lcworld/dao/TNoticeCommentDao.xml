@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TNoticeCommentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TNoticeCommentEntity" id="tNoticeCommentMap">
+        <result property="id" column="id"/>
+        <result property="content" column="content"/>
+        <result property="createtime" column="createtime"/>
+        <result property="uid" column="uid"/>
+        <result property="noticeid" column="noticeid"/>
+        <result property="score" column="score"/>
+        <result property="servicescore" column="servicescore"/>
+        <result property="productscore" column="productscore"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.TNoticeCommentEntity">
+		select * from t_notice_comment where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.TNoticeCommentEntity">
+		select c.*
+			<if test="auth!=null and auth == 0"> 
+			,
+			CASE c.anonymous WHEN 0 THEN IFNULL(u.realname,u.nickname)
+			WHEN 1  THEN "无权查看"
+			END username, 
+			CASE c.anonymous WHEN 0 THEN u.photo 
+			WHEN 1  THEN "无权查看" 
+			END  photo
+			</if>
+			<if test="auth!=null and auth == 1"> 
+			,
+			IFNULL(u.realname,u.nickname) username, u.photo photo 
+			</if>
+		,(SELECT n.title FROM t_notice n WHERE n.id = c.noticeid) noticename
+		from t_notice_comment c 
+		left join t_user u on u.id = c.uid
+		<where>
+			<if test="nid != null">c.noticeid = #{nid}</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_notice_comment c
+		<where>
+			<if test="mid!=null and mid.trim()!=''">c.noticeid = #{nid}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.TNoticeCommentEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_notice_comment
+		(
+			`content`, 
+			`createtime`, 
+			`uid`, 
+			`noticeid`,
+			`score`,
+			`servicescore`,
+			`productscore`,
+			`type`
+		)
+		values
+		(
+			#{content}, 
+			#{createtime}, 
+			#{uid}, 
+			#{noticeid},
+			#{score},
+			#{servicescore},
+			#{productscore},
+			#{type}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.TNoticeCommentEntity">
+		update t_notice_comment 
+		<set>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="noticeid != null">`noticeid` = #{noticeid},</if>
+			<if test="score != null">`score` = #{score}, </if>
+			<if test="servicescore != null">`servicescore` = #{servicescore},</if>
+			<if test="productscore != null">`productscore` = #{productscore}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_notice_comment where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_notice_comment where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.BgypfwSkuidDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.BgypfwSkuidEntity" id="bgypfwSkuidMap">
+        <result property="id" column="id"/>
+        <result property="skuname" column="skuname"/>
+        <result property="mainimg" column="mainimg"/>
+        <result property="price" column="price"/>
+        <result property="firstcataid" column="firstcataid"/>
+        <result property="secondcataid" column="secondcataid"/>
+        <result property="store" column="store"/>
+        <result property="createtime" column="createtime"/>
+        <result property="status" column="status"/>
+        <result property="productid" column="productid"/>
+        <result property="gg" column="gg"/>
+         <collection property="catainfolist" javaType="com.lcworld.entity.BgypfwSkuCataInfoEntity">
+	        	<id property="id" column="skuinfoid"/>
+		        <result property="skuid" column="skuid"/>
+		        <result property="cataid" column="cataid"/>
+		        <result property="content" column="content"/>
+		        <result property="productid" column="productid"/>
+	        </collection>
+      
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.BgypfwSkuidEntity">
+		select * from t_bgypfw_skuid where id = #{value}
+	</select>
+	<select id="querySkuidByName" resultType="com.lcworld.entity.BgypfwSkuidEntity">
+		select * from t_bgypfw_skuid where locate(#{value},skuname)>0
+	</select>
+	<select id="queryProductRemain" resultType="Integer" parameterType="java.util.Map">
+		SELECT
+			IFNULL(SUM(IFNULL(sku.store, 0)), 0)
+		FROM
+			t_bgypfw_skuid sku
+		WHERE
+			sku.productid = #{productId}
+	</select>
+
+	<select id="queryList"  parameterType="java.util.Map" resultMap="bgypfwSkuidMap">
+		SELECT
+			sku.*, (
+				SELECT
+					skuc.skucataname
+				FROM
+					t_bgypfw_skufirstcata skuc
+				WHERE
+					skuc.id = sku.firstcataid
+			) cataName,b.id skuinfoid,c.skucataname cataname,b.*
+		FROM
+			t_bgypfw_skuid sku 
+			inner join t_bgypfw_sku_cata_info  b on sku.id = b.skuid
+			inner join t_bgypfw_skufirstcata c on c.id = b.cataid
+		<where>
+			<if test="productId!=null">sku.productid = #{productId}</if>
+			<if test="status!=null">and sku.status = #{status}</if>
+			<if test="ids!=null">and sku.id in
+				<foreach item="id" collection="ids" open="(" separator="," close=")">
+					#{id}
+				</foreach>
+			</if>
+			<if test="firstcataid!=null and firstcataid.trim()!=''">and sku.firstcataid = #{firstcataid}</if>
+			<if test="keyword!=null and keyword.trim()!=''">and sku.skuname like concat('%',#{keyword},'%')</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+               ORDER BY sku.firstcataid
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_bgypfw_skuid sku
+		<where>
+			<if test="productId!=null">sku.productid = #{productId}</if>
+			<if test="status!=null">and sku.status = #{status}</if>
+			<if test="firstcataid!=null and firstcataid.trim()!=''">and sku.firstcataid = #{firstcataid}</if>
+			<if test="keyword!=null and keyword.trim()!=''">and sku.skuname like concat('%',#{keyword},'%')</if>
+		</where>
+	</select>
+ 	<select id="queryPricerange" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT MAX(sku.price) maxprice,MIN(sku.price) minprice FROM t_bgypfw_skuid sku
+		<where>
+			<if test="productId!=null">sku.productid = #{productId}</if>
+			<if test="status!=null">and sku.status = #{status}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.BgypfwSkuidEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_bgypfw_skuid
+		(
+			`skuname`, 
+			`mainimg`, 
+			`price`, 
+			`firstcataid`, 
+			`secondcataid`, 
+			`store`, 
+			`createtime`, 
+			`status`, 
+			`productid`
+		)
+		values
+		(
+			#{skuname}, 
+			#{mainimg}, 
+			#{price}, 
+			#{firstcataid}, 
+			#{secondcataid}, 
+			#{store}, 
+			#{createtime}, 
+			#{status}, 
+			#{productid}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.BgypfwSkuidEntity">
+		update t_bgypfw_skuid 
+		<set>
+			<if test="skuname != null">`skuname` = #{skuname}, </if>
+			<if test="mainimg != null">`mainimg` = #{mainimg}, </if>
+			<if test="price != null">`price` = #{price}, </if>
+			<if test="firstcataid != null">`firstcataid` = #{firstcataid}, </if>
+			<if test="secondcataid != null">`secondcataid` = #{secondcataid}, </if>
+			<if test="store != null">`store` = #{store}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="productid != null">`productid` = #{productid},</if>
+			<if test="failedreason != null">`failedreason` = #{failedreason},</if>
+			<if test="failedreasonids != null">`failedreasonids` = #{failedreasonids}</if>
+		</set>
+		where id = #{id}
+	</update>
+	<update id="updateSaleStatus" parameterType="java.util.Map">
+		update t_bgypfw_skuid 
+		<set>
+			`status` = #{status}
+		</set>
+		where id in 
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	<delete id="delete">
+		delete from t_bgypfw_skuid where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_bgypfw_skuid where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<delete id="deleteByPids">
+		delete from t_bgypfw_skuid where productid in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

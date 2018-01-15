@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.BgypfwOrderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.BgypfwOrderEntity" id="bgypfwOrderMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="code" column="code"/>
+        <result property="createtime" column="createtime"/>
+        <result property="totalprice" column="totalprice"/>
+        <result property="addressid" column="addressid"/>
+        <result property="remark" column="remark"/>
+        <result property="paytype" column="paytype"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="expertarrivaltme" column="expertarrivaltme"/>
+        <result property="username" column="username"/>
+        <result property="mobile" column="mobile"/>
+        <result property="status" column="status"/>
+        <result property="cancelReasonids" column="cancel_reasonids"/>
+        <result property="reasonContent" column="reason_content"/>
+        <result property="parentOrdercode" column="parent_ordercode"/>
+        <result property="dphoto" column="dphoto"/>
+        <result property="dusername" column="dusername"/>
+        <result property="dmobile" column="dmobile"/>
+        <result property="refundstatus" column="refundstatus"/>
+        <result property="realdel" column="realdel"/>
+        <association property="address" column="addressid" javaType="com.lcworld.entity.AddressEntity">
+        	<id property="id" column="addressid"/>
+	        <result property="realname" column="realname"/>
+	        <result property="mobile" column="mobile"/>
+	        <result property="address" column="address"/>
+	        <result property="isDefault" column="is_default"/>
+        </association>
+        <collection property="orderDetailList"  javaType="com.lcworld.entity.BgypfwOrderdetailEntity">
+        	<id property="id" column="odid"/>
+	        <result property="productid" column="productid"/>
+	        <result property="productname" column="productname"/>
+	        <result property="count" column="count"/>
+	        <result property="totalprice" column="odTp"/>
+	        <result property="price" column="odPrice"/>
+	        <association property="sku" column="skuid" javaType="com.lcworld.entity.BgypfwSkuidEntity">
+	        	<id property="id" column="skuid"/>
+		        <result property="skuname" column="skuname"/>
+		        <result property="mainimg" column="mainimg"/>
+	        </association>
+        </collection>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.BgypfwOrderEntity">
+		select * from t_bgypfw_order where id = #{value}
+	</select>
+	
+	<select id="queryList" resultMap="bgypfwOrderMap">
+		select *
+		<if test="webQuery == null">
+			,(SELECT productname FROM t_bgypfw_product where id = od.productid) productname,od.id odid,od.totalprice odTp,od.price odPrice
+		</if>
+			,dm.id did,dm.photo dphoto,dm.username dusername,dm.mobile dmobile
+		from t_bgypfw_order o 
+			LEFT JOIN t_address a ON a.id = o.addressid
+		<if test="webQuery == null">
+			LEFT JOIN t_bgypfw_orderdetail od ON o.id = od.orderid
+			LEFT JOIN t_bgypfw_skuid sku ON sku.id = od.skuid
+		</if>
+			LEFT JOIN t_deliveryman dm ON dm.id = (SELECT deor.did FROM t_delivery_order deor WHERE deor.orderid = o.id and deor.ordertype = #{ordertype})
+		<where>
+			<if test="uid!=null">o.uid = #{uid}</if>
+			<if test="orderStatus!=null">
+			
+				<choose>
+					<when test="orderStatus == 2"> AND o.status in (2,6)</when>
+					<otherwise>AND o.status = #{orderStatus}</otherwise>
+				</choose>
+			
+			</if>
+			<if test="oid!=null">AND o.id = #{oid}</if>
+			<if test="ordercode!=null and ordercode.trim()!=''">AND o.code like concat("%",#{ordercode},"%")</if>
+			<if test="payordercode !=null and payordercode.trim()!=''"> AND (o.code = #{payordercode} OR o.parent_ordercode = #{payordercode})</if>
+			<if test="realname!=null and realname.trim()!=''">AND o.username like concat("%",#{realname},"%")</if>
+			<if test="mobile!=null and mobile.trim()!=''">AND o.mobile like concat("%",#{mobile},"%")</if>
+			<if test="payStatus!=null">AND o.pay_status = #{payStatus}</if>
+			<if test="createTimeStart!=null and createTimeStart.trim()!=''">AND o.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null and createTimeEnd.trim()!=''">AND o.createtime &lt;= #{createTimeEnd}</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by o.createtime desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_bgypfw_order o
+		<where>
+			<if test="uid!=null">o.uid = #{uid}</if>
+			<if test="orderStatus!=null">AND o.status = #{orderStatus}</if>
+			<if test="oid!=null">AND o.id = #{oid}</if>
+			<if test="ordercode!=null and ordercode.trim()!=''">AND o.code like concat("%",#{ordercode},"%")</if>
+			<if test="realname!=null and realname.trim()!=''">AND o.username like concat("%",#{realname},"%")</if>
+			<if test="mobile!=null and mobile.trim()!=''">AND o.mobile like concat("%",#{mobile},"%")</if>
+			<if test="payStatus!=null">AND o.pay_status = #{payStatus}</if>
+			<if test="createTimeStart!=null and createTimeStart.trim()!=''">AND o.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null and createTimeEnd.trim()!=''">AND o.createtime &lt;= #{createTimeEnd}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.BgypfwOrderEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_bgypfw_order
+		(
+			`uid`, 
+			`code`, 
+			`createtime`, 
+			`totalprice`, 
+			`addressid`, 
+			`remark`, 
+			`paytype`, 
+			`pay_status`, 
+			`expertarrivaltme`, 
+			`username`, 
+			`mobile`, 
+			`cancel_reasonids`, 
+			`reason_content`, 
+			`status`,
+			`parent_ordercode`,
+			`realdel`
+		)
+		values
+		(
+			#{uid}, 
+			#{code}, 
+			#{createtime}, 
+			#{totalprice}, 
+			#{addressid}, 
+			#{remark}, 
+			#{paytype}, 
+			#{payStatus}, 
+			#{expertarrivaltme}, 
+			#{username}, 
+			#{mobile}, 
+			#{cancelReasonids}, 
+			#{reasonContent}, 
+			#{status},
+			#{parentOrdercode},
+			#{realdel}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.BgypfwOrderEntity">
+		update t_bgypfw_order 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="code != null">`code` = #{code}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="totalprice != null">`totalprice` = #{totalprice}, </if>
+			<if test="addressid != null">`addressid` = #{addressid}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="paytype != null">`paytype` = #{paytype}, </if>
+			<if test="payStatus != null">`pay_status` = #{payStatus}, </if>
+			<if test="expertarrivaltme != null">`expertarrivaltme` = #{expertarrivaltme}, </if>
+			<if test="username != null">`username` = #{username}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="cancelReasonids != null">`cancel_reasonids` = #{cancelReasonids}, </if>
+			<if test="reasonContent != null">`reason_content` = #{reasonContent}, </if>
+			<if test="status != null">`status` = #{status},</if>
+			<if test="parentOrdercode != null">`parent_ordercode` = #{parentOrdercode},</if>
+			<if test="refundstatus != null">`refundstatus` = #{refundstatus},</if>
+			<if test="realdel != null">`realdel` = #{realdel}</if>
+		</set>
+		where id = #{id}
+	</update>
+	<update id="invalidOrderBatch" parameterType="java.util.Map">
+		update t_bgypfw_order 
+		<set>
+			<if test="orderStatus != null">`status` = #{orderStatus}</if>
+		</set>
+		where id in 
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		and `status` = #{orderStatusFormer}
+	</update>
+	
+	<delete id="delete">
+		delete from t_bgypfw_order where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_bgypfw_order where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<select id="queryOrderlist" resultType="com.lcworld.dto.BgypfwOrderDTO">
+		SELECT
+			a.id,
+			b.address,
+			a.`code`,
+			a.createtime,
+			a.username,
+			a.mobile,
+			a.expertarrivaltme,
+			a.`status`,
+			d.img
+		FROM
+		
+		<choose>
+			<when test="orderstatus == 5">
+			t_bgypfw_order_cancel tboc
+			JOIN t_bgypfw_order a on tboc.order_id=a.id
+			</when>
+			<otherwise>
+				<!-- <choose>
+					<when test="orderstatus == 0">
+						t_bgypfw_order a
+					</when>
+					<otherwise> -->
+					t_bgypfw_order a
+					LEFT JOIN t_delivery_order tdo ON tdo.orderid = a.id
+					<!-- </otherwise>
+				</choose> -->
+			</otherwise>
+		</choose>
+			
+		INNER JOIN t_address b ON a.addressid = b.id
+		LEFT JOIN t_bgypfw_orderdetail c ON a.id = c.orderid
+		LEFT JOIN t_bgypfw_product_img d ON d.product_id = c.productid
+		WHERE
+		1=1
+		<choose>
+			<when test="orderstatus == 5">
+			AND tboc.menderid=#{uid}
+			</when>
+			<otherwise>
+			
+			AND
+			(
+				(tdo.did = #{uid} AND tdo. STATUS = #{orderstatus} AND tdo.ordertype = 8)
+				
+				<if test="orderstatus == 0">
+				OR
+				(a.pay_status=1 AND a.`status`=1)
+				</if>
+				
+			)
+			AND a.id not in (select order_id from t_bgyp_order_refuse where mender_id=#{uid})
+			
+			</otherwise>
+		</choose>
+		
+		and a.realdel = 0 
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by a.createtime desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+	
+	<select id="queryOrderDetail" resultType="com.lcworld.dto.BgypfwOrderDTO">
+		SELECT
+			a.id,
+			b.address,
+			a.`code`,
+			a.createtime,
+			a.username,
+			a.mobile,
+			a.expertarrivaltme,
+			a.`status`,
+			c.totalprice,
+			c.count,
+			d.img,
+			a.remark,
+			e.productname
+		FROM
+			t_bgypfw_order a
+		INNER JOIN t_address b ON a.addressid = b.id
+		LEFT JOIN t_bgypfw_orderdetail c ON a.id = c.orderid
+		LEFT JOIN t_bgypfw_product_img d ON d.product_id = c.productid
+		LEFT JOIN t_bgypfw_product e ON c.productid = e.id
+		WHERE
+			a.id = #{orderid}
+    </select>
+    
+    <insert id="saveOrderCancel">
+    	insert into t_bgypfw_order_cancel(order_id,menderid,cancel_time,cancel_reason)
+    	values (#{order_id},#{menderid},#{cancel_time},#{cancel_reason})
+    </insert>
+    
+    <update id="instantUpdateOrder">
+    	update t_delivery_order set status=1 where did=#{uid} and orderid=#{id} and ordertype=8
+    </update>
+    
+    <select id="selectCountByTypeAndOrderId" resultType="java.lang.Integer">
+    	select did from t_delivery_order where orderid=#{id} and ordertype=8
+    </select>
+    
+    <insert id="insertDeliveryOrder">
+    	insert into t_delivery_order (status,did,orerid,ordertype,createtime,deliverytime) values (1,#{uid},#{id},8,now(),now())
+    </insert>
+    
+    <update id="distributionOrder">
+    	update t_delivery_order set status=2 where orderid=#{id} and did=#{userId} and ordertype=8
+    </update>
+    
+    <delete id="deleteDeliveryOrder">
+    	delete from t_delivery_order where did=#{menderid} and orderid=#{order_id} and ordertype=8
+    </delete>
+    
+    <update id="finishDeliveryOrders">
+    	update t_delivery_order set status=3 where orderid=#{id} and did = #{uid} and ordertype=8
+    </update>
+    
+    <delete id="deleteCancelOrder">
+    	delete from t_bgypfw_order_cancel where order_id=#{id} and menderid=#{menderid}
+    </delete>
+   
+   	<update id="deleteOverOrder">
+   		update t_bgypfw_order set realdel = 1 where id=#{orderId}
+   	</update>
+   	
+   	<insert id="insertRefuseOrder">
+   		insert into t_bgyp_order_refuse(order_id,mender_id,refuse_time) values (#{orderId},#{uid},now())
+   	</insert>
+
+</mapper>

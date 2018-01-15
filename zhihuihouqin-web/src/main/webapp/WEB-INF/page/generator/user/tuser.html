@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>用户表</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+          <div class="form-group col-sm-2">
+                <input type="text" class="form-control" v-model="q.username" @keyup.enter="query" placeholder="用户名（手机号）">
+            </div>
+          <div class="form-group col-sm-2">
+                <input type="text" class="form-control" v-model="q.realname" @keyup.enter="query" placeholder="真实姓名">
+            </div>
+          <div class="form-group col-sm-2">
+                 <select class="form-control" v-model="q.departid">
+                          <option value="">----选择部门----</option>
+                          <option v-for="cata in departlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+            </div>
+          <div class="form-group col-sm-2">
+                <select class="form-control" v-model="q.officeid">
+                          <option value="">----选择处室----</option>
+                          <option v-for="cata in officelist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+            </div>
+            
+            <a class="btn btn-default" @click="query">查询</a>
+            #if($shiro.hasPermission("tuser:save"))
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            #end
+            #if($shiro.hasPermission("tuser:update"))
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            #end
+            #if($shiro.hasPermission("tuser:delete"))
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            #end
+            #if($shiro.hasPermission("tuser:setfthirdadmin"))
+            <a class="btn btn-primary" @click="setfthirdadmin"><i class="fa fa-trash-o"></i>&nbsp;设为处室管理</a>
+            #end
+            
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-2 control-label">用户名</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUser.userName" placeholder="用户名"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">密码</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUser.password" placeholder="密码"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">真实姓名</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUser.realname" placeholder="真实姓名"/>
+                </div>
+            </div>                  
+                                    
+            <div class="form-group">
+                <div class="col-sm-2 control-label">手机号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUser.mobile" placeholder="手机号"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">用户昵称</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUser.nickname" placeholder="用户昵称"/>
+                </div>
+            </div>
+            
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">办公室座机</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUser.tel" placeholder="办公室座机"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">房间号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUser.roomnum" placeholder="房间号"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                                    <div class="col-sm-2 control-label">部门</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="tUser.departid">
+                          <option value="0">----选择部门----</option>
+                          <option v-for="cata in departlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+               
+            </div>
+                                    <div class="form-group">
+                                    <div class="col-sm-2 control-label">处室</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="tUser.officeid">
+                          <option value="0">----选择处室----</option>
+                          <option v-for="cata in officelist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+               
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">楼号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUser.buildnum" placeholder="楼号"/>
+                </div>
+            </div>
+                                   
+              <div class="form-group">
+                           <div class="col-sm-2 control-label">截止时间</div>
+                            <div class=" input-group date form_datetime3 col-sm-10 "  data-date-format="yyyy MM dd">
+                                  <input class="form-control" id="dtp_input3"  size="25" type="text" value="" readonly placeholder="截止时间">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>  
+                    
+            <div class="form-group">
+                <div class="col-sm-2 control-label">头像</div>
+                <div class="col-sm-2">
+                  <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;上传头像</a>
+                </div>
+                <div class="col-sm-2">
+                  <input type="text" class="form-control" v-model="tUser.photo" placeholder="头像地址"/>
+                </div>
+                <div class="col-sm-3">
+                  <img alt="" :src="tUser.photo" style="width:100px;height:100px"/>
+                </div>
+            </div>          
+            
+            <div class="form-group">
+                <div class="col-sm-2 control-label">职位</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="tUser.positionid">
+                          <option value="0">----选择职位----</option>
+                          <option v-for="cata in positionlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+            </div>
+                                    
+            
+            <div class="form-group">
+                <div class="col-sm-2 control-label">民族</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="tUser.nation">
+                          <option value="0">----选择民族----</option>
+                          <option v-for="cata in nationlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+            </div>
+             <div class="form-group">
+                <div class="col-sm-2 control-label">性别</div>
+                <div class="col-sm-10">
+                                      男 : &nbsp;&nbsp;<input type="radio" name="sex" value="1" v-model="tUser.sex" placeholder="是否有效   1:有效，0 无效"/>
+                                   &nbsp;&nbsp; &nbsp;&nbsp; 
+                                   女 : &nbsp;&nbsp;    <input type="radio"  name="sex" value="0" v-model="tUser.sex" placeholder="是否有效   1:有效，0 无效"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">是否有效</div>
+                <div class="col-sm-10">
+                                      有效 : &nbsp;&nbsp;<input type="radio" name="valid" value="1" v-model="tUser.valid" placeholder="是否有效   1:有效，0 无效"/>
+                                   &nbsp;&nbsp; &nbsp;&nbsp; 
+                                   无效 : &nbsp;&nbsp;    <input type="radio"  name="valid" value="0" v-model="tUser.valid" placeholder="是否有效   1:有效，0 无效"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"></div> 
+                <input v-if="tUser.id != null" type="button" class="btn btn-info" @click="touptateuserpass" value="修改密码"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+    
+     <div id="showauth" style="display:none;padding:10px;"  class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+              <div class="form-group">
+                <div class="col-sm-2 control-label">姓名</div>
+                <div class="col-sm-10">
+                  <input  type="text"  class="form-control" v-model="tUserAuth.name" placeholder="姓名"/>
+                </div>
+            </div>
+             <div class="form-group">
+                <div class="col-sm-2 control-label">电话</div>
+                <div class="col-sm-10">
+                  <input  type="text" class="form-control" v-model="tUserAuth.mobile" placeholder="电话"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">身份证号</div>
+                <div class="col-sm-10">
+                  <input  type="text" class="form-control" v-model="tUserAuth.idcard" placeholder="身份证号"/>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                   <div class="col-sm-2 control-label">职位</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="tUserAuth.positionid">
+                          <option value="0">----选择职位----</option>
+                          <option v-for="cata in positionlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+                </div>
+                    <div class="form-group">
+                                    <div class="col-sm-2 control-label">部门</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="tUserAuth.departid">
+                          <option value="0">----选择部门----</option>
+                          <option v-for="cata in departlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+               
+            </div>
+                                    <div class="form-group">
+                                    <div class="col-sm-2 control-label">处室</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="tUserAuth.officeid">
+                          <option value="0">----选择处室----</option>
+                          <option v-for="cata in officelist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+               
+            </div>
+                
+            <div class="form-group">
+                   <div class="col-sm-2 control-label">选择民族</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="tUserAuth.nation">
+                          <option value="0">----选择民族----</option>
+                          <option v-for="cata in nationlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+                </div>
+
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">办公电话</div>
+                <div class="col-sm-10">
+                  <input  type="text" class="form-control" v-model="tUserAuth.officetel" placeholder="办公电话"/>
+                </div>
+            </div>
+           <div class="form-group">
+                <div class="col-sm-2 control-label">房间号</div>
+                <div class="col-sm-10">
+                  <input  type="text" class="form-control" v-model="tUserAuth.roomnum" placeholder="房间号"/>
+                </div>
+            </div>
+                <div class="form-group">
+                <div class="col-sm-2 control-label">楼号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUserAuth.buildnum" placeholder="楼号"/>
+                </div>
+            </div>
+                <div class="form-group">
+                <div class="col-sm-2 control-label">性别</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUserAuth.sex" placeholder="楼号"/>
+                </div>
+            </div>
+                <div class="form-group">
+                <div class="col-sm-2 control-label">出生年月</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUserAuth.birthday" placeholder="楼号"/>
+                </div>
+            </div>
+                <div class="form-group">
+                <div class="col-sm-2 control-label">开始工作</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUserAuth.startworktime" placeholder="楼号"/>
+                </div>
+            </div>
+                <div class="form-group">
+                <div class="col-sm-2 control-label">来部时间</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUserAuth.ldtime" placeholder="楼号"/>
+                </div>
+            </div>
+                <div class="form-group">
+                <div class="col-sm-2 control-label">邮箱</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUserAuth.email" placeholder="楼号"/>
+                </div>
+            </div>
+           <div class="form-group">
+                <div class="col-sm-2 control-label">失败原因</div>
+                <div class="col-sm-10">
+                  <input  type="text" class="form-control" v-model="tUserAuth.reason" placeholder="失败原因"/>
+                </div>
+            </div>
+           
+             <div  class="form-group">
+                <div class="col-sm-2 control-label">认证状态 </div>
+              
+                <div class="col-sm-10" v-if="tUserAuth.status == 0 || tUserAuth.status == null">
+                  <input readOnly="true"   type="text" class="form-control"  value="未提交审核"/>
+                </div>
+                <div class="col-sm-10" v-else-if="tUserAuth.status == 1"> 
+                     <input  readOnly="true" type="text" class="form-control"  value="待审核"/>
+                </div>
+                <div class="col-sm-10" v-else-if="tUserAuth.status == 2"> 
+                     <input readOnly="true"  type="text" class="form-control"  value="通过"/>
+                </div>
+                <div class="col-sm-10" v-else-if="tUserAuth.status == 3"> 
+                     <input readOnly="true" type="text" class="form-control"  value="不通过"/>
+                </div>
+            </div>
+            <div  class="form-group">
+                <div class="col-sm-2 control-label">操作</div>
+                <div v-if="tUserAuth.status == 1" class="col-sm-10">
+                   <input type="button" class="btn btn-primary" @click="updateAuth(2)" value="通过"/>
+                   &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="updateAuth(3)" value="不通过"/>
+                   &nbsp;&nbsp;<input type="button" class="btn btn-danger" @click="delauth" value="删除"/>
+                </div>
+                <div v-else-if="tUserAuth.status == null" class="col-sm-10">
+                   <input type="button" class="btn btn-primary" @click="updateAuth(1)" value="提交"/>
+                </div>
+                <div v-else-if="tUserAuth.status == 2" class="col-sm-10">
+                   <input type="button" class="btn btn-warning" @click="updateAuth(3)" value="不通过"/>
+                   &nbsp;&nbsp;<input type="button" class="btn btn-danger" @click="delauth" value="删除"/>
+                </div>
+                <div v-else-if="tUserAuth.status == 3" class="col-sm-10">
+                   <input type="button" class="btn btn-primary" @click="updateAuth(2)" value="通过"/>
+                    &nbsp;&nbsp;<input type="button" class="btn btn-danger" @click="delauth" value="删除"/>
+                </div>
+            </div>
+          
+        </form>
+    </div>
+    
+     <div id="showuserpass" style="display:none;padding:10px;"  class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+              <div class="form-group">
+                <div class="col-sm-2 control-label">新密码</div>
+                <div class="col-sm-10">
+                  <input  type="text"  class="form-control" v-model="tUser.password" placeholder="新密码"/>
+                </div>
+            </div>
+            
+            <div  class="form-group">
+                <div class="col-sm-2 control-label">操作</div>
+                <div  class="col-sm-10">
+                   <input type="button" class="btn btn-primary" @click="uptateuserpass" value="提交"/>
+                </div>
+            </div>
+          
+        </form>
+    </div>
+    
+    <!-- 车辆信息-->
+    <div id="carinfoDiv" style="display:none;padding:10px;">
+       <div v-show="showcarinfo">
+        <div class="grid-btn">
+            <a class="btn btn-primary" @click="adduserCar"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            <a class="btn btn-primary" @click="updateuserCar"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            <a class="btn btn-primary" @click="deluserCar"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+        </div>
+       <table id="jqGridOD"></table>
+        <div id="jqGridPagerOD"></div>
+    </div>
+    
+    <div v-show="!showcarinfo" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+                                            <div class="form-group">
+                <div class="col-sm-2 control-label">车辆类型编号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tCarUsercarinfo.cartypeid" placeholder="车辆类型编号"/>
+                </div>
+            </div>
+           
+             <div class="form-group">
+                <div class="col-sm-2 control-label">车牌号前缀</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tCarUsercarinfo.precarcode" placeholder=""/>
+                </div>
+            </div>
+             <div class="form-group">
+                <div class="col-sm-2 control-label">车牌号尾数</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tCarUsercarinfo.suffixcarcode" placeholder=""/>
+                </div>
+            </div>
+             <div class="form-group">
+                <div class="col-sm-2 control-label">认证id</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tCarUsercarinfo.authid" placeholder="认证id"/>
+                </div>
+            </div>
+                            <div class="form-group">
+                <div class="col-sm-2 control-label"></div> 
+                <input type="button" class="btn btn-primary" @click="saveOrUpdateuserCar" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reloaduserCar" value="返回"/>
+            </div>
+        </form>
+    </div>
+    
+    </div>
+    
+    
+    <!-- 角色信息-->
+    <div  id="rightinfoDiv" style="display:none;padding:10px;">
+        
+       <div v-show="showRight">
+            <div class="grid-btn">
+
+                <a class="btn btn-primary" @click="updateUserRight"><i class="fa fa-pencil-square-o"></i>&nbsp;更新</a>
+                <a class="btn btn-primary" @click="managelimit"><i class="fa fa-pencil-square-o"></i>&nbsp;对公账户额度管理</a>
+
+            </div>
+            <table id="jqGridRightOD"></table>
+        <div id="jqGridRightPagerOD"></div>
+        </div>
+        
+    </div>
+    
+    <div  id="showlimit" style="display:none;padding:10px;">
+      <div  class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+                                         
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">额度</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="userPurchaseLimit.highlimit" placeholder="额度"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">剩余</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="userPurchaseLimit.remain" placeholder="剩余"/>
+                </div>
+            </div>
+                            <div class="form-group">
+                <div class="col-sm-2 control-label"></div> 
+                <input type="button" class="btn btn-primary" @click="saveOrUpdatelimit" value="确定"/>
+                <input type="button" class="btn btn-warning" @click="dellimit" value="删除"/>
+            </div>
+        </form>
+    </div>
+        
+    </div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/user/tuser.js?_${date.systemTime}"></script>
+
+</body>
+</html>

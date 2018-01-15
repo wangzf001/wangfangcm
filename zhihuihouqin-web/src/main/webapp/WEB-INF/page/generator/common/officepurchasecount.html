@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>处室对公账户</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			#if($shiro.hasPermission("officepurchasecount:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("officepurchasecount:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("officepurchasecount:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+		  <div v-show="!showupdate">
+		        <div class="form-group">
+                <div class="col-sm-2 control-label">司局</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="officePurchaseCount.departid">
+                          <option v-for="cata in departlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+            </div>
+            
+               <div class="form-group">
+                <div class="col-sm-2 control-label">处室</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="officePurchaseCount.officeid">
+                          <option v-for="cata in officeList" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+            </div>
+            
+		  </div>
+			 
+            <div class="form-group">
+                    <div class="col-sm-2 control-label">账户类型</div>
+                         <div class="col-sm-10">
+                            <select class="form-control" v-model="officePurchaseCount.typeid">
+                              <option v-for="cata in typelist" :value="cata.id">{{cata.name}}</option>
+                            </select>
+                         </div>
+                </div>
+								
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">可用余额</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="officePurchaseCount.remain" placeholder="可用余额"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">支付密码</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="officePurchaseCount.sourcepaypass" placeholder="支付密码"/>
+			    </div>
+			</div>
+								
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">总金额</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="officePurchaseCount.total" placeholder="总金额"/>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+	
+	<div id="showlimitDiv" style="display:none;padding:10px;"  class="panel panel-default">
+	<div v-show="showlimitList">
+        <div class="grid-btn">
+            <a class="btn btn-primary" @click="updatelimit"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            <a class="btn btn-primary" @click="dellimit"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            <a class="btn btn-primary" @click="departlimit"><i class="fa fa-trash-o"></i>&nbsp;分配</a>
+        </div>
+        <table id="jqlimitGrid"></table>
+        <div id="jqGridlimitPager"></div>
+    </div>
+    
+    <div v-show="!showlimitList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+                                        
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">额度</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="userPurchaseLimit.highlimit" placeholder="额度"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">剩余</div>
+                <div class="col-sm-10">
+                  <input  type="text" class="form-control" v-model="userPurchaseLimit.remain" placeholder="剩余"/>
+                </div>
+            </div>
+                            <div class="form-group">
+                <div class="col-sm-2 control-label"></div> 
+                <input type="button" class="btn btn-primary" @click="saveOrUpdatelimit" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reloadlimit" value="返回"/>
+            </div>
+        </form>
+    </div>
+    </div>
+    
+    <!-- 分配额度 -->
+     <div id="departlimitDiv" style="display:none;padding:10px;"  class="panel panel-default">
+        <div class="grid-btn">
+            <a class="btn btn-primary" @click="ensuredepartlimit"><i class="fa fa-pencil-square-o"></i>&nbsp;确认</a>
+        </div>
+        <table id="jqdepartlimitGrid"></table>
+        <div id="jqGriddepartlimitPager"></div>
+     </div>
+	
+</div>
+
+<script src="${rc.contextPath}/js/generator/common/officepurchasecount.js?_${date.systemTime}"></script>
+</body>
+</html>

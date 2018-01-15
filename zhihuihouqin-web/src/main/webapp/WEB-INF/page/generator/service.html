@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>服务表</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.keyword" @keyup.enter="query" placeholder="唯一标识、服务名称">
+			</div>
+			<a class="btn btn-default" @click="query">查询</a>
+			<!-- #if($shiro.hasPermission("service:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end -->
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			<!-- <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a> -->
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">服务名称</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.name" placeholder="服务名称"/>
+			    </div>
+			</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">小图标</div>
+				   	<div class="col-sm-2">
+				      <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;上传图片</a>
+				    </div>
+				   	<div class="col-sm-2">
+				      <input type="text" class="form-control" v-model="service.smallimg" placeholder="图片地址"/>
+				    </div>
+				   	<div class="col-sm-3">
+				      <img alt="" :src="service.smallimg" style="width:100px;height:100px"/>
+				    </div>
+				</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">头图</div>
+			   	<div class="col-sm-2" v-for="img in service.imgEntityList">
+			   		<img alt="" :src="img.img" style="width:100px;height:100px"/>
+			      <input type="text" class="form-control"  v-model="img.img" placeholder="图片"/>
+			      <input type="text" class="form-control" v-model="img.sort" placeholder="排序"/>
+			    </div>
+			    <div class="col-sm-2" >
+			    	<a class="btn btn-primary" id="uploadPic"><i class="fa fa-plus"></i>&nbsp;上传图片</a>
+			    	<a class="btn btn-primary" @click="delPic"><i class="fa fa-plus"></i>&nbsp;删除图片</a>
+			    </div>
+			</div>
+			<div class="form-group">
+				   	<div class="col-sm-2 control-label">详情图片</div>
+				   	<div class="col-sm-2">
+				      <a class="btn btn-primary" id="upload2"><i class="fa fa-plus"></i>&nbsp;上传图片</a>
+				    </div>
+				   	<div class="col-sm-2">
+				      <input type="text" class="form-control" v-model="service.detailphoto" placeholder="图片地址"/>
+				    </div>
+				   	<div class="col-sm-3">
+				      <img alt="" :src="service.detailphoto" style="width:100px;height:100px"/>
+				    </div>
+				</div>
+									<!-- <div class="form-group">
+			   	<div class="col-sm-2 control-label">服务分类id</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.servicetypeid" placeholder="服务分类id"/>
+			    </div>
+			</div> -->
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">客服电话</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.mobile" placeholder="客服电话"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">服务价格</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.price" placeholder="服务价格"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">服务地址</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.place" placeholder="服务地址"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">营业时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.businesshour" placeholder="营业时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">店名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.tradename" placeholder="店名"/>
+			    </div>
+			</div>
+									<!-- <div class="form-group">
+			   	<div class="col-sm-2 control-label">唯一标识</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.sign" placeholder="唯一标识"/>
+			    </div>
+			</div> -->
+									<div class="form-group" v-show="service.sign==14">
+			   	<div class="col-sm-2 control-label">挂号费</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.ghprice" placeholder="挂号费"/>
+			    </div>
+			</div>
+									<div class="form-group" v-show="service.sign==15">
+			   	<div class="col-sm-2 control-label">工作餐固定餐</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.dcfwgzcfixedprice" placeholder="工作餐固定餐"/>
+			    </div>
+			</div>
+									<div class="form-group" v-show="service.sign==15">
+			   	<div class="col-sm-2 control-label">工作餐</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.dcfwgzcprice" placeholder="工作餐"/>
+			    </div>
+			</div>
+									<div class="form-group" v-show="service.sign==9">
+			   	<div class="col-sm-2 control-label">取餐地点</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="service.dcfwtokenplace" placeholder="取餐地点"/>
+			    </div>
+			</div>
+									<div class="form-group" v-show="service.sign==9">
+			   	<div class="col-sm-3 control-label">每周预约时间段:</div>
+			   	<div class="col-sm-9">
+				 <input type="checkbox" id="week1" v-model="orderweek" value="1"/>周一
+				 &nbsp;<input type="checkbox" id="week2" v-model="orderweek" value="2"/>周二
+				 &nbsp;<input type="checkbox" id="week3" v-model="orderweek" value="3"/>周三
+				 &nbsp;<input type="checkbox" id="week4" v-model="orderweek" value="4"/>周四
+				 &nbsp;<input type="checkbox" id="week5" v-model="orderweek" value="5"/>周五
+				 &nbsp;<input type="checkbox" id="week6" v-model="orderweek" value="6"/>周六
+				 &nbsp;<input type="checkbox" id="week7" v-model="orderweek" value="7"/>周日
+			    </div>
+			</div>
+									<div class="form-group" v-show="service.sign==9">
+				<div class="col-sm-3 control-label">每日预约时间段:</div>
+				<div class="input-group input-daterange col-sm-9" data-date-format="hh:ii" data-link-field="dtp_input1">
+	                <input class="form-control startTime" id="startTime" size="16" type="text" value="" readonly placeholder="预约开始时间">
+	                <div class="input-group-addon">to</div>
+	                <input class="form-control endTime" id="endTime" size="16" type="text" value="" readonly placeholder="预约结束时间" >
+	            </div>
+            </div>
+	        <script type="text/javascript">
+		       $(function(){
+		    	   $('.startTime').datetimepicker({
+		    		    	        language:  'zh-CN',
+		    		    			autoclose: 1,
+		    		    			startView: 1,
+		                                minView:0,
+		                                maxView:1,
+		    		    			forceParse: 0,
+		    		    	        showMeridian: 1,
+		    		    	        format: 'hh:ii',
+		    		    	        minuteStep:5
+		    		    	    }).on('changeDate',function(e){  
+		    		    	        var startTime = e.date;  
+		    		    	        $('.endTime').datetimepicker('setStartDate',startTime);  
+		    		    	    });
+		    	   $('.endTime').datetimepicker({
+		    		    	        language:  'zh-CN',
+		    		    			autoclose: 1,
+		    		    			startView: 1,
+		                                minView:0,
+		                                maxView:1,
+		    		    			forceParse: 0,
+		    		    	        showMeridian: 1,
+		    		    	        format: 'hh:ii',
+		    		    	        minuteStep:5
+		    		    	    }).on('changeDate',function(e){  
+		    		    	        var endTime = e.date;  
+		    		    	        $('.startTime').datetimepicker('setEndDate',endTime);
+		    		    	    });
+		       });
+	        </script>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">温馨提示</div>
+			   	<div class="col-sm-10">
+			   		<textarea id="myEditor">请输入</textarea>
+					<script type="text/javascript">
+					    var editor = new UE.ui.Editor();
+					    editor.render("myEditor");
+					</script>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/service.js?_${date.systemTime}"></script>
+</body>
+</html>

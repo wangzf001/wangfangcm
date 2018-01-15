@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TYytcCommentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TYytcCommentEntity" id="tYytcCommentMap">
+        <result property="id" column="id"/>
+        <result property="content" column="content"/>
+        <result property="createtime" column="createtime"/>
+        <result property="uid" column="uid"/>
+        <result property="mId" column="m_id"/>
+        <result property="score" column="score"/>
+        <result property="servicescore" column="servicescore"/>
+        <result property="productscore" column="productscore"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.TYytcCommentEntity">
+		select * from t_yytc_comment where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.TYytcCommentEntity">
+		select c.*,u.user_name username,u.photo,m.m_title mTitle from t_yytc_comment c 
+		left join t_user u on u.id = c.uid
+		left join t_yytc_meal m on c.m_id = m.m_id
+		<where>
+			<if test="ids!=null">c.id in 
+				<foreach item="id" collection="ids" open="(" separator="," close=")">
+					#{id}
+				</foreach>
+			</if>
+			<if test="mid!=null">c.m_id = #{mid}</if>
+			<if test="mTitle!=null and mTitle.trim()!=''">m.m_title like CONCAT("%",#{mTitle},"%")</if>
+			<if test="username!=null and username.trim()!=''">u.user_name like CONCAT("%",#{username},"%")</if>
+		</where>
+		group by c.id
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_yytc_comment c
+		left join t_user u on u.id = c.uid
+		left join t_yytc_meal m on c.m_id = m.m_id
+		<where>
+			<if test="mid!=null">c.m_id = #{mid}</if>
+			<if test="mTitle!=null and mTitle.trim()!=''">m.m_title like CONCAT("%",#{mTitle},"%")</if>
+			<if test="username!=null and username.trim()!=''">u.user_name like CONCAT("%",#{username},"%")</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.TYytcCommentEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_yytc_comment
+		(
+			`content`, 
+			`createtime`, 
+			`uid`, 
+			`m_id`,
+			`score`,
+			`servicescore`,
+			`productscore`,
+			`type`
+		)
+		values
+		(
+			#{content}, 
+			#{createtime}, 
+			#{uid}, 
+			#{mId},
+			#{score},
+			#{servicescore},
+			#{productscore},
+			#{type}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.TYytcCommentEntity">
+		update t_yytc_comment 
+		<set>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="mId != null">`m_id` = #{mId},</if>
+			<if test="score != null">`score` = #{score}, </if>
+			<if test="servicescore != null">`servicescore` = #{servicescore},</if>
+			<if test="productscore != null">`productscore` = #{productscore}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_yytc_comment where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_yytc_comment where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

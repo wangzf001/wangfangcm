@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.VisiuserNoticeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.VisiuserNoticeEntity" id="visiuserNoticeMap">
+        <result property="id" column="id"/>
+        <result property="utype" column="utype"/>
+        <result property="postid" column="postid"/>
+        <result property="getid" column="getid"/>
+        <result property="content" column="content"/>
+        <result property="createtime" column="createtime"/>
+        <result property="gettype" column="gettype"/>
+        <result property="postreadstatus" column="postreadstatus"/>
+        <result property="getreadstatus" column="getreadstatus"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.VisiuserNoticeEntity">
+		select * from t_visit_user_notice where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.VisiuserNoticeEntity">
+		select * from t_visit_user_notice
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_visit_user_notice 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.VisiuserNoticeEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_visit_user_notice
+		(
+			`utype`, 
+			`postid`, 
+			`getid`, 
+			`content`, 
+			`createtime`, 
+			`gettype`, 
+			`postreadstatus`, 
+			`getreadstatus`
+		)
+		values
+		(
+			#{utype}, 
+			#{postid}, 
+			#{getid}, 
+			#{content}, 
+			#{createtime}, 
+			#{gettype}, 
+			#{postreadstatus}, 
+			#{getreadstatus}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.VisiuserNoticeEntity">
+		update t_visit_user_notice 
+		<set>
+			<if test="utype != null">`utype` = #{utype}, </if>
+			<if test="postid != null">`postid` = #{postid}, </if>
+			<if test="getid != null">`getid` = #{getid}, </if>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="gettype != null">`gettype` = #{gettype}, </if>
+			<if test="postreadstatus != null">`postreadstatus` = #{postreadstatus}, </if>
+			<if test="getreadstatus != null">`getreadstatus` = #{getreadstatus}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_visit_user_notice where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_visit_user_notice where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

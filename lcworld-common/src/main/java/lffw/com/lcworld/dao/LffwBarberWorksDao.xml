@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.LffwBarberWorksDao">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.LffwBarberWorksEntity" id="lffwBarberWorksMap">
+        <result property="id" column="id"/>
+        <result property="smallimg" column="smallimg"/>
+        <result property="detailimg" column="detailimg"/>
+        <result property="brief" column="brief"/>
+        <result property="price" column="price"/>
+        <result property="createtime" column="createtime"/>
+        <result property="name" column="name"/>
+        <result property="barberid" column="barberid"/>
+        <result property="showonindex" column="showonindex"/>
+        <result property="content" column="content"/>
+        <result property="url" column="url"/>
+    </resultMap>
+
+    <select id="queryObject" resultType="com.lcworld.entity.LffwBarberWorksEntity">
+        select * from t_lffw_barber_works where id = #{value}
+    </select>
+
+    <select id="queryList" resultType="com.lcworld.entity.LffwBarberWorksEntity">
+        select * from t_lffw_barber_works w
+        <if test="favorstatus!=null">
+        	LEFT JOIN t_favor f ON f.entityid = w.id 
+        </if>
+        where 1=1
+        <if test="barberid != null and barberid != ''">
+            and w.barberid = #{barberid}
+        </if>
+        <if test="favorstatus != null and favortype != null and favoruid!=null">
+            AND f.favortype = #{favortype} AND f.uid = #{favoruid} AND f.`status` = #{favorstatus}
+        </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by w.id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryTotal" resultType="int">
+        select count(*) from t_lffw_barber_works  where 1=1
+        <if test="barberid != null">
+            and barberid = #{barberid}
+        </if>
+    </select>
+     
+    <insert id="save" parameterType="com.lcworld.entity.LffwBarberWorksEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into t_lffw_barber_works
+        (
+            `smallimg`, 
+            `detailimg`, 
+            `brief`, 
+            `price`, 
+            `createtime`, 
+            `name`, 
+            `barberid`, 
+            `showonindex`, 
+            `content`, 
+            `url`
+        )
+        values
+        (
+            #{smallimg}, 
+            #{detailimg}, 
+            #{brief}, 
+            #{price}, 
+            #{createtime}, 
+            #{name}, 
+            #{barberid}, 
+            #{showonindex}, 
+            #{content}, 
+            #{url}
+        )
+    </insert>
+     
+    <update id="update" parameterType="com.lcworld.entity.LffwBarberWorksEntity">
+        update t_lffw_barber_works 
+        <set>
+            <if test="smallimg != null">`smallimg` = #{smallimg}, </if>
+            <if test="detailimg != null">`detailimg` = #{detailimg}, </if>
+            <if test="brief != null">`brief` = #{brief}, </if>
+            <if test="price != null">`price` = #{price}, </if>
+            <if test="createtime != null">`createtime` = #{createtime}, </if>
+            <if test="name != null">`name` = #{name}, </if>
+            <if test="barberid != null">`barberid` = #{barberid}, </if>
+            <if test="showonindex != null">`showonindex` = #{showonindex}, </if>
+            <if test="content != null">`content` = #{content}, </if>
+            <if test="url != null">`url` = #{url}</if>
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="delete">
+        delete from t_lffw_barber_works where id = #{value}
+    </delete>
+    
+    <delete id="deleteBatch">
+        delete from t_lffw_barber_works where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+	
+	<select id="queryindexworkList" resultType="com.lcworld.entity.LffwBarberWorksEntity">
+        select * from t_lffw_barber_works where showonindex =1 and barberid =#{barberid}
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+</mapper>

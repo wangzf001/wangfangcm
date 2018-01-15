@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>办公用品服务-订单</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.ordercode" @keyup.enter="query" placeholder="订单号">
+			</div>
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.realname" @keyup.enter="query" placeholder="真名">
+			</div>
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.mobile" @keyup.enter="query" placeholder="电话">
+			</div>
+			<div class="form-group col-sm-3">
+				<select class="form-control" v-model="q.status">
+				  <option value="">----订单状态----</option>
+				  <option value="1">已预约</option>
+				  <option value="3">已完成</option>
+				  <option value="4">已评价</option>
+				  <option value="5">已取消</option>
+				</select>
+			</div>
+			<div class="form-group col-sm-3">
+				<select class="form-control" v-model="q.payStatus">
+				  <option value="">----支付状态----</option>
+				  <option value="0">未付款</option>
+				  <option value="1">已付款</option>
+				</select>
+			</div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+	                <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间开始">
+	                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+	            </div>
+				<input type="hidden" class="form-control" id="dtp_input1" v-model="q.createTimeStart" value=""/>
+            </div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime2" data-date-format="yyyy-mm-dd" data-link-field="dtp_input2" >
+                    <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间截止" >
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+				<input type="hidden" class="form-control" id="dtp_input2" v-model="q.createTimeEnd" value=""/>
+            </div>
+	        <script type="text/javascript">
+		       $(function(){
+		    	   $('.form_datetime').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		    	   $('.form_datetime2').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		       });
+	        </script>
+	        <a class="btn btn-default" @click="query">查询</a>
+			<!-- #if($shiro.hasPermission("bgypfworder:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("bgypfworder:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end -->
+			#if($shiro.hasPermission("bgypfworder:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label"></div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.uid" placeholder=""/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label"></div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.code" placeholder=""/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">创建时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.createtime" placeholder="创建时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">总价</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.totalprice" placeholder="总价"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">送货地址id</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.addressid" placeholder="送货地址id"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">备注</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.remark" placeholder="备注"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">支付类型(1:支付宝，2：微信，3：个人余额对公，4：个人余额对私 ，5：集体余额对公)</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.paytype" placeholder="支付类型(1:支付宝，2：微信，3：个人余额对公，4：个人余额对私 ，5：集体余额对公)"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">期望送达时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.expertarrivaltme" placeholder="期望送达时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">下单人姓名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.username" placeholder="下单人姓名"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">预留电话</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.mobile" placeholder="预留电话"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">订单状态1:已下单，2：配送中，3：已完成，4：待评价，5：已取消</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.status" placeholder="订单状态1:已下单，2：配送中，3：已完成，4：待评价，5：已取消"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">取消订单ids</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.cancelReasonids" placeholder="取消订单ids"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">原因内容</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.reasonContent" placeholder="原因内容"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">支付状态</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="bgypfwOrder.payStatus" placeholder="支付状态"/>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+	<div id="menuLayer1" style="display:none;padding:10px;">
+	<div class="form-group col-sm-5">
+			配送人员：
+		</div>
+		<div class="form-group col-sm-7">
+			<select class="form-control" v-model="did">
+			  <option value="">----配送人员(接单压力有小到大排序)----</option>
+			  <option v-for="dman in dmanlist" :value="dman.id">姓名：{{dman.username}}&nbsp;接单数：{{dman.ordernum}}</option>
+			</select>
+		</div>
+	</div>
+</div>
+<div id="menuLayer" style="display:none;padding:10px;">
+	<table id="jqGridOD"></table>
+    <div id="jqGridPagerOD"></div>
+</div>
+<script src="${rc.contextPath}/js/generator/bgypfw/bgypfworder.js?_${date.systemTime}"></script>
+</body>
+</html>

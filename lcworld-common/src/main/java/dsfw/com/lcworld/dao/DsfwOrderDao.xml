@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.DsfwOrderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.DsfwOrderEntity" id="dsfwOrderMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="ordercode" column="ordercode"/>
+        <result property="totalprice" column="totalprice"/>
+        <result property="status" column="status"/>
+        <result property="createtime" column="createtime"/>
+        <result property="mobile" column="mobile"/>
+        <result property="realname" column="realname"/>
+        <result property="sendtimeid" column="sendtimeid"/>
+        <result property="addressid" column="addressid"/>
+        <result property="remark" column="remark"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="payType" column="pay_type"/>
+        <result property="cancelReasonids" column="cancel_reasonids"/>
+        <result property="reasonContent" column="reason_content"/>
+        <result property="sendTime" column="sendtimes" />
+        <result property="parentOrdercode" column="parent_ordercode" />
+        <result property="dphoto" column="dphoto"/>
+        <result property="dusername" column="dusername"/>
+        <result property="dmobile" column="dmobile"/>
+        <result property="realdel" column="realdel"/>
+        <association property="address" column="addressid" javaType="com.lcworld.entity.AddressEntity">
+        	<id property="id" column="addressid"/>
+	        <result property="realname" column="realname"/>
+	        <result property="mobile" column="mobile"/>
+	        <result property="address" column="address"/>
+        </association>
+        <collection property="detailList" javaType="com.lcworld.entity.DsfwOrderdetailEntity" >
+        	<id property="id" column="odid"/>
+	        <result property="count" column="count"/>
+	        <result property="price" column="price"/>
+	        <result property="totalprice" column="odTotal"/>
+	        <association property="goods" column="goodsid" javaType="com.lcworld.entity.DsfwGoodsEntity">
+	        	<id property="id" column="goodsid"/>
+		        <result property="name" column="name"/>
+		        <result property="img" column="img"/>
+	        </association>
+        </collection>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.DsfwOrderEntity">
+		select * from t_dsfw_order where id = #{value}
+	</select>
+	<select id="getSendtime" resultType="com.lcworld.entity.DsfwSendtimeEntity" parameterType="Integer">
+		select * from t_dsfw_sendtime where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="dsfwOrderMap" parameterType="java.util.Map">
+		select *,
+		<if test="webQuery == null">
+			od.id odid,od.totalPrice odTotal,
+		</if>
+			dm.id did,dm.photo dphoto,dm.username dusername,dm.mobile dmobile,
+		(SELECT
+				CASE t.periodtype
+			WHEN 1 THEN
+				CONCAT_WS(
+					" ",
+					"上午",
+					CONCAT_WS("-", t.starttime, t.endtime)
+				)
+			ELSE
+				CONCAT_WS(
+					" ",
+					"下午",
+					CONCAT_WS("-", t.starttime, t.endtime)
+				)
+			END
+			FROM
+				t_dsfw_sendtime t
+			WHERE
+				t.id = o.sendtimeid) sendtimes
+		from t_dsfw_order o
+		left join t_address a on a.id = o.addressid
+		<if test="webQuery == null">
+			left join t_dsfw_orderdetail od on od.orderid = o.id
+			left join t_dsfw_goods g on g.id = od.goodsid
+		</if>
+			LEFT JOIN t_deliveryman dm ON dm.id = (SELECT deor.did FROM t_delivery_order deor WHERE deor.orderid = o.id and deor.ordertype = #{ordertype})
+		<where>
+			<if test="uid!=null">o.uid = #{uid}</if>
+			<if test="orderStatus!=null">
+				<choose>
+					<when test="orderStatus == 2">AND o.status in (2,6)</when>
+					<when test="orderStatus == 3">AND o.status in (3,4)</when>
+					<otherwise>AND o.status = #{orderStatus}</otherwise>
+				</choose>
+			</if>
+			<if test="oid!=null">AND o.id = #{oid}</if>
+			<if test="ordercode!=null and ordercode.trim()!=''">AND o.ordercode like concat("%",#{ordercode},"%")</if>
+			<if test="payordercode!=null and payordercode.trim()!=''"> AND (o.ordercode =#{payordercode} OR o.parent_ordercode =#{payordercode})</if>
+			<if test="realname!=null and realname.trim()!=''">AND o.realname like concat("%",#{realname},"%")</if>
+			<if test="mobile!=null and mobile.trim()!=''">AND o.mobile like concat("%",#{mobile},"%")</if>
+			<if test="payStatus!=null">AND o.pay_status = #{payStatus}</if>
+			<if test="createTimeStart!=null and createTimeStart.trim()!=''">AND o.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null and createTimeEnd.trim()!=''">AND o.createtime &lt;= #{createTimeEnd}</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by o.${sidx} ${order}
+            </when>
+			<otherwise>
+                order by o.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_dsfw_order o
+		<where>
+			<if test="uid!=null">o.uid = #{uid}</if>
+			<if test="orderStatus!=null">AND o.status = #{orderStatus}</if>
+			<if test="oid!=null">AND o.id = #{oid}</if>
+			<if test="ordercode!=null and ordercode.trim()!=''">AND o.ordercode like concat("%",#{ordercode},"%")</if>
+			<if test="realname!=null and realname.trim()!=''">AND o.realname like concat("%",#{realname},"%")</if>
+			<if test="mobile!=null and mobile.trim()!=''">AND o.mobile like concat("%",#{mobile},"%")</if>
+			<if test="payStatus!=null">AND o.pay_status = #{payStatus}</if>
+			<if test="createTimeStart!=null and createTimeStart.trim()!=''">AND o.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null and createTimeEnd.trim()!=''">AND o.createtime &lt;= #{createTimeEnd}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.DsfwOrderEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_dsfw_order
+		(
+			`uid`, 
+			`ordercode`, 
+			`totalprice`, 
+			`status`, 
+			`createtime`, 
+			`mobile`, 
+			`realname`, 
+			`sendtimeid`, 
+			`addressid`, 
+			`remark`, 
+			`pay_status`, 
+			`pay_type`, 
+			`cancel_reasonids`, 
+			`reason_content`,
+			`parent_ordercode`,
+			`realdel`
+			
+		)
+		values
+		(
+			#{uid}, 
+			#{ordercode}, 
+			#{totalprice}, 
+			#{status}, 
+			#{createtime}, 
+			#{mobile}, 
+			#{realname}, 
+			#{sendtimeid}, 
+			#{addressid}, 
+			#{remark}, 
+			#{payStatus}, 
+			#{payType}, 
+			#{cancelReasonids}, 
+			#{reasonContent},
+			#{parentOrdercode},
+			0
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.DsfwOrderEntity">
+		update t_dsfw_order 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="ordercode != null">`ordercode` = #{ordercode}, </if>
+			<if test="totalprice != null">`totalprice` = #{totalprice}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="realname != null">`realname` = #{realname}, </if>
+			<if test="sendtimeid != null">`sendtimeid` = #{sendtimeid}, </if>
+			<if test="addressid != null">`addressid` = #{addressid}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="payStatus != null">`pay_status` = #{payStatus}, </if>
+			<if test="payType != null">`pay_type` = #{payType}, </if>
+			<if test="cancelReasonids != null">`cancel_reasonids` = #{cancelReasonids}, </if>
+			<if test="reasonContent != null">`reason_content` = #{reasonContent},</if>
+			<if test="parentOrdercode != null">`parent_ordercode` = #{parentOrdercode},</if>
+			<if test="realdel != null">`realdel` = #{realdel}</if>
+		</set>
+		where id = #{id}
+	</update>
+	<update id="invalidOrderBatch" parameterType="java.util.Map">
+		update t_dsfw_order
+		<set>
+			<if test="orderStatus != null">`status` = #{orderStatus}</if>
+		</set>
+		where id in 
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		and `status` = #{orderStatusFormer}
+	</update>
+	<delete id="delete">
+		delete from t_dsfw_order where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_dsfw_order where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<select id="queryOrderlist" resultType="com.lcworld.dto.DsfwOrderDTO">
+		SELECT
+			a.id,
+			b.address,
+			a.ordercode,
+			a.createtime,
+			a.realname,
+			a.mobile,
+			e.endtime,
+			a.`status`,
+			d.img
+		FROM
+		
+		<choose>
+			<when test="orderstatus == 5">
+			t_dsfw_order_cancel tdoc
+			join t_dsfw_order a on tdoc.order_id=a.id
+			</when>
+			<otherwise>
+				t_dsfw_order a
+				LEFT JOIN t_delivery_order tdo ON tdo.orderid = a.id
+			</otherwise>
+		</choose>
+		
+		INNER JOIN t_address b ON a.addressid = b.id
+		LEFT JOIN t_dsfw_orderdetail c ON a.id = c.orderid
+		LEFT JOIN t_dsfw_goods d ON d.id = c.goodsid
+		LEFT JOIN t_dsfw_sendtime e ON e.id = a.sendtimeid
+		WHERE
+		1=1
+		<choose>
+			<when test="orderstatus == 5">
+			AND tdoc.menderid=#{uid}
+			</when>
+			<otherwise>
+			AND (
+				(tdo.did = #{uid} AND tdo.status = #{orderstatus} AND tdo.ordertype = 18)
+				<if test="orderstatus == 0">
+				OR
+				(a.`status` = 1 AND a.pay_status = 1)
+				</if>
+			)
+			AND a.id not in (select order_id from t_dsfw_order_refuse where mender_id=#{uid})
+			</otherwise>
+		</choose>
+		and a.realdel = 0 
+          
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by a.id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+	
+	<select id="queryOrderDetail" resultType="com.lcworld.dto.DsfwOrderDTO">
+		SELECT
+			a.id ,
+			b.address,
+			a.ordercode,
+			a.createtime,
+			a.realname,
+			a.mobile,
+			e.endtime,
+			a.`status`,
+			d.img,
+			c.totalprice,
+			c.count,
+			a.remark,
+			d.`name`,
+			a.uid
+		FROM
+			t_dsfw_order a
+		INNER JOIN t_address b ON a.addressid = b.id
+		LEFT JOIN t_dsfw_orderdetail c ON a.id = c.orderid
+		LEFT JOIN t_dsfw_goods d ON d.id = c.goodsid
+		LEFT JOIN t_dsfw_sendtime e ON e.id = a.sendtimeid
+		WHERE a.id = #{orderid}
+    </select>
+    
+    <insert id="saveOrderCancel">
+    	insert into t_dsfw_order_cancel(order_id,menderid,cancel_time,cancel_reason)
+    	values (#{order_id},#{menderid},#{cancel_time},#{cancel_reason})
+    </insert>
+    
+    <update id="instantUpdateOrder">
+    	update t_delivery_order set status=1 where did=#{uid} and orderid=#{id} and ordertype=18
+    </update>
+    
+    <select id="selectCountByOrderIdAndOrderType" resultType="java.lang.Integer">
+    	select did from t_delivery_order where orderid=#{id} and ordertype=18
+    </select>
+    
+    <insert id="insertDeliveryOrder">
+    	insert into t_delivery_order(status,did,orderid,ordertype,createtime,deliverytime) values (1,#{uid},#{id},18,now(),now())
+    </insert>
+    
+    <update id="distributionOrder">
+    	update t_delivery_order set status=2 where orderid=#{id} and did=#{userId} and ordertype=18
+    </update>
+    
+    <delete id="deleteDeliveryOrder">
+    	delete from t_delivery_order where did=#{menderid} and orderid=#{order_id} and ordertype=18
+    </delete>
+    
+    <update id="finishDeliveryOrders">
+    	update t_delivery_order set status=3 where orderid=#{id} and did = #{uid} and ordertype=18
+    </update>
+    
+    <delete id="deleteCancelOrder">
+    	delete from t_dsfw_order_cancel where order_id=#{id} and menderid=#{menderid}
+    </delete>
+    
+    <update id="deleteOverOrder">
+    	update t_dsfw_order set realdel = 1 where id=#{orderId}
+    </update>
+    
+    <insert id="insertRefuseOrder">
+    	insert into t_dsfw_order_refuse(order_id,mender_id,refuse_time) values (#{orderId},#{uid},now())
+    </insert>
+
+</mapper>

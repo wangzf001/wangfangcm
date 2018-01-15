@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>健康资讯</title>
+#parse("sys/header.html")
+
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+	                <div class="form-group col-sm-2">
+                <input type="text" class="form-control" v-model="q.title" @keyup.enter="query" placeholder="标题">
+            </div>
+              
+                <div class="form-group col-sm-2">
+                    <div class="input-group date form_datetime" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input1">
+                        <input class="form-control" id="dtp_input1"  size="25" type="text" value="" readonly placeholder="创建时间开始">
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-2">
+                    <div class="input-group date form_datetime2" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input2" >
+                        <input class="form-control" size="25" id="dtp_input2" type="text" value="" readonly placeholder="创建时间截止" >
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                
+                <script type="text/javascript">
+                   $(function(){
+                       $('.form_datetime').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                       $('.form_datetime2').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                   });
+                </script>
+		<div class="grid-btn">
+                <a class="btn btn-default" @click="query">查询</a>
+			#if($shiro.hasPermission("healthyinfo:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("healthyinfo:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("healthyinfo:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">标题</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="healthyinfo.title" placeholder="标题"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">创建时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="healthyinfo.createtime" placeholder="创建时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">资讯来源</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="healthyinfo.source" placeholder="资讯来源"/>
+			    </div>
+			</div>
+									   <div class="form-group">
+                <div class="col-sm-2 control-label">内容添加</div>
+                <div class="col-sm-10">
+                    <textarea id="myEditor">请输入</textarea>
+                    <script type="text/javascript">
+                       /*  var editor = new UE.ui.Editor();
+                        editor.render("myEditor"); */
+                        var editor_detail = UE.getEditor('myEditor');
+                        /* UE.Editor.prototype._bkGetActionUrl = UE.Editor.prototype.getActionUrl;  
+                        UE.Editor.prototype.getActionUrl = function(action) {  
+                                alert("1"+action);
+                            if (action == 'uploadimage' || action == 'uploadscrawl' || action == 'uploadvideo'||action==undefined) {  
+                                return '../../sys/oss/upload';  
+                            } else {  
+                                return this._bkGetActionUrl.call(this, action);  
+                            }
+                        }  */
+                    </script>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">缩略图</div>
+                <div class="col-sm-2">
+                  <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;上传图片</a>
+                </div>
+                <div class="col-sm-2">
+                  <input type="text" class="form-control" v-model="healthyinfo.imgs" placeholder="图片地址"/>
+                </div>
+                <div class="col-sm-3">
+                  <img alt="" :src="healthyinfo.imgs" style="width:100px;height:100px"/>
+                </div>
+            </div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">静态文件地址</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="healthyinfo.url" placeholder="静态文件地址"/>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+	
+	<div id="CommentDiv"  style="display:none;padding:10px;">
+      
+        <div  v-show="showComment" class="panel panel-default">
+            <table id="jqGridComment"></table>
+            <div id="jqGridCommentPager"></div>
+        </div>
+        
+        
+     </div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/ylfw/healthyinfo.js?_${date.systemTime}"></script>
+</body>
+</html>

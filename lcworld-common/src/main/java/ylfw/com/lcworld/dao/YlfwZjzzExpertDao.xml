@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.YlfwZjzzExpertDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.YlfwZjzzExpertEntity" id="ylfwZjzzExpertMap">
+        <result property="id" column="id"/>
+        <result property="realname" column="realname"/>
+        <result property="positionid" column="positionid"/>
+        <result property="mobile" column="mobile"/>
+        <result property="hospitalid" column="hospitalid"/>
+        <result property="consultcount" column="consultcount"/>
+        <result property="score" column="score"/>
+        <result property="createtime" column="createtime"/>
+        <result property="valid" column="valid"/>
+        <result property="brief" column="brief"/>
+        <result property="photo" column="photo"/>
+        <result property="invitetotalcount" column="invitetotalcount"/>
+        <result property="remaincount" column="remaincount"/>
+        <result property="worktime" column="worktime"/>
+        <result property="skilledinfo" column="skilledinfo"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.YlfwZjzzExpertEntity">
+		select * from t_ylfw_zjzz_expert where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.YlfwZjzzExpertEntity">
+		select * from t_ylfw_zjzz_expert e
+		<if test="favorstatus!=null">
+        	LEFT JOIN t_favor f ON f.entityid = e.id 
+        </if>
+        <where>
+        	<if test="favorstatus != null and favortype != null and favoruid!=null">
+	            AND f.favortype = #{favortype} AND f.uid = #{favoruid} AND f.`status` = #{favorstatus}
+	        </if>
+        </where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by e.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_ylfw_zjzz_expert 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.YlfwZjzzExpertEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_ylfw_zjzz_expert
+		(
+			`realname`, 
+			`positionid`, 
+			`mobile`, 
+			`hospitalid`, 
+			`consultcount`, 
+			`score`, 
+			`createtime`, 
+			`valid`, 
+			`brief`, 
+			`photo`, 
+			`invitetotalcount`, 
+			`remaincount`, 
+			`worktime`, 
+			`skilledinfo`
+		)
+		values
+		(
+			#{realname}, 
+			#{positionid}, 
+			#{mobile}, 
+			#{hospitalid}, 
+			#{consultcount}, 
+			#{score}, 
+			#{createtime}, 
+			#{valid}, 
+			#{brief}, 
+			#{photo}, 
+			#{invitetotalcount}, 
+			#{remaincount}, 
+			#{worktime}, 
+			#{skilledinfo}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.YlfwZjzzExpertEntity">
+		update t_ylfw_zjzz_expert 
+		<set>
+			<if test="realname != null">`realname` = #{realname}, </if>
+			<if test="positionid != null">`positionid` = #{positionid}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="hospitalid != null">`hospitalid` = #{hospitalid}, </if>
+			<if test="consultcount != null">`consultcount` = #{consultcount}, </if>
+			<if test="score != null">`score` = #{score}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="valid != null">`valid` = #{valid}, </if>
+			<if test="brief != null">`brief` = #{brief}, </if>
+			<if test="photo != null">`photo` = #{photo}, </if>
+			<if test="invitetotalcount != null">`invitetotalcount` = #{invitetotalcount}, </if>
+			<if test="remaincount != null">`remaincount` = #{remaincount}, </if>
+			<if test="worktime != null">`worktime` = #{worktime}, </if>
+			<if test="skilledinfo != null">`skilledinfo` = #{skilledinfo}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_ylfw_zjzz_expert where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_ylfw_zjzz_expert where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	 <select id="queryDoctorList" resultType="com.lcworld.dto.ZjzzExpertDTO">
+     SELECT
+            a.consultcount,
+            a. hospitalid hospitalname,
+            e. NAME positionname,
+            a.photo,
+            a.realname,
+            a.score,
+            a.skilledinfo,
+            a.id doctorid,
+            a.worktime,
+            a.brief,
+            a.mobile,
+            a.id,
+ifnull(b.count,0) remaincount,
+ifnull(c.count,0) invitetotalcount
+        FROM
+            t_ylfw_zjzz_expert a
+            
+        INNER JOIN t_ylfw_position e ON a.positionid = e.id
+left JOIN t_ylfw_zzjz_remaincount_view b on b.doctorid = a.id
+left JOIN t_ylfw_zzjz_totalcount_view c on c.doctorid = a.id
+        WHERE
+            a.valid = 1
+            <if test="doctorid != null and doctorid != ''">
+                and a.id = #{doctorid}
+            </if>
+        
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryexpertList" resultType="map">
+         SELECT
+            a.consultcount,
+            a. hospitalid hospitalname,
+            e. NAME positionname,
+            a.photo,
+            a.realname,
+            a.score,
+            a.skilledinfo,
+            a.id ,
+            a.worktime,
+            a.brief,
+            a.mobile,
+            a.id,
+            a.valid,
+            a.createtime,
+ifnull(b.count,0) remaincount,
+ifnull(c.count,0) invitetotalcount
+        FROM
+            t_ylfw_zjzz_expert a
+            
+        INNER JOIN t_ylfw_position e ON a.positionid = e.id
+left JOIN t_ylfw_zzjz_remaincount_view b on b.doctorid = a.id
+left JOIN t_ylfw_zzjz_totalcount_view c on c.doctorid = a.id
+        WHERE 1=1
+            
+            <if test="doctorid != null and doctorid != ''">
+                and a.id = #{doctorid}
+            </if>
+        
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryexpertTotal" resultType="int">
+        SELECT
+		    count(*)
+		FROM
+		    t_ylfw_zjzz_expert a
+		INNER JOIN t_ylfw_position b ON a.positionid = b.id
+		where 1=1
+    </select>
+    
+</mapper>

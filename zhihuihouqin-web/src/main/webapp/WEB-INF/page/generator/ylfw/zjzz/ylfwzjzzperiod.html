@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>医疗服务专家坐诊-时间段表</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			#if($shiro.hasPermission("ylfwzjzzperiod:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			
+			#if($shiro.hasPermission("ylfwzjzzperiod:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+								<div class="form-group">
+                           <div class="col-sm-2 control-label">开始时间</div>
+                            <div class=" input-group date form_datetime4 col-sm-10 "  data-date-format="HH:ii">
+                                  <input class="form-control" id="dtp_input4"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>              
+                       <div class="form-group">
+                           <div class="col-sm-2 control-label">结束时间</div>
+                            <div class=" input-group date form_datetime4 col-sm-10 " data-date-format="hh:ii">
+                                  <input class="form-control" id="dtp_input5"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>   
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+</div>
+ <script type="text/javascript">
+                   $(function(){
+                       $('.form_datetime4').datetimepicker({
+                            language:  'zh-CN',
+                            format: 'hh:ii',
+                            startView: 1,
+                            minView:0,
+                            maxView:1,
+                        });
+                   });
+                   
+                   
+                </script>
+<script src="${rc.contextPath}/js/generator/ylfw/zjzz/ylfwzjzzperiod.js?_${date.systemTime}"></script>
+</body>
+</html>

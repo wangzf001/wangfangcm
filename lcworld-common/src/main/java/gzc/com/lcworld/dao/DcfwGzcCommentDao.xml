@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.DcfwGzcCommentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.DcfwGzcCommentEntity" id="dcfwGzcCommentMap">
+        <result property="id" column="id"/>
+        <result property="imgs" column="imgs"/>
+        <result property="content" column="content"/>
+        <result property="orderid" column="orderid"/>
+        <result property="uid" column="uid"/>
+        <result property="supportid" column="supportid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="score" column="score"/>
+        <result property="anonymous" column="anonymous"/>
+        <result property="servicescore" column="servicescore"/>
+        <result property="productscore" column="productscore"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.DcfwGzcCommentEntity">
+		select * from t_dcfw_gzc_comment where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.DcfwGzcCommentEntity">
+		select c.*
+		<if test="auth!=null and auth == 0"> 
+		,CASE c.anonymous WHEN 0 THEN IFNULL(u.realname,u.nickname)
+		WHEN 1  THEN "无权查看"
+		END username, 
+		CASE c.anonymous WHEN 0 THEN u.photo 
+		WHEN 1  THEN "无权查看" 
+		END  photo
+		</if>
+		<if test="auth!=null and auth == 1"> 
+		,IFNULL(u.realname,u.nickname) username, u.photo photo 
+		</if> 
+		from t_dcfw_gzc_comment c
+		left join t_user u on u.id = c.uid
+		<where>
+			<if test="ids!=null">c.id in 
+				<foreach item="id" collection="ids" open="(" separator="," close=")">
+					#{id}
+				</foreach>
+			</if>
+			<if test="username != null and username.trim()!=''">u.user_name like CONCAT("%",#{username},"%")</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by c.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_dcfw_gzc_comment c
+		left join t_user u on u.id = c.uid
+		<where>
+			<if test="username != null and username.trim()!=''">u.user_name like CONCAT("%",#{username},"%")</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.DcfwGzcCommentEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_dcfw_gzc_comment
+		(
+			`imgs`, 
+			`content`, 
+			`orderid`, 
+			`uid`, 
+			`supportid`, 
+			`createtime`, 
+			`score`, 
+			`anonymous`,
+			`servicescore`,
+			`productscore`,
+			`type`
+		)
+		values
+		(
+			#{imgs}, 
+			#{content}, 
+			#{orderid}, 
+			#{uid}, 
+			#{supportid}, 
+			#{createtime}, 
+			#{score}, 
+			#{anonymous},
+			#{servicescore},
+			#{productscore},
+			#{type}
+		)
+	</insert>
+	<insert id="addImgList" parameterType="java.util.Map">
+		insert into t_dcfw_gzc_comment_img
+		(
+			img_path,
+			createtime,
+			comment_id
+		) 
+		VALUES 
+		<foreach item="img" collection="imgList" separator=",">
+		(
+			#{img.imgUrl},
+			#{img.createTime},
+			#{img.commentId}
+		)
+		</foreach>
+	</insert>
+	<update id="update" parameterType="com.lcworld.entity.DcfwGzcCommentEntity">
+		update t_dcfw_gzc_comment 
+		<set>
+			<if test="imgs != null">`imgs` = #{imgs}, </if>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="orderid != null">`orderid` = #{orderid}, </if>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="supportid != null">`supportid` = #{supportid}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="score != null">`score` = #{score}, </if>
+			<if test="anonymous != null">`anonymous` = #{anonymous},</if>
+			<if test="servicescore != null">`servicescore` = #{servicescore},</if>
+			<if test="productscore != null">`productscore` = #{productscore}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_dcfw_gzc_comment where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_dcfw_gzc_comment where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

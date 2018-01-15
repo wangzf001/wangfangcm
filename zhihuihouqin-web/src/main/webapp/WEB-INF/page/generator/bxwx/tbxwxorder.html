@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>报修维修订单</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+	   <div class="grid-btn">
+            <!-- #if($shiro.hasPermission("lffworder:save"))
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            #end
+            #if($shiro.hasPermission("lffworder:update"))
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            #end
+            #if($shiro.hasPermission("lffworder:delete"))
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            #end -->
+             <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.order.ordercode" @keyup.enter="query" placeholder="订单号">
+            </div>
+             <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.order.username" @keyup.enter="query" placeholder="用户名">
+            </div>
+             <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.order.mendername" @keyup.enter="query" placeholder="维修人员">
+            </div>
+            
+              <div class="form-group col-sm-3">
+                <select class="form-control" v-model="q.order.status">
+                  <option value="">----订单状态----</option>
+                  <option value="1">待接单</option>
+                  <option value="2">已接单</option>
+                  <option value="3">已完成</option>
+                  <option value="4">待评价</option>
+                  <option value="5">已取消</option>
+                </select>
+                </div>
+                
+              <div class="form-group col-sm-3">
+                <select class="form-control" v-model="q.order.paystatus">
+                  <option value="">----支付状态----</option>
+                  <option value="1">已支付</option>
+                  <option value="0">未支付</option>
+                </select>
+                </div>
+              
+                <div class="form-group col-sm-3">
+                    <div class="input-group date form_datetime" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input1">
+                        <input class="form-control" id="dtp_input1"  size="25" type="text" value="" readonly placeholder="创建时间开始">
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-3">
+                    <div class="input-group date form_datetime2" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input2" >
+                        <input class="form-control" size="25" id="dtp_input2" type="text" value="" readonly placeholder="创建时间截止" >
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                
+                <script type="text/javascript">
+                   $(function(){
+                       $('.form_datetime').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                       $('.form_datetime2').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                   });
+                </script>
+                <a class="btn btn-default" @click="query">查询</a>
+        </div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">维修项目</div>
+			   	 <div class="col-sm-10">
+			   	 <select class="form-control" v-model="tBxwxOrder.menditem">
+                          <option value="0">----选择维修项目----</option>
+                          <option v-for="cata in itemlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                        </div>
+			   	
+			</div>
+			<div class="form-group">
+                <div class="col-sm-2 control-label">订单号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tBxwxOrder.ordercode" placeholder="订单号"/>
+                </div>
+            </div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">姓名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tBxwxOrder.username" placeholder="姓名"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">手机号</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tBxwxOrder.mobile" placeholder="手机号"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">预约时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tBxwxOrder.invitetime" placeholder="预约时间"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">服务地点</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tBxwxOrder.serviceplace" placeholder="服务地点"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">维修人员</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="mender.realname" placeholder="维修人员"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">详情信息</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tBxwxOrder.mendcontent" placeholder="详情信息"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">维修图片</div>
+			   	<div class="col-sm-10">
+			   	 <img v-for="cata in imglist" alt="" :src="cata" style="width:100px;height:100px"/>  
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">价格</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tBxwxOrder.price" placeholder="价格"/>
+			    </div>
+			</div>
+									<div class="form-group">
+                        
+			   	<div class="col-sm-2 control-label">订单状态 </div>
+			   	<div class="col-sm-10">
+			   	      <select class="form-control" v-model="tBxwxOrder.orderstatus">
+                          <option value="0">----选择维修项目----</option>
+                          <option  :value="1">待接单</option>
+                          <option  :value="2">已接单</option>
+                          <option  :value="3">已完成</option>
+                          <option  :value="4">待评价</option>
+                          <option  :value="5">已取消</option>
+                        </select>
+			     
+			    </div>
+			</div>
+			<div v-if="tBxwxOrder.orderstatus == 5" class="form-group">
+			   	<div class="col-sm-2 control-label">取消原因</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tBxwxOrder.cancelreason" placeholder="取消原因"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">下单时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tBxwxOrder.createtime" placeholder="下单时间"/>
+			    </div>
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">支付状态</div>
+			   	<div class="col-sm-10">
+			      <input v-if="tBxwxOrder.paystatus == 0 || tBxwxOrder.paystatus == null" type="text" class="form-control" value="未支付"/>
+			      <input v-else="tBxwxOrder.paystatus == 1" type="text" class="form-control" value="已支付"/>
+			    </div>
+			</div>
+			
+			   <div  class="form-group">
+                <div class="col-sm-2 control-label">操作</div>
+                <div  class="col-sm-10">
+                  #if($shiro.hasPermission("lffworder:update"))
+	            <a class="btn btn-primary" @click="saveOrUpdate"><i class="fa fa-pencil-square-o"></i>&nbsp;确定</a>
+	            #end
+                #if($shiro.hasPermission("tbxwxorderprocesses:check"))
+                    <input type="button" class="btn btn-info" @click="check(3)" value="通过"/>
+                    <input type="button" class="btn btn-info" @click="check(4)" value="不通过"/>
+                   #end
+                   
+                #if($shiro.hasPermission("tbxwxorderprocesses:send"))
+                    <input type="button" class="btn btn-info" @click="check(5)" value="派单"/>
+                   #end
+                   
+                      <input type="button" class="btn btn-info" @click="reload" value="返回"/>
+                     
+                </div>
+            </div>
+          
+		</form>
+	</div>
+	
+	<div id="reasonDIV" style="display:none;padding:10px;"  class="panel panel-default">
+	   <form class="form-horizontal">
+	       <div class="form-group">
+                <div class="col-sm-2 control-label">失败原因</div>
+                 <div class="col-sm-10">  
+                 <select class="form-control" v-model="failurereasonid">
+                          <option value="0">----选择维修项目----</option>
+                          <option v-for="cata in reasonlist" :value="cata.id">{{cata.reason}}</option>
+                        </select>
+                        </div>
+                
+            </div>
+	       <div class="form-group">
+                <div class="col-sm-2 control-label">其他原因</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="failurereason" placeholder="其他原因"/>
+                </div>
+            </div>
+	   </form>
+	</div>
+	<div id="sendDIV" style="display:none;padding:10px;"  class="panel panel-default">
+	   <form class="form-horizontal">
+	       <div class="form-group">
+                <div class="col-sm-2 control-label">选择人员</div>
+                 <div class="col-sm-10">  
+                 <select class="form-control" v-model="menderid">
+                          <option value="0">----选择人员----</option>
+                          <option v-for="cata in menderlist" :value="cata.id">{{cata.realname}}{{cata.shanchanglingyu}}</option>
+                        </select>
+                        </div>
+                
+            </div>
+	      
+	   </form>
+	</div>
+	
+	<div id="showCheckDIV" style="display:none;padding:10px;"  class="panel panel-default">
+	   <table id="jqGridCheck"></table>
+        <div id="jqGridCheckPager"></div>
+	</div>
+	
+	 <div id="CommentDiv"  style="display:none;padding:10px;">
+	    <div class="grid-btn">
+            <a class="btn btn-primary" @click="updateComment"><i class="fa fa-pencil-square-o"></i>&nbsp;查看</a>
+        </div>
+        <div  v-show="showComment" class="panel panel-default">
+            <table id="jqGridComment"></table>
+            <div id="jqGridCommentPager"></div>
+        </div>
+        
+          <div v-show="!showComment" class="panel panel-default">
+             <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-2 control-label">订单编号</div>
+                <div class="col-sm-10">
+                  <input readonly="value" type="text" class="form-control" v-model="tBxwxComment.orderid" placeholder="订单编号"/>
+                </div>
+            </div>
+                                            <div class="form-group">
+                <div class="col-sm-2 control-label">图片</div>
+                <div class="col-sm-10">
+                   <img v-for="cata in commentimglist" alt="" :src="cata" style="width:100px;height:100px"/>  
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">评价内容</div>
+                <div class="col-sm-10">
+                  <input readonly="value" type="text" class="form-control" v-model="tBxwxComment.content" placeholder="评价内容"/>
+                </div>
+            </div>
+                                
+                          
+                                 
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">创建时间</div>
+                <div class="col-sm-10">
+                  <input readonly="value" type="text" class="form-control" v-model="tBxwxComment.createtime" placeholder="创建时间"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">总分</div>
+                <div class="col-sm-10">
+                  <input readonly="value" type="text" class="form-control" v-model="tBxwxComment.score" placeholder="总分"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">服务评分</div>
+                <div class="col-sm-10">
+                  <input readonly="value" type="text" class="form-control" v-model="tBxwxComment.servicescore" placeholder="服务评分"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">是否匿名</div>
+                <div class="col-sm-10">
+                  <input readonly="value" v-if="tBxwxComment.anonymous == 1" type="text" value="是" class="form-control" />
+                  <input readonly="value" v-else type="text" value="否" class="form-control" />
+                </div>
+            </div>
+                           
+        </form>
+          </div>
+        
+	   
+	 </div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/bxwx/tbxwxorder.js?_${date.systemTime}"></script>
+</body>
+</html>

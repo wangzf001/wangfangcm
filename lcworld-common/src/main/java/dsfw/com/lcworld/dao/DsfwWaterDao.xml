@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.DsfwWaterDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.DsfwWaterEntity" id="dsfwWaterMap">
+        <result property="id" column="id"/>
+        <result property="photo" column="photo"/>
+        <result property="name" column="name"/>
+        <result property="positionid" column="positionid"/>
+        <result property="score" column="score"/>
+        <result property="mobile" column="mobile"/>
+        <result property="brief" column="brief"/>
+        <result property="valid" column="valid"/>
+        <result property="username" column="userName"/>
+        <result property="password" column="password"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.DsfwWaterEntity">
+		select * from t_dsfw_water where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.DsfwWaterEntity">
+		select * from t_dsfw_water
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_dsfw_water 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.DsfwWaterEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_dsfw_water
+		(
+			`photo`, 
+			`name`, 
+			`positionid`, 
+			`score`, 
+			`mobile`, 
+			`brief`, 
+			`valid`, 
+			`userName`, 
+			`password`
+		)
+		values
+		(
+			#{photo}, 
+			#{name}, 
+			#{positionid}, 
+			#{score}, 
+			#{mobile}, 
+			#{brief}, 
+			#{valid}, 
+			#{username}, 
+			#{password}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.DsfwWaterEntity">
+		update t_dsfw_water 
+		<set>
+			<if test="photo != null">`photo` = #{photo}, </if>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="positionid != null">`positionid` = #{positionid}, </if>
+			<if test="score != null">`score` = #{score}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="brief != null">`brief` = #{brief}, </if>
+			<if test="valid != null">`valid` = #{valid}, </if>
+			<if test="username != null">`userName` = #{username}, </if>
+			<if test="password != null">`password` = #{password}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_dsfw_water where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_dsfw_water where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

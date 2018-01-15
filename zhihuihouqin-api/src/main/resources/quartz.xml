@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.0.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-4.0.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-4.0.xsd ">
+
+	  <!-- 配置定时任务-->
+    <bean id="orderCancelTask"
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="cancel" />
+        </property>
+        <property name="concurrent" value="false" />
+        <property name="targetMethod">
+            <value>orderCancel</value>
+        </property>
+    </bean>
+    <!-- 任务启动类 -->
+    <bean id="cancel" class="com.lcworld.task.OrderCancelTask"></bean>
+    <!-- 配置定时任务时间-->
+    <bean id="orderCancelTaskTriggers"
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail">
+            <ref bean="orderCancelTask" />
+        </property>
+        <!-- cron表达式 每天上午1点更新数据-->
+        <property name="cronExpression">
+        <value>0/4 * * * * ?</value>
+        </property>
+    </bean>
+    <!-- scheduler factory 开启定时任务-->
+    <bean id="orderCancelSchedulerFactory" lazy-init="false" autowire="no"
+        class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="orderCancelTaskTriggers" />
+            </list>
+        </property>
+          <property name="taskExecutor">
+             <ref bean="threadPoolTaskExecutor" />
+        </property>
+    </bean>
+    
+	 <!-- 自动完成 -->
+    <bean id="lffworderfinishTask"
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="lffworderfinish" />
+        </property>
+        <property name="concurrent" value="false" />
+        <property name="targetMethod">
+            <value>finish</value>
+        </property>
+    </bean>
+    <!-- 任务启动类 -->
+    <bean id="lffworderfinish" class="com.lcworld.task.LffwOrderAutoFinishTask"></bean>
+    <!-- 配置定时任务时间-->
+    <bean id="lffworderfinishTaskTriggers"
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail">
+            <ref bean="lffworderfinishTask" />
+        </property>
+        <!-- cron表达式 每天上午1点更新数据-->
+        <property name="cronExpression">
+        <value>0 0/5 * * * ?</value>
+        </property>
+    </bean>
+    <!-- scheduler factory 开启定时任务-->
+    <bean id="lffworderfinishSchedulerFactory" lazy-init="false" autowire="no"
+        class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="lffworderfinishTaskTriggers" />
+            </list>
+        </property>
+          <property name="taskExecutor">
+             <ref bean="threadPoolTaskExecutor" />
+        </property>
+    </bean>
+   
+    
+    
+    
+    <!-- 配置定时任务-->
+    <bean id="remindTask"
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="remind" />
+        </property>
+        <property name="concurrent" value="false" />
+        <property name="targetMethod">
+            <value>orderRemid</value>
+        </property>
+    </bean>
+    <!-- 任务启动类 -->
+    <bean id="remind" class="com.lcworld.task.RemindTask"></bean>
+    <!-- 配置定时任务时间-->
+    <bean id="remindTaskTriggers"
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail">
+            <ref bean="remindTask" />
+        </property>
+        <!-- cron表达式 每天上午1点更新数据-->
+        <property name="cronExpression">
+        <value>0 0/1 * * * ?</value>
+        </property>
+    </bean>
+    <!-- scheduler factory 开启定时任务-->
+    <bean id="remindSchedulerFactory" lazy-init="false" autowire="no"
+        class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="remindTaskTriggers" />
+            </list>
+        </property>
+          <property name="taskExecutor">
+             <ref bean="threadPoolTaskExecutor" />
+        </property>
+    </bean>
+
+    <!-- 配置节能减排定时任务-->
+    <bean id="energyTask"
+          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="energy" />
+        </property>
+        <property name="concurrent" value="false" />
+        <property name="targetMethod">
+            <value>getEnergyCost</value>
+        </property>
+    </bean>
+    <!-- 任务启动类 -->
+    <bean id="energy" class="com.lcworld.task.EnergyTask"></bean>
+    <!-- 配置定时任务时间-->
+    <bean id="energyTaskTriggers"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail">
+            <ref bean="energyTask" />
+        </property>
+        <!-- cron表达式 每天上午1点更新数据-->
+        <property name="cronExpression">
+            <value>0 59 23 * * ?</value>
+        </property>
+    </bean>
+    <!-- scheduler factory 开启定时任务-->
+    <bean id="energySchedulerFactory" lazy-init="false" autowire="no"
+          class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="energyTaskTriggers" />
+            </list>
+        </property>
+        <property name="taskExecutor">
+            <ref bean="threadPoolTaskExecutor" />
+        </property>
+    </bean>
+    
+    
+    <bean id="threadPoolTaskExecutor" scope="singleton"
+      class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+      <!-- 核心线程数，默认为1 -->
+      <property name="corePoolSize" value="1" />
+
+      <!-- 最大线程数，默认为Integer.MAX_VALUE -->
+      <property name="maxPoolSize" value="10" />
+
+      <!-- 队列最大长度，一般需要设置值>=notifyScheduledMainExecutor.maxNum；默认为Integer.MAX_VALUE
+          <property name="queueCapacity" value="1000" /> -->
+
+      <!-- 线程池维护线程所允许的空闲时间，默认为60s -->
+      <property name="keepAliveSeconds" value="300" />
+
+      <!-- 线程池对拒绝任务（无线程可用）的处理策略，目前只支持AbortPolicy、CallerRunsPolicy；默认为后者 -->
+      <property name="rejectedExecutionHandler">
+          <!-- AbortPolicy:直接抛出java.util.concurrent.RejectedExecutionException异常 -->
+          <!-- CallerRunsPolicy:主线程直接执行该任务，执行完之后尝试添加下一个任务到线程池中，可以有效降低向线程池内添加任务的速度 -->
+          <!-- DiscardOldestPolicy:抛弃旧的任务、暂不支持；会导致被丢弃的任务无法再次被执行 -->
+          <!-- DiscardPolicy:抛弃当前任务、暂不支持；会导致被丢弃的任务无法再次被执行 -->
+          <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
+      </property>
+    </bean>
+</beans>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TVisitUserDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TVisitUserEntity" id="tVisitUserMap">
+        <result property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="mobile" column="mobile"/>
+        <result property="roomnum" column="roomnum"></result>
+        <result property="reason" column="reason"/>
+        <result property="expertarrivaltime" column="expertarrivaltime"/>
+        <result property="expertleavetime" column="expertleavetime"/>
+        <result property="visitperiod" column="visitperiod"/>
+        <result property="cartype" column="cartype"/>
+        <result property="carcode" column="carcode"/>
+        <result property="uid" column="uid"/>
+        <result property="buildnum" column="buildnum"/>
+        <result property="unit" column="unit"/>
+        <result property="visittime" column="visittime"/>
+        <result property="createtime" column="createtime"/>
+        <result property="status" column="status"/>
+        <result property="vname" column="vname"/>
+        <result property="vmobile" column="vmobile"/>
+        <result property="vidnum" column="vidnum"/>
+        <result property="vpnum" column="vpnum"/>
+        <result property="cancelreason" column="cancelreason"/>
+        <result property="isdel" column="isdel"/>
+        <result property="ordercode" column="ordercode"/>
+        <result property="realname" column="realname"/>
+         <result property="visitreason" column="visitreason"/>
+        <result property="adminreason" column="adminreason"/>
+        <collection property="byuserlist" javaType="com.lcworld.entity.UserVisibyEntity" >
+            <id property="id" column="byid"/>
+            <result property="visituid" column="visituid"/>
+            <result property="idcard" column="idcard"/>
+            <result property="name" column="name"/>
+        </collection>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.TVisitUserEntity">
+		select * from t_visit_user where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.TVisitUserEntity">
+		select * from t_visit_user
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_visit_user 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.TVisitUserEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_visit_user
+		(
+			`roomnum`, 
+			`reason`, 
+			`expertarrivaltime`, 
+			`expertleavetime`, 
+			`uid`,
+			`unit`,
+			`visittime`,
+			`createtime`,
+			`status`,
+			`vname`,
+			`vmobile`,
+			`vidnum`,
+			`phonenum`,
+			`vpnum`,
+			`cancelreason`,
+			`isdel`,
+			`ordercode`,
+			`realname`,
+			`visitreason`,
+			`adminreason`
+		)
+		values
+		(
+			#{roomnum}, 
+			#{reason}, 
+			#{expertarrivaltime}, 
+			#{expertleavetime}, 
+			#{uid},
+			#{unit},
+			#{visittime},
+			#{createtime},
+			#{status},
+			#{vname},
+			#{vmobile},
+			#{vidnum},
+			#{phonenum},
+			#{vpnum},
+			#{cancelreason},
+			#{isdel},
+			#{ordercode},
+			#{realname},
+			#{visitreason},
+			#{adminreason}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.TVisitUserEntity">
+		update t_visit_user 
+		<set>
+			<if test="phonenum != null">`phonenum` = #{phonenum}, </if>
+			<if test="roomnum != null">`roomnum` = #{roomnum}, </if>
+			<if test="reason != null">`reason` = #{reason}, </if>
+			<if test="expertarrivaltime != null">`expertarrivaltime` = #{expertarrivaltime}, </if>
+			<if test="expertleavetime != null">`expertleavetime` = #{expertleavetime}, </if>
+			<if test="uid != null">`uid` = #{uid},</if>
+			<if test="unit != null">`unit` = #{unit},</if>
+			<if test="visittime != null">`visittime` = #{visittime},</if>
+			<if test="createtime != null">`createtime` = #{createtime},</if>
+			<if test="status != null">`status` = #{status},</if>
+			<if test="vname != null">`vname` = #{vname},</if>
+			<if test="vmobile != null">`vmobile` = #{vmobile},</if>
+			<if test="vidnum != null">`vidnum` = #{vidnum},</if>
+			<if test="vpnum != null">`vpnum` = #{vpnum},</if>
+			<if test="cancelreason != null">`cancelreason` = #{cancelreason},</if>
+			<if test="isdel != null">`isdel` = #{isdel},</if>
+			<if test="ordercode != null">`ordercode` = #{ordercode},</if>
+			<if test="realname != null">`realname` = #{realname}</if>
+			<if test="visitreason != null">`visitreason` = #{visitreason}</if>
+			<if test="adminreason != null">`adminreason` = #{adminreason}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_visit_user where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_visit_user where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="queryOrderList" resultMap="tVisitUserMap">
+	   select a.*,e.id byid,e.visituid,e.name,e.idcard,e.visituid from t_visit_user a 
+	   left join t_user_visit_by e  on e.visituid = a.id 
+	   where isdel = 0 
+	   
+	   <if test="uid != null and uid != ''">
+	       and  a.uid = #{uid}
+	   </if>
+	 <if test="statuslist != null and statuslist.size > 0">
+          and a.status in 
+           <foreach item="id" collection="statuslist" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        </if>
+	   order by a.createtime desc 
+	   <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+	   
+	</select>
+
+</mapper>

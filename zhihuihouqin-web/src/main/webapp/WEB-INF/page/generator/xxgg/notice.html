@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>公告</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.keyword" @keyup.enter="query" placeholder="题目、来源或内容">
+			</div>
+			<div class="form-group col-sm-3">
+				<select class="form-control" v-model="q.typeid">
+				  <option value="">----分类----</option>
+				  <option v-for="type in noticetypeList" :value="type.id">{{type.name}}</option>
+				</select>
+			</div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+	                <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间开始">
+	                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+	            </div>
+				<input type="hidden" class="form-control" id="dtp_input1" v-model="q.createTimeStart" value=""/>
+            </div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime2" data-date-format="yyyy-mm-dd" data-link-field="dtp_input2" >
+                    <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间截止" >
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+				<input type="hidden" class="form-control" id="dtp_input2" v-model="q.createTimeEnd" value=""/>
+            </div>
+	        <script type="text/javascript">
+		       $(function(){
+		    	   $('.form_datetime').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		    	   $('.form_datetime2').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		       });
+	        </script>
+			<a class="btn btn-default" @click="query">查询</a>
+			#if($shiro.hasPermission("notice:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("notice:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("notice:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal" style="width:800px">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">分类id</div>
+			   	<div class="col-sm-10">
+			       <select class="form-control" v-model="notice.typeid">
+					  <option value="">----分类----</option>
+					  <option v-for="type in noticetypeList" :value="type.id">{{type.name}}</option>
+					</select>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">标题</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="notice.title" placeholder="标题"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">来源</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="notice.source" placeholder="来源"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">内容添加</div>
+			   	<div class="col-sm-10">
+			   		<textarea id="myEditor">请输入</textarea>
+					<script type="text/javascript">
+					    var editor = new UE.ui.Editor();
+					    editor.render("myEditor");
+					    /* UE.Editor.prototype._bkGetActionUrl = UE.Editor.prototype.getActionUrl;  
+					    UE.Editor.prototype.getActionUrl = function(action) {  
+						    	alert("1"+action);
+							if (action == 'uploadimage' || action == 'uploadscrawl' || action == 'uploadvideo'||action==undefined) {  
+							    return '../../sys/oss/upload';  
+							} else {  
+							    return this._bkGetActionUrl.call(this, action);  
+							}
+					    }  */
+					</script>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">缩略图</div>
+			   	<div class="col-sm-2">
+			      <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;上传图片</a>
+			    </div>
+			   	<div class="col-sm-2">
+			      <input type="text" class="form-control" v-model="notice.img" placeholder="图片地址"/>
+			    </div>
+			   	<div class="col-sm-3">
+			      <img alt="" :src="notice.img" style="width:100px;height:100px"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">静态文件地址</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="notice.url" placeholder="静态文件地址"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">是否推荐</div>
+			   	<div class="col-sm-10">
+			   		<label class="radio-inline">
+					     <input type="radio" name="isRecommend" v-model="notice.isRecommend" value="0"/><span class="label label-default">不选择</span>
+					</label>
+			   		<label class="radio-inline">
+					     <input type="radio" name="isRecommend" v-model="notice.isRecommend" value="1"/><span class="label label-success">推荐</span>
+					</label>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+</div>
+<div id="menuLayer" style="display:none;padding:10px;">
+</div>
+<script src="${rc.contextPath}/js/generator/xxgg/notice.js?_${date.systemTime}"></script>
+</body>
+</html>

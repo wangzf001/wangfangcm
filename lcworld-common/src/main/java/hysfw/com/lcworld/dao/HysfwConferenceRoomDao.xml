@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.HysfwConferenceRoomDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.lcworld.entity.HysfwConferenceRoomEntity"
+		id="hysfwConferenceRoomMap">
+		<result property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="capacity" column="capacity" />
+		<result property="usenumber" column="usenumber" />
+		<result property="address" column="address" />
+		<result property="introduce" column="introduce" />
+		<result property="imgs" column="imgs" />
+		<result property="area" column="area" />
+		<result property="photo" column="photo" />
+		<result property="status" column="status" />
+	</resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.HysfwConferenceRoomEntity">
+		SELECT
+		r.*, (
+		SELECT
+		GROUP_CONCAT(CONCAT_WS("-",e.id,e.`name`))
+		FROM
+		t_hysfw_room_equipment ce
+		LEFT JOIN t_hysfw_conference_equipment e ON e.id = ce.eid
+		WHERE
+		ce.roomid = r.id
+		and ce.type = 1
+		) enames, (
+		SELECT
+		GROUP_CONCAT(CONCAT_WS("-",e.id,e.`name`))
+		FROM
+		t_hysfw_room_equipment ce
+		LEFT JOIN t_hysfw_conference_service e ON e.id = ce.eid
+		WHERE
+		ce.roomid = r.id
+		and ce.type = 2
+		) snames
+		FROM
+		t_hysfw_conference_room r
+		WHERE
+		r.id = #{value}
+	</select>
+	<select id="queryAvailableEquipmentList" resultType="com.lcworld.entity.HysfwConferenceEquipmentEntity"
+		parameterType="Integer">
+		SELECT
+		e.*
+		FROM
+		t_hysfw_conference_equipment e
+		LEFT JOIN t_hysfw_room_equipment ce ON e.id = ce.eid
+		WHERE
+		ce.roomid = #{value}
+		and ce.type = 1
+	</select>
+	<select id="queryAvailableServiceList" resultType="com.lcworld.entity.HysfwConferenceServiceEntity"
+		parameterType="Integer">
+		SELECT
+		s.*
+		FROM
+		t_hysfw_conference_service s
+		LEFT JOIN t_hysfw_room_equipment ce ON s.id = ce.eid
+		WHERE
+		ce.roomid = #{value}
+		and ce.type = 2
+	</select>
+	<select id="queryConferenceType" resultType="java.util.Map">
+		SELECT * FROM t_hysfw_conference_type
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.HysfwConferenceRoomEntity">
+		select * from t_hysfw_conference_room
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		t_hysfw_conference_room
+	</select>
+
+	<insert id="save" parameterType="com.lcworld.entity.HysfwConferenceRoomEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		t_hysfw_conference_room
+		(
+		`name`,
+		`capacity`,
+		`usenumber`,
+		`address`,
+		`introduce`,
+		`imgs`,
+		`area`,
+		`photo`,
+		`status`
+		)
+		values
+		(
+		#{name},
+		#{capacity},
+		#{usenumber},
+		#{address},
+		#{introduce},
+		#{imgs},
+		#{area},
+		#{photo},
+		#{status}
+		)
+	</insert>
+	<insert id="saveRoomSE" parameterType="list">
+		insert into
+		t_hysfw_room_equipment
+		(
+			`eid`,
+			`roomid`,
+			`count`,
+			`type`
+		)
+		values
+		<foreach item="item" collection="list" separator=",">
+		(
+			#{item.eid},
+			#{item.roomid},
+			#{item.count},
+			#{item.type}
+		)
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="com.lcworld.entity.HysfwConferenceRoomEntity">
+		update t_hysfw_conference_room
+		<set>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="capacity != null">`capacity` = #{capacity}, </if>
+			<if test="usenumber != null">`usenumber` = #{usenumber}, </if>
+			<if test="address != null">`address` = #{address}, </if>
+			<if test="introduce != null">`introduce` = #{introduce}, </if>
+			<if test="imgs != null">`imgs` = #{imgs}, </if>
+			<if test="area != null">`area` = #{area},</if>
+			<if test="photo != null">`photo` = #{photo},</if>
+			<if test="status != null">`status` = #{status}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from t_hysfw_conference_room where id =
+		#{value}
+	</delete>
+	<delete id="deleteByRoomid">
+		delete from t_hysfw_room_equipment where roomid =
+		#{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from t_hysfw_conference_room where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

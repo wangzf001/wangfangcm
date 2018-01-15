@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TdhdActivitysignDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TdhdActivitysignEntity" id="tdhdActivitysignMap">
+        <result property="asId" column="as_id"/>
+        <result property="aId" column="a_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="asAvatar" column="as_avatar"/>
+        <result property="asUsername" column="as_username"/>
+        <result property="asMebile" column="as_mebile"/>
+    </resultMap>
+
+    <select id="queryObject" resultType="com.lcworld.entity.TdhdActivitysignEntity">
+		select * from t_tdhd_activitysign where as_id = #{value}
+	</select>
+
+    <select id="queryList" resultType="com.lcworld.entity.TdhdActivitysignEntity">
+        select *
+        from t_tdhd_activitysign
+        where 1=1
+        <if test="activityid != null ">
+            and a_id =#{activityid}
+        </if>
+        <if test="uid != null ">
+            and user_id =#{uid}
+        </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by as_id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from t_tdhd_activitysign 
+	</select>
+
+    <insert id="save" parameterType="com.lcworld.entity.TdhdActivitysignEntity">
+		insert into t_tdhd_activitysign
+		(
+			`as_id`, 
+			`a_id`, 
+			`user_id`, 
+			`as_avatar`, 
+			`as_username`, 
+			`as_mebile`
+		)
+		values
+		(
+			#{asId}, 
+			#{aId}, 
+			#{userId}, 
+			#{asAvatar}, 
+			#{asUsername}, 
+			#{asMebile}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.lcworld.entity.TdhdActivitysignEntity">
+        update t_tdhd_activitysign
+        <set>
+            <if test="aId != null">`a_id` = #{aId},</if>
+            <if test="userId != null">`user_id` = #{userId},</if>
+            <if test="asAvatar != null">`as_avatar` = #{asAvatar},</if>
+            <if test="asUsername != null">`as_username` = #{asUsername},</if>
+            <if test="asMebile != null">`as_mebile` = #{asMebile}</if>
+        </set>
+        where as_id = #{asId}
+    </update>
+
+    <delete id="delete">
+		delete from t_tdhd_activitysign where as_id = #{value}
+	</delete>
+
+    <delete id="deleteBatch">
+        delete from t_tdhd_activitysign where as_id in
+        <foreach item="asId" collection="array" open="(" separator="," close=")">
+            #{asId}
+        </foreach>
+    </delete>
+
+
+    <select id="queryuserList" resultType="com.lcworld.dto.TdhdActivityUserDTO">
+        select b.photo ,a.as_username username,a.as_mebile mobile ,c.`name` nationname ,a.as_id asid from
+        t_tdhd_activitysign a
+        INNER JOIN t_user b on a.user_id=b.id
+        LEFT JOIN t_nation c on c.id=b.nation
+        where 1=1
+        <if test="activityid != null and activityid != ''">
+            and a.a_id =#{activityid}
+        </if>
+        <if test="username != null and username != ''">
+            and a.as_username like '%${username}%'
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and a.as_mebile like '%${mobile}%'
+        </if>
+
+        <if test="ids != null and ids != ''">
+            and a.as_id in
+            <foreach item="asId" collection="ids" open="(" separator="," close=")">
+                #{asId}
+            </foreach>
+
+        </if>
+
+
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryuserTotal" resultType="int">
+        select count(*) from t_tdhd_activitysign a
+        INNER JOIN t_user b on a.user_id=b.id
+        LEFT JOIN t_nation c on c.id=b.nation
+        where 1=1
+        <if test="activityid != null  and activityid != ''">
+            and a.a_id =#{activityid}
+        </if>
+        <if test="username != null and username != ''">
+            and a.as_username like '%${username}%'
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and a.as_mebile like '%${mobile}%'
+        </if>
+        <if test="ids != null and ids != ''">
+            and a.as_id in
+            <foreach item="asId" collection="ids" open="(" separator="," close=")">
+                #{asId}
+            </foreach>
+        </if>
+
+    </select>
+
+    <select id="queryuserList1" resultType="map">
+        select a.as_avatar asAvatar,a.as_username asUsername,a.as_mebile asMebile ,c.`name` nationname ,a.as_id asId
+        from t_tdhd_activitysign a
+        LEFT JOIN t_user b on a.user_id=b.id
+        LEFT JOIN t_nation c on c.id=b.nation
+        where 1=1
+        <if test="activityid != null and activityid != ''">
+            and a.a_id =#{activityid}
+        </if>
+        <if test="username != null and username != ''">
+            and a.as_username like '%${username}%'
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and a.as_mebile like '%${mobile}%'
+        </if>
+
+        <if test="ids != null and ids != ''">
+            and a.as_id in
+            <foreach item="asId" collection="ids" open="(" separator="," close=")">
+                #{asId}
+            </foreach>
+
+        </if>
+
+
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryEnrollList" resultType="com.lcworld.dto.TdhdActivityEnrollDTO">
+        select s.as_id id,s.a_id activity_id,s.user_id user_id,ifnull(u.realname,u.user_name) username,u.mobile,u.photo,
+        case demand.position when 1 then tup.name else '不提供' end postion,
+        case demand.depart when 1 then dep.name else '不提供' end depart,
+        case demand.office when 1 then off.name else '不提供' end office,
+        case demand.nation when 1 then tn.name else '不提供' end nation,
+        case demand.sex when 1 then u.sex else '不提供' end sex,
+        case demand.age when 1 then 0 else 0 end age
+        from t_tdhd_activitysign s
+        LEFT JOIN t_tdhd_activity_demand demand ON demand.activiy_id = s.a_id
+        INNER JOIN t_user u ON u.id = s.user_id
+        LEFT JOIN t_nation tn ON tn.id = u.nation
+        LEFT JOIN t_depart dep ON dep.id = u.departid
+        LEFT JOIN t_office off ON off.id = u.officeid
+        LEFT JOIN t_user_position tup ON tup.id = u.positionid
+        <where>
+            <if test="activityid != null and activityid != ''">
+                and s.a_id =#{activityid}
+            </if>
+            <if test="username != null and username != ''">
+                and  locate(#{username},CONCAT(u.realname,u.user_name))>0
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and locate(#{mobile},u.mobile) > 0
+            </if>
+
+            <if test="ids != null and ids != ''">
+                and s.as_id in
+                <foreach item="asId" collection="ids" open="(" separator="," close=")">
+                    #{asId}
+                </foreach>
+
+            </if>
+        </where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by s.as_id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+</mapper>

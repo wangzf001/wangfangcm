@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.FwCommenviewDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.FwCommenviewEntity" id="fwCommenviewMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="userName" column="user_name"/>
+        <result property="negative" column="negative"/>
+        <result property="commonly" column="commonly"/>
+        <result property="good" column="good"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.FwCommenviewEntity">
+		select * from t_fw_comment_view where id = #{value}
+	</select>
+
+	<select id="queryGoodComment" resultType="com.lcworld.entity.FwCommenviewEntity">
+		select * from t_fw_comment_view where uid = #{uid}  
+		<if test="type != null" >
+		and type  = #{type}
+		</if>
+	</select>
+	
+
+	<select id="queryList" resultType="com.lcworld.entity.FwCommenviewEntity">
+		select * from t_fw_comment_view where type = #{type}
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_fw_comment_view where type = #{type}
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.FwCommenviewEntity">
+		insert into t_fw_comment_view
+		(
+			`id`, 
+			`uid`, 
+			`user_name`, 
+			`negative`, 
+			`commonly`, 
+			`good`, 
+			`type`
+		)
+		values
+		(
+			#{id}, 
+			#{uid}, 
+			#{userName}, 
+			#{negative}, 
+			#{commonly}, 
+			#{good}, 
+			#{type}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.FwCommenviewEntity">
+		update t_fw_comment_view 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="userName != null">`user_name` = #{userName}, </if>
+			<if test="negative != null">`negative` = #{negative}, </if>
+			<if test="commonly != null">`commonly` = #{commonly}, </if>
+			<if test="good != null">`good` = #{good}, </if>
+			<if test="type != null">`type` = #{type}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_fw_comment_view where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_fw_comment_view where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

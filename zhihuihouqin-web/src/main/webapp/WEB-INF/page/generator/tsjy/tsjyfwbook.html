@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>图书借阅服务-图书</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            #if($shiro.hasPermission("tsjyfwbook:save"))
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            #end
+            #if($shiro.hasPermission("tsjyfwbook:update"))
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            #end
+            #if($shiro.hasPermission("tsjyfwbook:delete"))
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            #end
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+                                            <div class="form-group">
+                <div class="col-sm-2 control-label">标题</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.title" placeholder="标题"/>
+                </div>
+            </div>
+                                            <div class="form-group">
+                <div class="col-sm-2 control-label">副标题</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.subtitle" placeholder="标题"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">作者</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.author" placeholder="作者"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">出版社</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.publisher" placeholder="出版社"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">作者简介</div>
+                <div class="col-sm-10">
+                     <textarea v-model="tsjyfwBook.authorbrief" class="form-control" placeholder="作者简介"></textarea>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">创建时间</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.createtime" placeholder="创建时间"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">封面</div>
+                 <div class="col-sm-2">
+                  <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;封面</a>
+                </div>
+                <div class="col-sm-2">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.img" placeholder="封面地址"/>
+                </div>
+                <div class="col-sm-3">
+                  <img alt="" :src="tsjyfwBook.img" style="width:100px;height:100px"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">内容简介</div>
+                <div class="col-sm-10">
+                    <textarea v-model="tsjyfwBook.brief" placeholder="内容简介" class="form-control"></textarea>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">图书分类id</div>
+                 <div class="col-sm-10">
+                        <select class="form-control" v-model="tsjyfwBook.typeid">
+                          <option value="0">----图书分类----</option>
+                          <option v-for="cata in catalist" :value="cata.id">{{cata.typename}}</option>
+                        </select>
+                     </div>
+            </div>
+                                
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">分数</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.score" placeholder="分数"/>
+                </div>
+            </div>
+              <div class="form-group">
+                <div class="col-sm-2 control-label">搜索号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.searchid" placeholder="搜索号"/>
+                </div>
+            </div>
+                                 
+                                  
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">条码号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.barcode" placeholder="条码号"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">isbn</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.isbn" placeholder="isbn"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">关键词</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.keyword" placeholder="关键词"/>
+                </div>
+            </div>
+                                   
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">列表页简介</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBook.shortbrief" placeholder="列表页简介"/>
+                </div>
+            </div>
+                                
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">收藏量</div>
+                <div class="col-sm-10">
+                  <input readonly="true" type="text" class="form-control" v-model="tsjyfwBook.favorcount" placeholder="收藏量"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">借阅量</div>
+                <div class="col-sm-10">
+                  <input readonly="true" type="text" class="form-control" v-model="tsjyfwBook.borrowcount" placeholder="借阅量"/>
+                </div>
+            </div>
+               
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">是否下架</div>
+                 <div class="col-sm-10">
+                                      是: &nbsp;&nbsp;<input type="radio" name="isdel" value="1" v-model="tsjyfwBook.isdel" />
+                                   &nbsp;&nbsp; &nbsp;&nbsp; 
+                                   否 : &nbsp;&nbsp;    <input type="radio"  name="isdel" value="0" v-model="tsjyfwBook.isdel" />
+                </div>
+            </div>
+                            <div class="form-group">
+                <div class="col-sm-2 control-label"></div> 
+                <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+    
+      <div id="showbookcopy" style="display:none;padding:10px;">
+        <div v-show="showbookcopyList">
+        <div class="grid-btn">
+            <a class="btn btn-primary" @click="addcopy"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            <a class="btn btn-primary" @click="updatecopy"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            <a class="btn btn-primary" @click="delcopy"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+        </div>
+        <table id="jqGridbookcopy"></table>
+        <div id="jqGridbookcopyPager"></div>
+    </div>
+    
+    <div v-show="!showbookcopyList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+                                            <div class="form-group">
+                <div class="col-sm-2 control-label">搜索号</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tsjyfwBookCopy.searchid" placeholder="搜索号"/>
+                </div>
+            </div>
+                                           
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">是否正本</div>
+                <div class="col-sm-10">
+                     <div class="col-sm-10">
+                                      是 : &nbsp;&nbsp;<input type="radio" name="valid" value="1" v-model="tsjyfwBookCopy.original" placeholder=""/>
+                                   &nbsp;&nbsp; &nbsp;&nbsp; 
+                                   否 : &nbsp;&nbsp;    <input type="radio"  name="valid" value="0" v-model="tsjyfwBookCopy.original" placeholder=""/>
+                </div>
+                </div>
+            </div>
+                                 
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">借阅状态</div>
+                <div class="col-sm-10">
+                  <select class="form-control" v-model="tsjyfwBookCopy.borrowstatus">
+                          <option value="0">----借阅状态----</option>
+                          <option  :value="1">未借出</option>
+                          <option  :value="2">已借出</option>
+                        </select>
+                </div>
+                
+                
+            </div>
+                            <div class="form-group">
+                <div class="col-sm-2 control-label"></div> 
+                <input type="button" class="btn btn-primary" @click="saveOrUpdatecopy" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reloadcopy" value="返回"/>
+            </div>
+        </form>
+    </div>
+        
+    </div>
+        
+    </div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/tsjy/tsjyfwbook.js?_${date.systemTime}"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.DsfwCategoryDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.DsfwCategoryEntity" id="dsfwCategoryMap">
+        <result property="id" column="id"/>
+        <result property="skucataname" column="skucataname"/>
+        <result property="pskucataid" column="pskucataid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="needdeposit" column="needdeposit"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.DsfwCategoryEntity">
+		select * from t_dsfw_category where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.DsfwCategoryEntity">
+		select * from t_dsfw_category
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_dsfw_category 
+	</select>
+ 	<select id="queryBygid" resultType="com.lcworld.entity.DsfwCategoryEntity" parameterType="java.util.Map">
+		select * from t_dsfw_category dc where EXISTS(SELECT 1 FROM t_dsfw_goods g WHERE g.cid = dc.id AND g.id = #{id})
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.DsfwCategoryEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_dsfw_category
+		(
+			`skucataname`, 
+			`pskucataid`, 
+			`createtime`,
+			`needdeposit`
+		)
+		values
+		(
+			#{skucataname}, 
+			#{pskucataid}, 
+			#{createtime},
+			#{needdeposit}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.DsfwCategoryEntity">
+		update t_dsfw_category 
+		<set>
+			<if test="skucataname != null">`skucataname` = #{skucataname}, </if>
+			<if test="pskucataid != null">`pskucataid` = #{pskucataid}, </if>
+			<if test="createtime != null">`createtime` = #{createtime},</if>
+			<if test="needdeposit != null">`needdeposit` = #{needdeposit}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_dsfw_category where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_dsfw_category where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

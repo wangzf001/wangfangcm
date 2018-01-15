@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.YlfwZjzzCommentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.YlfwZjzzCommentEntity" id="ylfwZjzzCommentMap">
+        <result property="id" column="id"/>
+        <result property="imgs" column="imgs"/>
+        <result property="content" column="content"/>
+        <result property="orderid" column="orderid"/>
+        <result property="uid" column="uid"/>
+        <result property="doctorid" column="doctorid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="score" column="score"/>
+        <result property="anonymous" column="anonymous"/>
+        <result property="servicescore" column="servicescore"/>
+        <result property="productscore" column="productscore"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.YlfwZjzzCommentEntity">
+		select * from t_ylfw_zjzz_comment where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.YlfwZjzzCommentEntity">
+		select *,imgs imglist  from t_ylfw_zjzz_comment c where 1=1
+		<if test="doctorid != null and doctorid != ''">
+		  and doctorid = #{doctorid}
+		</if>
+		<if test="orderid != null and orderid != ''">
+		  and orderid = #{orderid}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_ylfw_zjzz_comment where 1=1
+		<if test="orderid != null and orderid != ''">
+          and orderid = #{orderid}
+        </if>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.YlfwZjzzCommentEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_ylfw_zjzz_comment
+		(
+			`imgs`, 
+			`content`, 
+			`orderid`, 
+			`uid`, 
+			`doctorid`, 
+			`createtime`, 
+			`score`, 
+			`anonymous`, 
+			`servicescore`,
+			`productscore`,
+			`type`
+		)
+		values
+		(
+			#{imgs}, 
+			#{content}, 
+			#{orderid}, 
+			#{uid}, 
+			#{doctorid}, 
+			#{createtime}, 
+			#{score}, 
+			#{anonymous}, 
+			#{servicescore},
+			#{productscore},
+			#{type}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.YlfwZjzzCommentEntity">
+		update t_ylfw_zjzz_comment 
+		<set>
+			<if test="imgs != null">`imgs` = #{imgs}, </if>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="orderid != null">`orderid` = #{orderid}, </if>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="doctorid != null">`doctorid` = #{doctorid}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="score != null">`score` = #{score}, </if>
+			<if test="anonymous != null">`anonymous` = #{anonymous}, </if>
+			<if test="servicescore != null">`servicescore` = #{servicescore},</if>
+			<if test="productscore != null">`productscore` = #{productscore}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_ylfw_zjzz_comment where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_ylfw_zjzz_comment where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	
+        <select id="queryCommentList" resultType="com.lcworld.dto.YlfwCommentDTO">
+        select 
+        a.imgs,a.content,a.orderid,a.uid,a.doctorid,date_format(a.createtime,'%Y-%m-%d') createtime,
+        a.score,a.anonymous,a.servicescore ,b.photo,b.realname
+         from t_ylfw_zjzz_comment a 
+        inner join t_user b on a.uid = b.id where 1=1
+        <if test="doctorid != null and doctorid != ''">
+          and a.doctorid = #{doctorid}
+        </if>
+        order by createtime desc 
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+     <select id="queryScore" resultType="java.lang.Double">
+        select AVG(score)  from t_ylfw_zjzz_comment   where doctorid =#{doctorid} group by doctorid
+    </select>
+    <select id="queryStat" resultType="java.util.Map">
+        SELECT
+        t1.uid,
+        user.user_name,
+        ROUND(IFNULL(t4.total, 0)/IFNULL(t1.total, 0),1) AS 'negative',
+        ROUND(IFNULL(t2.total, 0)/IFNULL(t1.total, 0),1) AS 'commonly',
+        ROUND(IFNULL(t3.total, 0)/IFNULL(t1.total, 0),1) AS 'good',t1.type
+        FROM <include refid="statis"/>
+        <where>
+        	<if test="user_name != null and user_name != ''">
+        		user.user_name = #{user_name}
+        	</if>
+        </where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by t1.uid desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    <select id="queryStatTotal" resultType="int">
+        SELECT count(*)  FROM <include refid="statis"/>
+    </select>
+    <sql id="statis">
+        (<include refid="publicSql"/> GROUP BY uid, type ) t1
+        LEFT JOIN (<include refid="publicSql"/> WHERE score &gt; 2 AND score &lt; 4 GROUP BY uid, type ) t2 ON t2.uid = t1.uid
+        LEFT JOIN (<include refid="publicSql"/> WHERE score &gt; 4 GROUP BY uid, type) t3 ON t3.uid = t1.uid
+        LEFT JOIN (<include refid="publicSql"/> WHERE score &lt; 2 GROUP BY uid, type ) t4 ON t4.uid = t1.uid
+        LEFT JOIN t_user user ON user.id = t1.uid
+    </sql>
+    <sql id="publicSql">
+        SELECT uid, SUM(IFNULL(score, 0)) AS total, type  FROM t_ylfw_zjzz_comment
+    </sql>
+    
+    <select id="getScore" resultType="java.lang.Double">
+		SELECT
+			t.score
+		FROM
+			t_ylfw_zjzz_comment AS t
+		WHERE
+			t.doctorid = #{doctorid}
+    </select>
+
+</mapper>

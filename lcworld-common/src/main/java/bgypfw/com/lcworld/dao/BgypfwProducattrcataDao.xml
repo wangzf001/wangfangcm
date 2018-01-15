@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.BgypfwProducattrcataDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.BgypfwProducattrcataEntity" id="bgypfwProducattrcataMap">
+        <result property="id" column="id"/>
+        <result property="productid" column="productid"/>
+        <result property="cataid" column="cataid"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.BgypfwProducattrcataEntity">
+		select * from t_bgypfw_product_attrcata where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.BgypfwProducattrcataEntity">
+		select a.*,b.skucataname cataname from t_bgypfw_product_attrcata a 
+		inner join t_bgypfw_skufirstcata  b on a.cataid = b.id
+        where 1=1
+         <if test="productid != null and productid != ''">
+         	and productid =  #{productid}
+         </if>
+          order by a.id desc
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_bgypfw_product_attrcata where 1=1 
+		 <if test="productid != null and productid != ''">
+         	and productid =  #{productid}
+         </if>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.BgypfwProducattrcataEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_bgypfw_product_attrcata
+		(
+			`productid`, 
+			`cataid`
+		)
+		values
+		(
+			#{productid}, 
+			#{cataid}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.BgypfwProducattrcataEntity">
+		update t_bgypfw_product_attrcata 
+		<set>
+			<if test="productid != null">`productid` = #{productid}, </if>
+			<if test="cataid != null">`cataid` = #{cataid}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_bgypfw_product_attrcata where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_bgypfw_product_attrcata where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

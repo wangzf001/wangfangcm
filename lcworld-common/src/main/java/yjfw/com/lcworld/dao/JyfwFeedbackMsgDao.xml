@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.JyfwFeedbackMsgDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.JyfwFeedbackMsgEntity" id="jyfwFeedbackMsgMap">
+        <result property="id" column="id"/>
+        <result property="complaintId" column="complaint_id"/>
+        <result property="utype" column="utype"/>
+        <result property="uid" column="uid"/>
+        <result property="serviceuid" column="serviceuid"/>
+        <result property="content" column="content"/>
+        <result property="createtime" column="createtime"/>
+        <result property="readstatus" column="readstatus"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.JyfwFeedbackMsgEntity">
+		select * from t_jyfw_feedback_msg where id = #{value}
+	</select>
+	<select id="queryServiceUid" resultType="Integer" parameterType="java.util.Map">
+		SELECT
+			serviceuid
+		FROM
+			t_jyfw_feedback_msg
+		WHERE
+			createtime = (
+				SELECT
+					MAX(createtime)
+				FROM
+					t_jyfw_feedback_msg
+				WHERE
+					complaint_id = #{cid}
+				AND serviceuid IS NOT NULL
+			)
+		LIMIT 0,1
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.JyfwFeedbackMsgEntity">
+		SELECT
+			m.*, CASE m.utype
+		WHEN 1 THEN
+			(
+				SELECT
+					photo
+				FROM
+					t_user
+				WHERE
+					id = m.uid
+			)
+		WHEN 2 THEN
+		"asdfdfa"
+		 END photo
+		FROM
+			t_jyfw_feedback_msg m
+		<where>
+			<if test="cid!=null">m.complaint_id = #{cid}</if>
+			<if test="uid!=null">and createtime in (SELECT MAX(createtime) FROM t_jyfw_feedback_msg WHERE uid = #{uid} GROUP BY complaint_id) </if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by createtime desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_jyfw_feedback_msg m
+		<where>
+			<if test="cid!=null">m.complaint_id = #{cid}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.JyfwFeedbackMsgEntity">
+		insert into t_jyfw_feedback_msg
+		(
+			`id`, 
+			`complaint_id`, 
+			`utype`, 
+			`uid`, 
+			`content`, 
+			`createtime`, 
+			`readstatus`,
+			`serviceuid`
+		)
+		values
+		(
+			#{id}, 
+			#{complaintId}, 
+			#{utype}, 
+			#{uid}, 
+			#{content}, 
+			#{createtime}, 
+			#{readstatus},
+			#{serviceuid}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.JyfwFeedbackMsgEntity">
+		update t_jyfw_feedback_msg 
+		<set>
+			<if test="complaintId != null">`complaint_id` = #{complaintId}, </if>
+			<if test="utype != null">`utype` = #{utype}, </if>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="serviceuid != null">`serviceuid` = #{serviceuid}, </if>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="readstatus != null">`readstatus` = #{readstatus}</if>
+		</set>
+		where id = #{id}
+	</update>
+	<update id="updateListRead">
+		update t_jyfw_feedback_msg 
+		<set>
+			readstatus = 1
+		</set>
+		where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	<delete id="delete">
+		delete from t_jyfw_feedback_msg where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_jyfw_feedback_msg where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

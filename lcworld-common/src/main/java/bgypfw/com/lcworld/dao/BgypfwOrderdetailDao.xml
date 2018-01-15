@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.BgypfwOrderdetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.BgypfwOrderdetailEntity" id="bgypfwOrderdetailMap">
+        <result property="id" column="id"/>
+        <result property="skuid" column="skuid"/>
+        <result property="productid" column="productid"/>
+        <result property="count" column="count"/>
+        <result property="price" column="price"/>
+        <result property="totalprice" column="totalprice"/>
+        <result property="createtime" column="createtime"/>
+        <result property="orderid" column="orderid"/>
+        <association property="sku" column="skuid" javaType="com.lcworld.entity.BgypfwSkuidEntity">
+        	<id property="id" column="skuid"/>
+	        <result property="skuname" column="skuname"/>
+	        <result property="mainimg" column="mainimg"/>
+        </association>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.BgypfwOrderdetailEntity">
+		select * from t_bgypfw_orderdetail where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="bgypfwOrderdetailMap">
+		select * from t_bgypfw_orderdetail od
+		LEFT JOIN t_bgypfw_skuid sku ON sku.id = od.skuid
+		<where>
+			<if test="oid!=null">od.orderid=#{oid}</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by od.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_bgypfw_orderdetail
+		<where>
+			<if test="oid!=null">orderid=#{oid}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.BgypfwOrderdetailEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_bgypfw_orderdetail
+		(
+			`skuid`, 
+			`productid`, 
+			`count`, 
+			`price`, 
+			`totalprice`, 
+			`createtime`, 
+			`orderid`
+		)
+		values
+		(
+			#{skuid}, 
+			#{productid}, 
+			#{count}, 
+			#{price}, 
+			#{totalprice}, 
+			#{createtime}, 
+			#{orderid}
+		)
+	</insert>
+	<insert id="saveBatch" useGeneratedKeys="true" parameterType="java.util.List">
+		<selectKey resultType="int" keyProperty="id" order="AFTER">  
+	        SELECT  
+	        LAST_INSERT_ID()
+	    </selectKey> 
+		insert into t_bgypfw_orderdetail
+		(
+			`skuid`, 
+			`productid`, 
+			`count`, 
+			`price`, 
+			`totalprice`, 
+			`createtime`, 
+			`orderid`
+		)
+		values
+		<foreach collection="list" item="item" index="index" separator="," >  
+	        (
+	        	#{item.skuid}, 
+				#{item.productid}, 
+				#{item.count}, 
+				#{item.price}, 
+				#{item.totalprice}, 
+				#{item.createtime}, 
+				#{item.orderid}
+	        )  
+	    </foreach>
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.BgypfwOrderdetailEntity">
+		update t_bgypfw_orderdetail 
+		<set>
+			<if test="skuid != null">`skuid` = #{skuid}, </if>
+			<if test="productid != null">`productid` = #{productid}, </if>
+			<if test="count != null">`count` = #{count}, </if>
+			<if test="price != null">`price` = #{price}, </if>
+			<if test="totalprice != null">`totalprice` = #{totalprice}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="orderid != null">`orderid` = #{orderid}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_bgypfw_orderdetail where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_bgypfw_orderdetail where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

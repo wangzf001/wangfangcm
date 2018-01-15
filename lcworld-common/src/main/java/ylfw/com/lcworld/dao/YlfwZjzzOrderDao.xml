@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.YlfwZjzzOrderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.YlfwZjzzOrderEntity" id="ylfwZjzzOrderMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="doctorid" column="doctorid"/>
+        <result property="invitemobile" column="invitemobile"/>
+        <result property="scheduleid" column="scheduleid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="changes" column="changes"/>
+        <result property="status" column="status"/>
+        <result property="ordercode" column="ordercode"/>
+        <result property="isdel" column="isdel"/>
+        <result property="realname" column="realname"/>
+        <result property="mobile" column="mobile"/>
+        <result property="cancelreason" column="cancelreason"/>
+        <result property="invitetime" column="invitetime"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.YlfwZjzzOrderEntity">
+		select * from t_ylfw_zjzz_order where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.YlfwZjzzOrderEntity">
+		select o.*,u.realname,u.mobile invitemobile from t_ylfw_zjzz_order o INNER JOIN t_user u ON u.id = o.uid where 1=1
+		
+			<if test="uid != null and uid != ''">
+				and o.uid = #{uid}
+			</if>
+			<if test="doctorid != null and doctorid != ''">
+				and o.doctorid  = #{doctorid}
+			</if>
+			<if test="excuteTimeAddHalf!=null">
+				and o.invitetime &gt;= #{excuteTimeAddHalf}
+			</if>
+			<if test="notstatus != null and notstatus != ''">
+				and o.status &lt; #{notstatus}
+			</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_ylfw_zjzz_order 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.YlfwZjzzOrderEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_ylfw_zjzz_order
+		(
+			`uid`, 
+			`doctorid`, 
+			`scheduleid`,
+			`createtime`, 
+			`changes`, 
+			`status`, 
+			`ordercode`,
+			`isdel`,
+			`cancelreason`,
+			`invitetime`
+		)
+		values
+		(
+			#{uid}, 
+			#{doctorid}, 
+			#{scheduleid},
+			#{createtime}, 
+			#{changes}, 
+			#{status}, 
+			#{ordercode},
+			#{isdel},
+			#{cancelreason},
+			#{invitetime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.YlfwZjzzOrderEntity">
+		update t_ylfw_zjzz_order 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="doctorid != null">`doctorid` = #{doctorid}, </if>
+			<if test="scheduleid != null">`scheduleid` = #{scheduleid}, </if>
+			<if test="changes != null">`changes` = #{changes}, </if>
+            <if test="status != null">`status` = #{status}, </if>
+            <if test="ordercode != null">`ordercode` = #{ordercode},</if>
+            <if test="isdel != null">`isdel` = #{isdel},</if>
+            <if test="invitetime != null">`invitetime` = #{invitetime},</if>
+            <if test="createtime != null">`createtime` = #{createtime}, </if>
+            <if test="cancelreason != null">`cancelreason` = #{cancelreason}</if>
+        </set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_ylfw_zjzz_order where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_ylfw_zjzz_order where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+    
+    
+    
+     <resultMap type="com.lcworld.dto.YlfwzjzzOrderDTO"  id="ylfwzjzzorderResultMap">
+        <result column="id" jdbcType="INTEGER" property="id" />
+        <result column="doctorid" jdbcType="INTEGER" property="doctorid" />
+        <result column="scheduleid" jdbcType="INTEGER" property="scheduleid" />
+        <result column="changes" jdbcType="INTEGER" property="changes" />
+        <result column="status" jdbcType="INTEGER" property="status" />
+        <result column="remind" jdbcType="INTEGER" property="remind" />
+        <result column="createtime" jdbcType="VARCHAR" property="createtime" />
+        <result column="ordercode" jdbcType="VARCHAR" property="ordercode" />
+        <result column="scheduledate" jdbcType="VARCHAR" property="scheduledate" />
+        <!-- 所有分类 -->
+        <association property="doctor" javaType="com.lcworld.dto.ZjzzExpertDTO" 
+            column="{doctorid=doctorid}" select="com.lcworld.dao.YlfwZjzzExpertDao.queryDoctorList">
+        </association>
+    </resultMap>
+    
+    <select id="queryOrderdetail" resultMap = "ylfwzjzzorderResultMap">
+           SELECT
+            a.id,
+            a.doctorid,
+            a.scheduleid,
+            date_format(a.createtime, '%Y-%m-%d') createtime,
+            a.changes,
+            a. STATUS,
+            a.ordercode,
+        
+    
+         CONCAT(
+            date_format(b.scheduledate, '%Y-%m-%d'),
+            ' ',
+            c.starttime
+        ) scheduledate
+        FROM
+            t_ylfw_zjzz_order a
+        INNER JOIN t_ylfw_zjzz_doctor_schedule b ON a.scheduleid = b.id
+        INNER JOIN t_ylfw_zjzz_period c ON c.id = b.consultperiodid
+        WHERE
+            1 = 1
+        AND a.isdel = 0
+        <if test="orderid != null and orderid != ''">
+            and a.id =#{orderid}
+        </if>
+         <if test="statuslist != null and statuslist.size > 0">
+          and a.status in 
+           <foreach item="id" collection="statuslist" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        </if>
+        order by a.createtime desc 
+       
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryOrderlist" resultType = "com.lcworld.dto.YlfwzjzzOrderDTO">
+          SELECT
+            a.id,
+            a.doctorid,
+            a.scheduleid,
+            date_format(a.createtime, '%Y-%m-%d') createtime,
+            a.changes,
+            a. STATUS,
+            a.ordercode,
+            u.realname,
+            u.mobile invitemobile ,
+
+         CONCAT(
+            date_format(b.scheduledate, '%Y-%m-%d'),
+            ' ',
+            c.starttime
+        ) scheduledate,
+        d.photo,d.realname
+        FROM
+            t_ylfw_zjzz_order a
+        INNER JOIN t_user u on u.id = a.uid
+        INNER JOIN t_ylfw_zjzz_doctor_schedule b ON a.scheduleid = b.id
+        INNER JOIN t_ylfw_zjzz_period c ON c.id = b.consultperiodid
+        inner join t_ylfw_zjzz_expert d on d.id = a.doctorid
+        WHERE
+            1 = 1 and uid=#{uid}
+        AND a.isdel = 0
+       
+        <if test="orderid != null and orderid != ''">
+            and a.id =#{orderid}
+        </if>
+         <if test="statuslist != null and statuslist.size > 0">
+          and a.status in 
+           <foreach item="id" collection="statuslist" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        </if>
+        order by a.createtime desc 
+       
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryorderList" resultType="map">
+       SELECT
+		    a.*, b.realname doctorname,
+		    c.realname username,
+            c.mobile invitemobile
+		FROM
+		    t_ylfw_zjzz_order a
+		INNER JOIN t_ylfw_zjzz_expert b ON a.doctorid = b.id
+		INNER JOIN t_user c ON c.id = a.uid where 1=1
+           <if test="status != null and status != ''" > and a.status = #{status}</if>
+           <if test="orderid != null and orderid != ''" > and a.id = #{orderid}</if>
+           <if test="ordercode != null and ordercode != ''" > and a.ordercode like '%${ordercode}%'</if>
+           <if test="username != null and username != ''" > and c.realname like  '%${username}%'</if>
+           <if test="doctorname != null and doctorname != ''" > and b.realname like  '%${doctorname}%'</if>
+           <if test="starttime != null and starttime != ''"> and a.createtime &gt;= str_to_date(#{starttime},'%Y-%m-%d %H:%i')</if>
+           <if test="endtime != null and endtime != ''"> and a.createtime &lt;= str_to_date(#{endtime},'%Y-%m-%d %H:%i')</if>
+           order by date_format(now(),'%Y-%m-%d')=date_format(invitetime,'%Y-%m-%d') desc, status asc ,invitetime asc
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryorderTotal" resultType="int">
+        SELECT
+		  count(*)
+		FROM
+		    t_ylfw_zjzz_order a
+		INNER JOIN t_ylfw_zjzz_expert b ON a.doctorid = b.id
+		INNER JOIN t_user c ON c.id = a.uid where 1=1
+		<if test="orderid != null and orderid != ''" > and a.id = #{orderid}</if>
+		  <if test="status != null and status != ''" > and a.status = #{status}</if>
+           <if test="ordercode != null and ordercode != ''" > and a.ordercode like '%${ordercode}%'</if>
+           <if test="username != null and username != ''" > and c.realname like  '%${username}%'</if>
+           <if test="doctorname != null and doctorname != ''" > and b.realname like  '%${doctorname}%'</if>
+           <if test="starttime != null and starttime != ''"> and a.createtime &gt;= str_to_date(#{starttime},'%Y-%m-%d %H:%i')</if>
+           <if test="endtime != null and endtime != ''"> and a.createtime &lt;= str_to_date(#{endtime},'%Y-%m-%d %H:%i')</if>
+    </select>
+    
+</mapper>

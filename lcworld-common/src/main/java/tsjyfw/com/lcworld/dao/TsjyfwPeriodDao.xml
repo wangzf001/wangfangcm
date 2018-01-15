@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TsjyfwPeriodDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TsjyfwPeriodEntity" id="tsjyfwPeriodMap">
+        <result property="id" column="id"/>
+        <result property="timeperiod" column="timeperiod"/>
+        <result property="typeid" column="typeid"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.TsjyfwPeriodEntity">
+		select * from t_tsjyfw_period where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.TsjyfwPeriodEntity">
+		select * from t_tsjyfw_period
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+	<select id="querytimeList" resultType="com.lcworld.entity.TsjyfwPeriodEntity">
+		select * from t_tsjyfw_period
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_tsjyfw_period 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.TsjyfwPeriodEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_tsjyfw_period
+		(
+			`timeperiod`, 
+			`typeid`, 
+			`sort`
+		)
+		values
+		(
+			#{timeperiod}, 
+			#{typeid}, 
+			#{sort}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.TsjyfwPeriodEntity">
+		update t_tsjyfw_period 
+		<set>
+			<if test="timeperiod != null">`timeperiod` = #{timeperiod}, </if>
+			<if test="typeid != null">`typeid` = #{typeid}, </if>
+			<if test="sort != null">`sort` = #{sort}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_tsjyfw_period where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_tsjyfw_period where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+
+</mapper>

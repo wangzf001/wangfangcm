@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>干洗店服务-订单</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.ordercode" @keyup.enter="query" placeholder="订单号">
+			</div>
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.realname" @keyup.enter="query" placeholder="真名">
+			</div>
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.mobile" @keyup.enter="query" placeholder="电话">
+			</div>
+			<div class="form-group col-sm-3">
+				<select class="form-control" v-model="q.status">
+				  <option value="">----订单状态----</option>
+				  <option value="1">已预约</option>
+				  <option value="3">已完成</option>
+				  <option value="4">已评价</option>
+				  <option value="5">已取消</option>
+				</select>
+			</div>
+			<div class="form-group col-sm-3">
+				<select class="form-control" v-model="q.payStatus">
+				  <option value="">----支付状态----</option>
+				  <option value="0">未付款</option>
+				  <option value="1">已付款</option>
+				</select>
+			</div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+	                <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间开始">
+	                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+	            </div>
+				<input type="hidden" class="form-control" id="dtp_input1" v-model="q.createTimeStart" value=""/>
+            </div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime2" data-date-format="yyyy-mm-dd" data-link-field="dtp_input2" >
+                    <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间截止" >
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+				<input type="hidden" class="form-control" id="dtp_input2" v-model="q.createTimeEnd" value=""/>
+            </div>
+	        <script type="text/javascript">
+		       $(function(){
+		    	   $('.form_datetime').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		    	   $('.form_datetime2').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		       });
+	        </script>
+	        <a class="btn btn-default" @click="query">查询</a>
+			<!-- #if($shiro.hasPermission("gxdfworder:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("gxdfworder:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end -->
+			#if($shiro.hasPermission("gxdfworder:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+			<a class="btn btn-primary" @click="getLogInfo"><i class="fa fa-trash-o"></i>&nbsp;更改订单记录</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">预定人uid</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.uid" placeholder="预定人uid"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">电话</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.mobile" placeholder="电话"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">预计送达时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.expectarrivaltime" placeholder="预计送达时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">订单号</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.code" placeholder="订单号"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">创建时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.createtime" placeholder="创建时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">订单状态 1:已下单，2：去受理，3：已完成，4：待评价，5：已取消</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.status" placeholder="订单状态 1:已下单，2：服务中，3：已完成，4：已评价，5：已取消"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">总价</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.totalprice" placeholder="总价"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">付款状态0未付款1已付款</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.payStatus" placeholder="付款状态0未付款1已付款"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">取消订单ids</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.cancelReasonids" placeholder="取消订单ids"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">原因内容</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="gxdfwOrder.reasonContent" placeholder="原因内容"/>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+	<div id="menuLayer2" style="display:none;padding:10px;">
+	<div class="form-group">
+	   	<div class="col-sm-2 control-label">订单状态</div>
+	   	<div class="col-sm-10">
+		   	<label class="radio-inline">
+				<input type="radio" name="status" value="1" v-model="gxdfworderlog.status"/> <span class="label label-default">下单</span>
+			</label>
+			<label class="radio-inline">
+				<input type="radio" name="status" value="2" v-model="gxdfworderlog.status"/> <span class="label label-default">待送件</span>
+			</label>
+			<label class="radio-inline">
+				<input type="radio" name="status" value="3" v-model="gxdfworderlog.status"/> <span class="label label-default">洗涤中</span>
+			</label>
+			<label class="radio-inline">
+				<input type="radio" name="status" value="4" v-model="gxdfworderlog.status"/> <span class="label label-default">已完成</span>
+			</label>
+			<label class="radio-inline">
+				<input type="radio" name="status" value="5" v-model="gxdfworderlog.status"/> <span class="label label-default">取件</span>
+			</label>
+			<label class="radio-inline">
+				<input type="radio" name="status" value="6" v-model="gxdfworderlog.status"/> <span class="label label-default">支付</span>
+			</label>
+			<label class="radio-inline">
+				<input type="radio" name="status" value="7" v-model="gxdfworderlog.status"/> <span class="label label-default">评价</span>
+			</label>
+	    </div>
+	</div>
+</div>
+
+<!-- 选择菜单 -->
+<div id="menuLayer" style="display:none;padding:10px;">
+    <div v-show="showdetailList">
+        <div class="grid-btn">
+            <a class="btn btn-primary" @click="addDetail"><i class="fa fa-pencil-square-o"></i>&nbsp;新增</a>
+            <a class="btn btn-primary" @click="updateDetail"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            <a class="btn btn-primary" @click="delDetail"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            <a class="btn btn-primary" @click="checkDetail"><i class="fa fa-trash-o"></i>&nbsp;通过</a>
+        </div>
+        <table id="jqGridOD"></table>
+    <div id="jqGridPagerOD"></div>
+    </div>
+    
+    <div v-show="!showdetailList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+                                           
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">衣服类型</div>
+                 <div class="col-sm-10">
+                        <select class="form-control" v-model="gxdfwOrderdetail.clothestypeid">
+                          <option value="0">----选择类型----</option>
+                          <option v-for="cata in typelist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">数量</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="gxdfwOrderdetail.count" placeholder="数量"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">单价</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="gxdfwOrderdetail.price" placeholder="单价"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">备注</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="gxdfwOrderdetail.remark" placeholder="备注"/>
+                </div>
+            </div>
+                                    <div class="form-group">
+                <div class="col-sm-2 control-label">总价</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="gxdfwOrderdetail.totalprice" placeholder="详情总价"/>
+                </div>
+            </div>
+                                 
+                            <div class="form-group">
+                <div class="col-sm-2 control-label"></div> 
+                <input type="button" class="btn btn-primary" @click="saveOrUpdateDetail" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reloadDetail" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+</div>
+
+
+<script src="${rc.contextPath}/js/generator/gxdfw/gxdfworder.js?_${date.systemTime}"></script>
+</body>
+</html>

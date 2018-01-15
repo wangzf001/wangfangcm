@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>节能减排资讯信息</title>
+    #parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            #if($shiro.hasPermission("energyinformation:save"))
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            #end
+            #if($shiro.hasPermission("energyinformation:update"))
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            #end
+            #if($shiro.hasPermission("energyinformation:delete"))
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            #end
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-2 control-label">资讯标题</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="energyInformation.title" placeholder="资讯标题"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">摘要</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="energyInformation.abstracts" placeholder="摘要"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">资讯内容</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="energyInformation.content" placeholder="资讯内容"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">图片</div>
+                <div class="col-sm-2">
+                    <img alt="" :src="energyInformation.img" style="width:100px;height:100px"/>
+                    <input type="text" class="form-control" v-model="energyInformation.img" placeholder="图片地址"/>
+                </div>
+                <div class="col-sm-2">
+                    <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;上传图片</a>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">收藏量</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="energyInformation.favorNum" placeholder="收藏量"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">是否推荐</div>
+                <div class="col-sm-10">
+                    <select class="form-control" v-model="energyInformation.isRecommend">
+                        <option value="false">不推荐</option>
+                        <option value="true">推荐</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">资讯来源</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="energyInformation.sourceName" placeholder="资讯来源"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">来源地址</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="energyInformation.sourceUrl" placeholder="来源地址"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/common/energyinformation.js?_${date.systemTime}"></script>
+</body>
+</html>

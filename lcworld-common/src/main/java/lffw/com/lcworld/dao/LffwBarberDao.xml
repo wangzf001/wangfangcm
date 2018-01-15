@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.LffwBarberDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.LffwBarberEntity" id="lffwBarberMap">
+        <result property="id" column="id"/>
+        <result property="photo" column="photo"/>
+        <result property="name" column="name"/>
+        <result property="positionid" column="positionid"/>
+        <result property="score" column="score"/>
+        <result property="mobile" column="mobile"/>
+        <result property="brief" column="brief"/>
+        <result property="valid" column="valid"/>
+    </resultMap>
+
+    <select id="queryObject" resultType="com.lcworld.entity.LffwBarberEntity">
+        select * from t_lffw_barber where id = #{value}
+    </select>
+
+    <select id="queryList" resultType="com.lcworld.entity.LffwBarberEntity">
+        select * from t_lffw_barber b
+        <if test="favorstatus!=null">
+            LEFT JOIN t_favor f ON f.entityid = b.id 
+        </if>
+        <where>
+            <if test="valid != null">
+                and b.valid = #{valid}
+            </if>
+            <if test="favorstatus != null and favortype != null and favoruid!=null">
+                AND f.favortype = #{favortype} AND f.uid = #{favoruid} AND f.`status` = #{favorstatus}
+            </if>
+        </where>
+        
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by b.id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryTotal" resultType="int">
+        select count(*) from t_lffw_barber 
+    </select>
+     
+    <insert id="save" parameterType="com.lcworld.entity.LffwBarberEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into t_lffw_barber
+        (
+            `photo`, 
+            `name`, 
+            `positionid`, 
+            `score`, 
+            `mobile`, 
+            `brief`, 
+            `valid`
+        )
+        values
+        (
+            #{photo}, 
+            #{name}, 
+            #{positionid}, 
+            #{score}, 
+            #{mobile}, 
+            #{brief}, 
+            #{valid}
+        )
+    </insert>
+     
+    <update id="update" parameterType="com.lcworld.entity.LffwBarberEntity">
+        update t_lffw_barber 
+        <set>
+            <if test="photo != null">`photo` = #{photo}, </if>
+            <if test="name != null">`name` = #{name}, </if>
+            <if test="positionid != null">`positionid` = #{positionid}, </if>
+            <if test="score != null">`score` = #{score}, </if>
+            <if test="mobile != null">`mobile` = #{mobile}, </if>
+            <if test="brief != null">`brief` = #{brief}, </if>
+            <if test="valid != null">`valid` = #{valid}</if>
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="delete">
+        delete from t_lffw_barber where id = #{value}
+    </delete>
+    
+    <delete id="deleteBatch">
+        delete from t_lffw_barber where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <select id="querybarberList" resultType="com.lcworld.dto.LffwBarberDTO">
+        select a.*,b.name positionName ,IFNULL(c.count,0) remaincount,IFNULL(d.count,0) tatalcount  from t_lffw_barber a INNER JOIN t_lffw_position b on a.positionid = b.id
+        left JOIN t_lffw_barber_remaincount_view c on a.id=c.barberid 
+        left JOIN t_lffw_barber_totalcount_view d on a.id =d.barberid
+        where 1=1
+        
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+</mapper>

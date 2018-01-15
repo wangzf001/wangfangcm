@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.HealthyinfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.HealthyinfoEntity" id="healthyinfoMap">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="createtime" column="createtime"/>
+        <result property="source" column="source"/>
+        <result property="content" column="content"/>
+        <result property="url" column="url"/>
+        <result property="imgs" column="imgs"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.HealthyinfoEntity">
+		select * from t_healthyinfo where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.HealthyinfoEntity">
+		select * from t_healthyinfo where 1=1
+		  <if test="title != null and title != ''" > and title like  '%${title}%'</if>
+           <if test="starttime != null and starttime != ''"> and createtime &gt;= str_to_date(#{starttime},'%Y-%m-%d %H:%i')</if>
+           <if test="endtime != null and endtime != ''"> and createtime &lt;= str_to_date(#{endtime},'%Y-%m-%d %H:%i')</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_healthyinfo where 1=1
+		 <if test="title != null and title != ''" > and title like  '%${title}%'</if>
+           <if test="starttime != null and starttime != ''"> and createtime &gt;= str_to_date(#{starttime},'%Y-%m-%d %H:%i')</if>
+           <if test="endtime != null and endtime != ''"> and createtime &lt;= str_to_date(#{endtime},'%Y-%m-%d %H:%i')</if>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.HealthyinfoEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_healthyinfo
+		(
+			`title`, 
+			`createtime`, 
+			`source`, 
+			`content`, 
+			`url`,
+			`imgs`
+		)
+		values
+		(
+			#{title}, 
+			#{createtime}, 
+			#{source}, 
+			#{content}, 
+			#{url},
+			#{imgs}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.HealthyinfoEntity">
+		update t_healthyinfo 
+		<set>
+			<if test="title != null">`title` = #{title}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="source != null">`source` = #{source}, </if>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="url != null">`url` = #{url}</if>
+			<if test="imgs != null">`imgs` = #{imgs}</if>
+		</set>
+		where id = #{id}
+	</update>
+	 
+	<delete id="delete">
+		delete from t_healthyinfo where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_healthyinfo where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="queryInfoList" resultType="com.lcworld.dto.HealthyinfoDTO">
+        select id,title,source,url,imgs img,date_format(createtime,'%Y-%m-%d %H:%i') createtime
+         from t_healthyinfo where 1=1
+         <if test="keywords != null and keywords !=''">
+            and title like '%${keywords}%'
+         </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+</mapper>

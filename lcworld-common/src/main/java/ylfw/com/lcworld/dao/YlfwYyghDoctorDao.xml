@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.YlfwYyghDoctorDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.YlfwYyghDoctorEntity" id="ylfwYyghDoctorMap">
+        <result property="id" column="id"/>
+        <result property="realname" column="realname"/>
+        <result property="positionid" column="positionid"/>
+        <result property="mobile" column="mobile"/>
+        <result property="hospitalid" column="hospitalid"/>
+        <result property="consultcount" column="consultcount"/>
+        <result property="score" column="score"/>
+        <result property="createtime" column="createtime"/>
+        <result property="valid" column="valid"/>
+        <result property="brief" column="brief"/>
+        <result property="photo" column="photo"/>
+        <result property="skilledinfo" column="skilledinfo"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.YlfwYyghDoctorEntity">
+		select * from t_ylfw_yygh_doctor where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.YlfwYyghDoctorEntity">
+		select * from t_ylfw_yygh_doctor
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_ylfw_yygh_doctor 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.YlfwYyghDoctorEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_ylfw_yygh_doctor
+		(
+			`realname`, 
+			`positionid`, 
+			`mobile`, 
+			`hospitalid`, 
+			`consultcount`, 
+			`score`, 
+			`createtime`, 
+			`valid`, 
+			`brief`, 
+			`photo`, 
+			`skilledinfo`
+		)
+		values
+		(
+			#{realname}, 
+			#{positionid}, 
+			#{mobile}, 
+			#{hospitalid}, 
+			#{consultcount}, 
+			#{score}, 
+			#{createtime}, 
+			#{valid}, 
+			#{brief}, 
+			#{photo}, 
+			#{skilledinfo}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.YlfwYyghDoctorEntity">
+		update t_ylfw_yygh_doctor 
+		<set>
+			<if test="realname != null">`realname` = #{realname}, </if>
+			<if test="positionid != null">`positionid` = #{positionid}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="hospitalid != null">`hospitalid` = #{hospitalid}, </if>
+			<if test="consultcount != null">`consultcount` = #{consultcount}, </if>
+			<if test="score != null">`score` = #{score}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="valid != null">`valid` = #{valid}, </if>
+			<if test="brief != null">`brief` = #{brief}, </if>
+			<if test="photo != null">`photo` = #{photo}, </if>
+			<if test="skilledinfo != null">`skilledinfo` = #{skilledinfo}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_ylfw_yygh_doctor where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_ylfw_yygh_doctor where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	 <select id="queryDoctorList" resultType="com.lcworld.dto.DoctorDTO">
+       SELECT
+            a.consultcount,
+            d. NAME hospitalname,
+            e. NAME positionname,
+            a.photo,
+            a.realname,
+            a.score,
+            a.skilledinfo,
+            ifnull(b.count,0) totalcount,
+            ifnull(c.count,0) remaincount,
+            a.id doctorid,
+        
+        IF (c.count &lt; b.count, 1, 0) available
+        FROM
+            t_ylfw_yygh_doctor a
+        INNER JOIN t_ylfw_hospital d ON a.hospitalid = d.id
+        INNER JOIN t_ylfw_position e ON a.positionid = e.id
+        INNER JOIN t_ylfw_yygh_totalcount_view b ON a.id = b.doctorid
+        INNER JOIN t_ylfw_yygh_remaincount_view c ON a.id = c.doctorid
+        WHERE
+            a.valid = 1
+            <if test="doctorid != null and doctorid != ''">
+                and a.id = #{doctorid}
+            </if>
+        
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+	 <select id="queryDoctorList1" resultType="com.lcworld.dto.DoctorDTO">
+       SELECT
+            a.consultcount,
+            d. NAME hospitalname,
+            e. NAME positionname,
+            a.photo,
+            a.realname,
+            a.score,
+            a.skilledinfo,
+            a.id doctorid
+        FROM
+            t_ylfw_yygh_doctor a
+        INNER JOIN t_ylfw_hospital d ON a.hospitalid = d.id
+        INNER JOIN t_ylfw_position e ON a.positionid = e.id
+        WHERE
+            a.valid = 1
+            <if test="doctorid != null and doctorid != ''">
+                and a.id = #{doctorid}
+            </if>
+        
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+	
+
+</mapper>

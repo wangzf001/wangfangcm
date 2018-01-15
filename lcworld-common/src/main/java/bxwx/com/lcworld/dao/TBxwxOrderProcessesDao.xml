@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TBxwxOrderProcessesDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TBxwxOrderProcessesEntity" id="tBxwxOrderProcessesMap">
+        <result property="id" column="id"/>
+        <result property="status" column="status"/>
+        <result property="detail" column="detail"/>
+        <result property="orderid" column="orderid"/>
+        <result property="createtime" column="createtime"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.TBxwxOrderProcessesEntity">
+		select * from t_bxwx_order_processes where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.TBxwxOrderProcessesEntity">
+		select * from t_bxwx_order_processes where 1=1 
+		<if test="orderid != null and orderid != ''">
+		  and orderid = #{orderid}
+		</if>
+		<if test="status != null and status != ''">
+		  and status = #{status}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_bxwx_order_processes where 1=1 
+		<if test="orderid != null and orderid != ''">
+          and orderid = #{orderid}
+        </if>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.TBxwxOrderProcessesEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_bxwx_order_processes
+		(
+			`status`, 
+			`detail`, 
+			`orderid`, 
+			`createtime`
+		)
+		values
+		(
+			#{status}, 
+			#{detail}, 
+			#{orderid}, 
+			#{createtime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.TBxwxOrderProcessesEntity">
+		update t_bxwx_order_processes 
+		<set>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="detail != null">`detail` = #{detail}, </if>
+			<if test="orderid != null">`orderid` = #{orderid}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_bxwx_order_processes where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_bxwx_order_processes where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="queryProcessList" resultType="com.lcworld.dto.BxwxOrderProcessDTO">
+        select 
+            id,status,detail,orderid,date_format(createtime,'%Y/%m/%d %H:%i') createtime
+        
+         from t_bxwx_order_processes where orderid=#{orderid}
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+</mapper>

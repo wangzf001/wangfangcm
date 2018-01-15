@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.SysRoleDao">
+
+	<select id="queryObject" resultType="com.lcworld.entity.SysRoleEntity">
+		select * from sys_role where role_id = #{value}
+	</select>
+	
+	
+	<select id="queryList" resultType="com.lcworld.entity.SysRoleEntity">
+		select * from sys_role 
+		
+		
+		<where>
+			<if test="roleName != null and roleName.trim() != ''">
+				and `role_name` like concat('%',#{roleName},'%') 
+			</if>
+			<if test="createUserId != null">
+				and create_user_id = #{createUserId} 
+			</if>
+			<if test="type != null">
+				and type = #{type} 
+			</if>
+		</where>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by role_id asc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+	<select id="queryTotal" resultType="int">
+		select count(*) from sys_role 
+		<where>
+			<if test="roleName != null and roleName.trim() != ''">
+				and `role_name` like concat('%',#{roleName},'%') 
+			</if>
+			<if test="createUserId != null">
+				and create_user_id = #{createUserId} 
+			</if>
+			<if test="type != null">
+                and type = #{type} 
+            </if>
+		</where>
+	</select>
+	
+	<select id="querypubList" resultType="com.lcworld.entity.SysRoleEntity">
+		select a.*,e.name roletypename from sys_role a 
+		<if test="uid != null and uid != 1">
+			INNER JOIN 
+			(
+			select min(b.rolesort) minsort,roletype from sys_user_role a INNER JOIN sys_role b on a.role_id =b.role_id
+			where 1=1 
+			<if test="uid != null and uid > 0">
+				and a.user_id = #{uid} 
+			</if>
+			and b.roletype is not null 
+			 group by b.roletype)d
+			on a.roletype = d.roletype and a.rolesort > d.minsort
+		
+		</if>
+		inner join t_purchase_type e on e.servicecode = a.roletype
+		
+		
+		where 1=1 
+		<if test="roleName != null and roleName.trim() != ''">
+					and a.role_name like concat('%',#{roleName},'%') 
+				</if>
+		 order by a.role_id asc
+		
+	
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+	<select id="querypubList1" resultType="com.lcworld.entity.SysRoleEntity">
+		select a.*,e.name roletypename from sys_role a 
+		<if test="uid != null and uid != 1">
+			INNER JOIN 
+			(
+			select min(b.rolesort) minsort,roletype from sys_user_role a INNER JOIN sys_role b on a.role_id =b.role_id
+			where 1=1 
+			<if test="uid != null and uid > 0">
+				and a.user_id = #{uid} 
+			</if>
+			and b.roletype is not null 
+			 group by b.roletype)d
+			on a.roletype = d.roletype and a.rolesort >= d.minsort
+		
+		</if>
+		inner join t_purchase_type e on e.servicecode = a.roletype
+		
+		
+		where 1=1 
+		<if test="roleName != null and roleName.trim() != ''">
+					and a.role_name like concat('%',#{roleName},'%') 
+				</if>
+		 order by a.role_id asc
+		
+	
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+	<select id="querypubTotal" resultType="int">
+		select count(*) from sys_role a 
+		<if test="uid != null and uid != 1">
+			INNER JOIN 
+			(
+			select min(b.rolesort) minsort,roletype from sys_user_role a INNER JOIN sys_role b on a.role_id =b.role_id
+			where 1=1 
+			<if test="uid != null and uid > 0">
+				and a.user_id = #{uid}
+			</if>
+			and b.roletype is not null 
+			 group by b.roletype)d
+			on a.roletype = d.roletype and a.rolesort > d.minsort
+		
+		</if>
+		inner join t_purchase_type e on e.servicecode = a.roletype
+		
+		where 1=1 
+		<if test="roleName != null and roleName.trim() != ''">
+					and a.role_name like concat('%',#{roleName},'%') 
+				</if>
+		order by a.role_id asc
+	</select>
+	
+	<select id="querypubTotal1" resultType="int">
+		select count(*) from sys_role a 
+		<if test="uid != null and uid != 1">
+			INNER JOIN 
+			(
+			select min(b.rolesort) minsort,roletype from sys_user_role a INNER JOIN sys_role b on a.role_id =b.role_id
+			where 1=1 
+			<if test="uid != null and uid > 0">
+				and a.user_id = #{uid}
+			</if>
+			and b.roletype is not null 
+			 group by b.roletype)d
+			on a.roletype = d.roletype and a.rolesort >= d.minsort
+		
+		</if>
+		inner join t_purchase_type e on e.servicecode = a.roletype
+		
+		where 1=1 
+		<if test="roleName != null and roleName.trim() != ''">
+					and a.role_name like concat('%',#{roleName},'%') 
+				</if>
+		order by a.role_id asc
+	</select>
+	
+	<insert id="save" parameterType="com.lcworld.entity.SysRoleEntity" useGeneratedKeys="true" keyProperty="roleId">
+		insert into sys_role
+		(
+			`role_id`, 
+			`role_name`, 
+			`remark`,
+			`create_user_id`,
+			`create_time`,
+			`roletype`,
+			`rolesort`,
+			`type`
+		)
+		values
+		(
+			#{roleId}, 
+			#{roleName}, 
+			#{remark},
+			#{createUserId},
+			#{createTime},
+			#{roletype},
+			#{rolesort},
+			#{type}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.SysRoleEntity">
+		update sys_role 
+		<set> 
+			<if test="roleName != null">`role_name` = #{roleName}, </if>
+			<if test="remark != null">`remark` = #{remark},</if>
+			<if test="roletype != null">`roletype` = #{roletype},</if>
+			<if test="rolesort != null">`rolesort` = #{rolesort},</if>
+			<if test="type != null">`type` = #{type}</if>
+		</set>
+		where role_id = #{roleId}
+	</update>
+	
+	<delete id="deleteBatch">
+		delete from sys_role where role_id in 
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+		;
+		delete from sys_role_menu where role_id in 
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+		;
+		delete from sys_user_role where role_id in 
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+	</delete>
+	
+	<!-- 查询用户创建的角色ID列表 -->
+	<select id="queryRoleIdList" resultType="long">
+		select role_id from sys_role where create_user_id = #{createUserId} 
+	</select> 
+	
+	<select id="queryMinRoleSort" resultType="int">
+		select min(b.rolesort) from sys_user_role a INNER JOIN sys_role b on a.role_id = b.role_id 
+		where a.user_id = #{uid} and b.roletype = #{servicecode}
+	</select> 
+	
+	<select id="queryRolelistByUid" resultType="com.lcworld.entity.SysRoleEntity">
+			SELECT
+			distinct c.*
+		FROM
+			 sys_user_role b 
+		INNER JOIN sys_role c ON b.role_id = c.role_id
+		INNER JOIN (
+			SELECT
+				min(b.rolesort) minsort,
+				roletype
+			FROM
+				sys_user_role a
+			INNER JOIN sys_role b ON a.role_id = b.role_id
+			WHERE
+				1 = 1
+			AND a.user_id = #{uid}
+			GROUP BY
+				b.roletype
+		) d ON c.roletype = d.roletype
+		AND c.rolesort > d.minsort
+	</select>
+	
+	<select id="queryListByUid" resultType="com.lcworld.entity.SysRoleEntity">
+			SELECT
+            distinct c.*
+        FROM
+             sys_user_role b 
+        INNER JOIN sys_role c ON b.role_id = c.role_id
+        INNER JOIN (
+            SELECT
+                min(b.rolesort) minsort,
+                roletype
+            FROM
+                sys_user_role a
+            INNER JOIN sys_role b ON a.role_id = b.role_id
+            WHERE
+                1 = 1
+            AND a.user_id = #{uid} and b.type =2
+            GROUP BY
+                b.roletype
+        ) d ON c.roletype = d.roletype
+        AND c.rolesort > d.minsort
+
+union
+
+SELECT
+            distinct c.*
+        FROM
+             sys_user_role b 
+        INNER JOIN sys_role c ON b.role_id = c.role_id 
+where b.user_id = #{uid} and c.rolesort > 1 and c.type =1
+ 
+
+
+	</select>
+	
+	<select id="queryNPUserRoleMin" resultType="int"> 
+	   SELECT
+                min(b.rolesort) minsort 
+                
+            FROM
+                sys_user_role a
+            INNER JOIN sys_role b ON a.role_id = b.role_id
+            WHERE
+                1 = 1
+            AND a.user_id = 2 and b.roletype is  null and b.type = 1
+	</select>
+	<select id="queryTotalByUid" resultType="int">
+	   select count(*) from (
+	           SELECT
+            distinct c.*
+        FROM
+             sys_user_role b 
+        INNER JOIN sys_role c ON b.role_id = c.role_id
+        INNER JOIN (
+            SELECT
+                min(b.rolesort) minsort,
+                roletype
+            FROM
+                sys_user_role a
+            INNER JOIN sys_role b ON a.role_id = b.role_id
+            WHERE
+                1 = 1
+            AND a.user_id = #{uid} and b.type =2
+            GROUP BY
+                b.roletype
+        ) d ON c.roletype = d.roletype
+        AND c.rolesort > d.minsort
+
+union
+
+SELECT
+            distinct c.*
+        FROM
+             sys_user_role b 
+        INNER JOIN sys_role c ON b.role_id = c.role_id 
+where b.user_id = #{uid} and c.rolesort > 1 and c.type =1
+	   )M where 1=1 
+	 </select>
+	
+</mapper>

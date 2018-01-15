@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>来访人员</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			 <div class="form-group col-sm-2">
+                <input type="text" class="form-control" v-model="q.realname" @keyup.enter="query" placeholder="真实姓名">
+            </div>
+            <a class="btn btn-default" @click="query">查询</a>
+            &nbsp;&nbsp;
+			#if($shiro.hasPermission("visiuser:check"))
+			<a class="btn btn-primary" @click="check(1)"><i class="fa "></i>&nbsp;审核通过</a>
+			&nbsp;&nbsp;<a class="btn btn-primary" @click="uncheck(2)"><i class="fa "></i>&nbsp;审核不通过</a>
+			#end
+			<a class="btn btn-primary" @click="bylist"><i class="fa "></i>&nbsp;随行人员</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">来访人姓名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.vname" placeholder="来访人姓名"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">来访人手机号</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.vmobile" placeholder="来访人手机号"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">受访人房间号</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.roomnum" placeholder="受访人房间号"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">来访事由（预留）</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.reason" placeholder="来访事由（预留）"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">预计到达时间（预留）</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.expertarrivaltime" placeholder="预计到达时间（预留）"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">访问时段 1: 一次，2：一星期，3：半个月，4：长期</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.vperiod" placeholder="访问时段 1: 一次，2：一星期，3：半个月，4：长期"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">随行人数</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.vpnum" placeholder="随行人数"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">受访人uid</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.uid" placeholder="受访人uid"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">审核0待审核1审核通过2审核不通过</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.checked" placeholder="审核0待审核1审核通过2审核不通过"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">来访人员身份证号</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.vidnum" placeholder="来访人员身份证号"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">受访人办公电话</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.phonenum" placeholder="受访人办公电话"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">预计离开时间（预留）</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.expertleavetime" placeholder="预计离开时间（预留）"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">是否有效</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.valid" placeholder="是否有效"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">受访人员姓名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.realname" placeholder="受访人员姓名"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">单位</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.unit" placeholder="单位"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">来访时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.visittime" placeholder="来访时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">创建时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.createtime" placeholder="创建时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">订单状态  1:已预约，3：已评论，4:待评价，5：已取消 </div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.status" placeholder="订单状态  1:已预约，3：已评论，4:待评价，5：已取消 "/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">取消原因</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.cancelreason" placeholder="取消原因"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label"></div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.isdel" placeholder=""/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label"></div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="visiuser.ordercode" placeholder=""/>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+	
+	 <div id="reasonDIV" style="display:none;padding:10px;"  class="panel panel-default">
+	   <form class="form-horizontal">
+	       <div class="form-group">
+                <div class="col-sm-2 control-label">不通过原因</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="failurereason" placeholder="原因"/>
+                </div>
+            </div>
+	   </form>
+	</div>
+</div>
+
+ <div  id="detaillist" style="display:none;padding:10px;">
+ 	  <table id="jqdetailGrid"></table>
+	    <div id="jqdetailGridPager"></div>
+ </div>
+ 
+
+
+<script src="${rc.contextPath}/js/generator/user/visiuser.js?_${date.systemTime}"></script>
+</body>
+</html>

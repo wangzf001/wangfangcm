@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.PositionPurchaselimitDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.PositionPurchaselimitEntity" id="positionPurchaselimitMap">
+        <result property="id" column="id"/>
+        <result property="positionid" column="positionid"/>
+        <result property="servicecode" column="servicecode"/>
+        <result property="purchasecount" column="purchasecount"/>
+        <result property="position" column="position"/>
+        <result property="service" column="service"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.PositionPurchaselimitEntity">
+		select * from t_position_purchaselimit where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.PositionPurchaselimitEntity">
+		select pp.*,up.`name` 'position',s.`name` 'service' from t_position_purchaselimit pp
+		LEFT JOIN t_user_position up
+		on pp.positionid = up.id 
+		LEFT JOIN t_service s
+		on pp.servicecode = s.id
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_position_purchaselimit 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.PositionPurchaselimitEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_position_purchaselimit
+		(
+			`positionid`, 
+			`servicecode`, 
+			`purchasecount`
+		)
+		values
+		(
+			#{positionid}, 
+			#{servicecode}, 
+			#{purchasecount}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.PositionPurchaselimitEntity">
+		update t_position_purchaselimit 
+		<set>
+			<if test="positionid != null">`positionid` = #{positionid}, </if>
+			<if test="servicecode != null">`servicecode` = #{servicecode}, </if>
+			<if test="purchasecount != null">`purchasecount` = #{purchasecount}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_position_purchaselimit where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_position_purchaselimit where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

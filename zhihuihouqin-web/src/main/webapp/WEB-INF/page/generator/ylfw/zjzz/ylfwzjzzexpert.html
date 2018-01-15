@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>医疗服务专家坐诊医生表</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			#if($shiro.hasPermission("ylfwzjzzexpert:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("ylfwzjzzexpert:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("ylfwzjzzexpert:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">医生名称</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="ylfwZjzzExpert.realname" placeholder="医生名称"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">职称</div>
+                     <div class="col-sm-10">
+                        <select class="form-control" v-model="ylfwZjzzExpert.positionid">
+                          <option value="0">----选择职位----</option>
+                          <option v-for="cata in positionlist" :value="cata.id">{{cata.name}}</option>
+                        </select>
+                     </div>
+			   
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">电话</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="ylfwZjzzExpert.mobile" placeholder="电话"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">医院</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="ylfwZjzzExpert.hospitalid" placeholder="医院"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">问诊量</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="ylfwZjzzExpert.consultcount" placeholder="问诊量"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">分数</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="ylfwZjzzExpert.score" placeholder="分数"/>
+			    </div>
+			</div>
+								
+									
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">简介</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="ylfwZjzzExpert.brief" placeholder="简介"/>
+			    </div>
+			</div>
+			 <div class="form-group">
+                <div class="col-sm-2 control-label">头像</div>
+                <div class="col-sm-2">
+                  <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;上传头像</a>
+                </div>
+                <div class="col-sm-2">
+                  <input type="text" class="form-control" v-model="ylfwZjzzExpert.photo" placeholder="头像地址"/>
+                </div>
+                <div class="col-sm-3">
+                  <img alt="" :src="ylfwZjzzExpert.photo" style="width:100px;height:100px"/>
+                </div>
+            </div>          
+			
+			
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">工作时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="ylfwZjzzExpert.worktime" placeholder="工作时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">擅长</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="ylfwZjzzExpert.skilledinfo" placeholder="擅长"/>
+			    </div>
+			</div>
+			 <div class="form-group">
+                <div class="col-sm-2 control-label">是否有效</div>
+                <div class="col-sm-10">
+                                      有效 : &nbsp;&nbsp;<input type="radio" name="valid" value="1" v-model="ylfwZjzzExpert.valid" placeholder="是否有效   1:有效，0 无效"/>
+                                   &nbsp;&nbsp; &nbsp;&nbsp; 
+                                   无效 : &nbsp;&nbsp;    <input type="radio"  name="valid" value="0" v-model="ylfwZjzzExpert.valid" placeholder="是否有效   1:有效，0 无效"/>
+                </div>
+            </div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+	
+	<div id="scheduleDiv"  style="display:none;padding:10px;">
+        <div v-show="showSchedule">
+            <div class="grid-btn">
+                <a class="btn btn-primary" @click="addSchedule"><i class="fa fa-plus"></i>&nbsp;新增</a>
+                <a class="btn btn-primary" @click="delSchedule"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+               <div class="form-group col-sm-3">
+                <select class="form-control" v-model="q.schedule.status">
+                  <option value="">----预约状态----</option>
+                  <option value="1">已预约</option>
+                  <option value="0">未预约</option>
+                </select>
+                </div>
+              
+                <div class="form-group col-sm-3">
+                    <div class="input-group date form_datetime" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input1">
+                        <input class="form-control" id="dtp_input1"  size="25" type="text" value="" readonly placeholder="创建时间开始">
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-3">
+                    <div class="input-group date form_datetime2" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input2" >
+                        <input class="form-control" size="25" id="dtp_input2" type="text" value="" readonly placeholder="创建时间截止" >
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                   $(function(){
+                       $('.form_datetime').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                       $('.form_datetime2').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                       $('.form_datetime4').datetimepicker({
+                            language:  'zh-CN',
+                            format: 'hh:ii',
+                            startView: 1,
+                            minView:0,
+                            maxView:1,
+                        });
+                       $('.form_datetime3').datetimepicker({
+                            language:  'zh-CN',
+                            format: 'yyyy-mm-dd',
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                        });
+                   });
+                   
+                   
+                </script>
+                <a class="btn btn-default" @click="querySchedule">查询</a>
+            </div> 
+            
+            
+            
+            <table id="jqGridSchedule"></table>
+            <div id="jqGridSchedulePager"></div>
+        </div>
+     <div v-show="!showSchedule" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal">
+                   
+                <div class="form-group">
+                           <div class="col-sm-2 control-label">开始日期</div>
+                            <div class=" input-group date form_datetime3 col-sm-10 "  data-date-format="yyyy MM dd">
+                                  <input class="form-control" id="dtp_input3"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>  
+                       <div class="form-group">
+                           <div class="col-sm-2 control-label">结束日期</div>
+                            <div class=" input-group date form_datetime3 col-sm-10 "  data-date-format="yyyy MM dd">
+                                  <input class="form-control" id="dtp_input4"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>  
+                       
+                       <div class="form-group">
+                           <div class="col-sm-2 control-label">上午开始时间</div>
+                            <div class=" input-group date form_datetime4 col-sm-10 "  data-date-format="hh:ii">
+                                  <input class="form-control" id="period_1_starttime"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>  
+                       <div class="form-group">
+                           <div class="col-sm-2 control-label">上午结束时间</div>
+                            <div class=" input-group date form_datetime4 col-sm-10 "  data-date-format="hh:ii">
+                                  <input class="form-control" id="period_1_endtime"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>  
+                       <div class="form-group">
+                            <div class="col-sm-2 control-label">上午人数</div>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="period_1_count" name="amcount"  placeholder="上午人数"/>
+                            </div>
+                        </div>
+                        
+                       <div class="form-group">
+                           <div class="col-sm-2 control-label">下午开始时间</div>
+                            <div class=" input-group date form_datetime4 col-sm-10 "  data-date-format="hh:ii">
+                                  <input class="form-control" id="period_2_starttime"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>  
+                       <div class="form-group">
+                           <div class="col-sm-2 control-label">下午结束时间</div>
+                            <div class=" input-group date form_datetime4 col-sm-10 "  data-date-format="hh:ii">
+                                  <input class="form-control" id="period_2_endtime"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>  
+                       <div class="form-group">
+                            <div class="col-sm-2 control-label">下午人数</div>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="period_2_count" name="pmcount"  placeholder="上午人数"/>
+                            </div>
+                        </div>
+                        
+                        
+                       <div class="form-group">
+                           <div class="col-sm-2 control-label">晚上开始时间</div>
+                            <div class=" input-group date form_datetime4 col-sm-10 "  data-date-format="hh:ii">
+                                  <input class="form-control" id="period_3_starttime"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>  
+                       <div class="form-group">
+                           <div class="col-sm-2 control-label">晚上结束时间</div>
+                            <div class=" input-group date form_datetime4 col-sm-10 "  data-date-format="hh:ii">
+                                  <input class="form-control" id="period_3_endtime"  size="25" type="text" value="" readonly placeholder="预约日期">
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                  <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>              
+                       </div>  
+                       <div class="form-group">
+                            <div class="col-sm-2 control-label">晚上人数</div>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="period_3_count" name="pmcount"  placeholder="上午人数"/>
+                            </div>
+                        </div>
+                                   
+                        <div class="form-group">
+                    <div class="col-sm-2 control-label"></div> 
+                    <input type="button" class="btn btn-primary" @click="saveOrUpdateSchedule" value="确定"/>
+                    &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reloadSchedule" value="返回"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/ylfw/zjzz/ylfwzjzzexpert.js?_${date.systemTime}"></script>
+</body>
+</html>

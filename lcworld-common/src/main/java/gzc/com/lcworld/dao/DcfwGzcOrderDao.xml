@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.DcfwGzcOrderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.DcfwGzcOrderEntity" id="dcfwGzcOrderMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="ordercode" column="ordercode"/>
+        <result property="totalprice" column="totalprice"/>
+        <result property="status" column="status"/>
+        <result property="createtime" column="createtime"/>
+        <result property="mobile" column="mobile"/>
+        <result property="realname" column="realname"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="sendfoodtime" column="sendfoodtime"/>
+        <result property="payType" column="pay_type"/>
+        <result property="cancelReasonids" column="cancel_reasonids"/>
+        <result property="reasonContent" column="reason_content"/>
+        <result property="count" column="count"/>
+        <result property="addressId" column="address_id"/>
+        <result property="type" column="type"/>
+        <result property="fixedmealtype" column="fixedmealtype"/>
+        <result property="fixedmealstartdate" column="fixedmealstartdate"/>
+        <result property="fixedmealenddate" column="fixedmealenddate"/>
+        <result property="price" column="price"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.DcfwGzcOrderEntity">
+		select * from t_dcfw_gzc_order where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.DcfwGzcOrderEntity">
+		select o.*, 
+		(SELECT
+				CASE t.periodtype
+			WHEN 1 THEN
+				CONCAT_WS(
+					" ",
+					"上午",
+					CONCAT_WS("-", t.starttime, t.endtime)
+				)
+			ELSE
+				CONCAT_WS(
+					" ",
+					"下午",
+					CONCAT_WS("-", t.starttime, t.endtime)
+				)
+			END
+			FROM
+				t_dcfw_gzc_sendfoodtime t
+			WHERE
+				t.id = o.sendfoodtime) sendTime,
+			(SELECT a.address FROM t_address a WHERE a.id = o.address_id) address
+		from t_dcfw_gzc_order o
+		<where>
+			<if test="uid!=null">o.uid = #{uid}</if>
+			<if test="orderStatus != null and orderStatus == 3">AND o.status in (3,4)</if>
+			<if test="orderStatus != null and orderStatus != 3">AND o.status = #{orderStatus}</if>
+			<if test="oid!=null">AND o.id = #{oid}</if>
+			<if test="ordercode!=null and ordercode.trim()!=''">AND o.ordercode like concat("%",#{ordercode},"%")</if>
+			<if test="payordercode!=null and payordercode.trim()!=''"> AND o.ordercode = #{payordercode}</if>
+			<if test="realname!=null and realname.trim()!=''">AND o.realname like concat("%",#{realname},"%")</if>
+			<if test="mobile!=null and mobile.trim()!=''">AND o.mobile like concat("%",#{mobile},"%")</if>
+			<if test="payStatus!=null">AND o.pay_status = #{payStatus}</if>
+			<if test="createTimeStart!=null">AND o.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null">AND o.createtime &lt;= #{createTimeEnd}</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_dcfw_gzc_order o
+		<where>
+			<if test="uid!=null">o.uid = #{uid}</if>
+			<if test="orderStatus!=null">AND o.status = #{orderStatus}</if>
+			<if test="oid!=null">AND o.id = #{oid}</if>
+			<if test="ordercode!=null and ordercode.trim()!=''">AND o.ordercode like concat("%",#{ordercode},"%")</if>
+			<if test="realname!=null and realname.trim()!=''">AND o.realname like concat("%",#{realname},"%")</if>
+			<if test="mobile!=null and mobile.trim()!=''">AND o.mobile like concat("%",#{mobile},"%")</if>
+			<if test="payStatus!=null">AND o.pay_status = #{payStatus}</if>
+			<if test="createTimeStart!=null">AND o.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null">AND o.createtime &lt;= #{createTimeEnd}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.DcfwGzcOrderEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_dcfw_gzc_order
+		(
+			`uid`, 
+			`ordercode`, 
+			`totalprice`, 
+			`status`, 
+			`createtime`, 
+			`mobile`, 
+			`realname`, 
+			`pay_status`, 
+			`sendfoodtime`, 
+			`pay_type`, 
+			`cancel_reasonids`, 
+			`reason_content`, 
+			`count`,
+			`address_id`,
+			`type`,
+			`fixedmealtype`,
+			`fixedmealstartdate`,
+			`fixedmealenddate`,
+			`price`
+		)
+		values
+		(
+			#{uid}, 
+			#{ordercode}, 
+			#{totalprice}, 
+			#{status}, 
+			#{createtime}, 
+			#{mobile}, 
+			#{realname}, 
+			#{payStatus}, 
+			#{sendfoodtime}, 
+			#{payType}, 
+			#{cancelReasonids}, 
+			#{reasonContent}, 
+			#{count},
+			#{addressId},
+			#{type},
+			#{fixedmealtype},
+			#{fixedmealstartdate},
+			#{fixedmealenddate},
+			#{price}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.DcfwGzcOrderEntity">
+		update t_dcfw_gzc_order 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="ordercode != null">`ordercode` = #{ordercode}, </if>
+			<if test="totalprice != null">`totalprice` = #{totalprice}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="realname != null">`realname` = #{realname}, </if>
+			<if test="payStatus != null">`pay_status` = #{payStatus}, </if>
+			<if test="sendfoodtime != null">`sendfoodtime` = #{sendfoodtime}, </if>
+			<if test="payType != null">`pay_type` = #{payType}, </if>
+			<if test="cancelReasonids != null">`cancel_reasonids` = #{cancelReasonids}, </if>
+			<if test="reasonContent != null">`reason_content` = #{reasonContent}, </if>
+			<if test="count != null">`count` = #{count},</if>
+			<if test="addressId != null">`address_id` = #{addressId},</if>
+			<if test="payStatus != null">`pay_status` = #{payStatus},</if>
+			<if test="type != null">`type` = #{type},</if>
+			<if test="fixedmealtype != null">`fixedmealtype` = #{fixedmealtype},</if>
+			<if test="fixedmealstartdate != null">`fixedmealstartdate` = #{fixedmealstartdate},</if>
+			<if test="fixedmealenddate != null">`fixedmealenddate` = #{fixedmealenddate},</if>
+			<if test="price != null">`price` = #{price}</if>
+		</set>
+		where id = #{id}
+	</update>
+	<update id="updateOrderBatch" parameterType="java.util.Map">
+		update t_dcfw_gzc_order
+		<set>
+			<if test="orderStatus != null">`status` = #{orderStatus}</if>
+		</set>
+		where id in 
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		and `status` = #{orderStatusFormer}
+	</update>
+	
+	<delete id="delete">
+		delete from t_dcfw_gzc_order where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_dcfw_gzc_order where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

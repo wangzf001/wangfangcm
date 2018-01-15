@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>图书借阅服务-读者推荐</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			 <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.title" @keyup.enter="query" placeholder="标题">
+            </div>
+             <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.username" @keyup.enter="query" placeholder="用户名">
+            </div>
+             <div class="form-group col-sm-3">
+                <input type="text" class="form-control" v-model="q.mobile" @keyup.enter="query" placeholder="手机号">
+            </div>
+            
+         
+                
+              <div class="form-group col-sm-3">
+                <select class="form-control" v-model="q.status" >
+                  <option value="">----处理状态----</option>
+                  <option value="1">未处理</option>
+                  <option value="2">已处理</option>
+                </select>
+                </div>
+              
+                <div class="form-group col-sm-3">
+                    <div class="input-group date form_datetime" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input1">
+                        <input class="form-control" id="dtp_input1"  size="25" type="text" value="" readonly placeholder="创建时间开始">
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-3">
+                    <div class="input-group date form_datetime2" data-date-format="yyyy MM dd - HH:ii" data-link-field="dtp_input2" >
+                        <input class="form-control" size="25" id="dtp_input2" type="text" value="" readonly placeholder="创建时间截止" >
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                </div>
+                
+                <script type="text/javascript">
+                   $(function(){
+                       $('.form_datetime').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                       $('.form_datetime2').datetimepicker({
+                            language:  'zh-CN',
+                            weekStart: 1,
+                            todayBtn:  1,
+                            autoclose: 1,
+                            todayHighlight: 1,
+                            startView: 2,
+                            minView:2,
+                            maxView:2,
+                            forceParse: 0,
+                            showMeridian: 1,
+                            linkFormat: "yyyy-mm-dd"
+                        });
+                   });
+                </script>
+                <a class="btn btn-default" @click="query">查询</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">标题</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tsjyfwUserrecommand.title" placeholder="标题"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">作者</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tsjyfwUserrecommand.author" placeholder="作者"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">出版社</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tsjyfwUserrecommand.publisher" placeholder="出版社"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">备注</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tsjyfwUserrecommand.remark" placeholder="备注"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label"></div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tsjyfwUserrecommand.uid" placeholder=""/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">创建时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tsjyfwUserrecommand.createtime" placeholder="创建时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">处理状态(1: 未处理，2：已处理)</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tsjyfwUserrecommand.status" placeholder="处理状态(1: 未处理，2：已处理)"/>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/tsjy/tsjyfwuserrecommand.js?_${date.systemTime}"></script>
+</body>
+</html>

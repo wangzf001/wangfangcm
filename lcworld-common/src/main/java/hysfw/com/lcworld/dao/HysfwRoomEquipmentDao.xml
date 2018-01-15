@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.HysfwRoomEquipmentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.HysfwRoomEquipmentEntity" id="hysfwRoomEquipmentMap">
+        <result property="id" column="id"/>
+        <result property="eid" column="eid"/>
+        <result property="roomid" column="roomid"/>
+        <result property="count" column="count"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.HysfwRoomEquipmentEntity">
+		select * from t_hysfw_room_equipment where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.HysfwRoomEquipmentEntity">
+		select * from t_hysfw_room_equipment
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_hysfw_room_equipment 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.HysfwRoomEquipmentEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_hysfw_room_equipment
+		(
+			`eid`, 
+			`roomid`, 
+			`count`, 
+			`type`
+		)
+		values
+		(
+			#{eid}, 
+			#{roomid}, 
+			#{count}, 
+			#{type}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.HysfwRoomEquipmentEntity">
+		update t_hysfw_room_equipment 
+		<set>
+			<if test="eid != null">`eid` = #{eid}, </if>
+			<if test="roomid != null">`roomid` = #{roomid}, </if>
+			<if test="count != null">`count` = #{count}, </if>
+			<if test="type != null">`type` = #{type}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_hysfw_room_equipment where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_hysfw_room_equipment where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

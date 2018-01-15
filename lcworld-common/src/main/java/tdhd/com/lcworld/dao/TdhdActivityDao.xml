@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TdhdActivityDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.lcworld.entity.TdhdActivityEntity" id="tdhdActivityMap">
+		<result property="aId" column="a_id" />
+		<result property="aTitle" column="a_title" />
+		<result property="aPlace" column="a_place" />
+		<result property="aContactMobile" column="a_contact_mobile" />
+		<result property="aTime" column="a_time" />
+		<result property="aImg" column="a_img" />
+		<result property="aSignCount" column="a_sign_count" />
+		<result property="aTotal" column="a_total" />
+		<result property="aStatus" column="a_status" />
+		<result property="aContent" column="a_content" />
+		<result property="aSponsor" column="a_sponsor" />
+		<result property="aCreateTime" column="a_create_time" />
+		<result property="aIsChecked" column="a_is_checked" />
+		<result property="aUserId" column="a_user_id" />
+		<result property="aPhoto" column="a_photo" />
+		<result property="aRealname" column="a_realname" />
+		<result property="aMobile" column="a_mobile" />
+		<result property="aNation" column="a_nation" />
+		<result property="failurereason" column="failurereason" />
+	</resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.TdhdActivityEntity">
+		select * from t_tdhd_activity where a_id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.TdhdActivityEntity">
+		select * from t_tdhd_activity a
+		<if test="favorstatus!=null">
+			LEFT JOIN t_favor f ON f.entityid = a.a_id
+		</if>
+		where 1=1
+		<if test="title != null and title != ''">
+			and a_title like '%${title}%'
+		</if>
+		<if test="username != null and username != ''">
+			and a_realname like '%${username}%'
+		</if>
+		<if test="status != null and status != ''">
+			and a_status = #{status}
+		</if>
+		<if test="checkstatus != null and checkstatus != ''">
+			and a_is_checked = #{checkstatus}
+		</if>
+		<if test="starttime != null and starttime != ''"> and a.a_create_time &gt;=	str_to_date(#{starttime},'%Y-%m-%d %H:%i')</if>
+		<if test="endtime != null and endtime != ''"> and a.a_create_time &lt;=	str_to_date(#{endtime},'%Y-%m-%d %H:%i')</if>
+		<if test="favorstatus != null and favortype != null and favoruid!=null">
+			AND f.favortype = #{favortype} AND f.uid = #{favoruid} AND f.`status` =	#{favorstatus}
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by a.a_create_time desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryDTOList" resultType="com.lcworld.dto.TdhdActivityDTO">
+		select * from t_tdhd_activity a
+		<if test="favorstatus!=null">
+			LEFT JOIN t_favor f ON f.entityid = a.a_id
+		</if>
+		where 1=1
+		<if test="title != null and title != ''">
+			and a_title like '%${title}%'
+		</if>
+		<if test="username != null and username != ''">
+			and a_realname like '%${username}%'
+		</if>
+		<if test="status != null and status != ''">
+			and a_status = #{status}
+		</if>
+		<if test="checkstatus != null and checkstatus != ''">
+			and a_is_checked = #{checkstatus}
+		</if>
+		<if test="starttime != null and starttime != ''"> and a.a_create_time &gt;=	str_to_date(#{starttime},'%Y-%m-%d %H:%i')</if>
+		<if test="endtime != null and endtime != ''"> and a.a_create_time &lt;=	str_to_date(#{endtime},'%Y-%m-%d %H:%i')</if>
+		<if test="favorstatus != null and favortype != null and favoruid!=null">
+			AND f.favortype = #{favortype} AND f.uid = #{favoruid} AND f.`status` =	#{favorstatus}
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by a.a_create_time desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from t_tdhd_activity a where 1=1
+		<if test="favorstatus!=null">
+			LEFT JOIN t_favor f ON f.entityid = a.a_id
+		</if>
+		<if test="title != null and title != ''">
+			and a_title like '%${title}%'
+		</if>
+		<if test="username != null and username != ''">
+			and a_realname like '%${username}%'
+		</if>
+		<if test="status != null and status != ''">
+			and a_status = #{status}
+		</if>
+		<if test="checkstatus != null and checkstatus != ''">
+			and a_is_checked = #{checkstatus}
+		</if>
+		<if test="starttime != null and starttime != ''"> and a.a_create_time &gt;=	str_to_date(#{starttime},'%Y-%m-%d %H:%i')</if>
+		<if test="endtime != null and endtime != ''"> and a.a_create_time &lt;=	str_to_date(#{endtime},'%Y-%m-%d %H:%i')</if>
+		<if test="favorstatus != null and favortype != null and favoruid!=null">
+			AND f.favortype = #{favortype} AND f.uid = #{favoruid} AND f.`status` =	#{favorstatus}
+		</if>
+	</select>
+
+	<insert id="save" parameterType="com.lcworld.entity.TdhdActivityEntity"
+		useGeneratedKeys="true" keyProperty="aId">
+		insert into t_tdhd_activity
+		(
+		`a_title`,
+		`a_place`,
+		`a_contact_mobile`,
+		`a_time`,
+		`a_img`,
+		`a_sign_count`,
+		`a_total`,
+		`a_status`,
+		`a_content`,
+		`a_sponsor`,
+		`a_create_time`,
+		`a_is_checked`,
+		`a_user_id`,
+		`a_photo`,
+		`a_realname`,
+		`a_mobile`,
+		`a_nation`,
+		`failurereason`
+		)
+		values
+		(
+		#{aTitle},
+		#{aPlace},
+		#{aContactMobile},
+		#{aTime},
+		#{aImg},
+		#{aSignCount},
+		#{aTotal},
+		#{aStatus},
+		#{aContent},
+		#{aSponsor},
+		#{aCreateTime},
+		#{aIsChecked},
+		#{aUserId},
+		#{aPhoto},
+		#{aRealname},
+		#{aMobile},
+		#{aNation},
+		#{failurereason}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.lcworld.entity.TdhdActivityEntity">
+		update t_tdhd_activity
+		<set>
+			<if test="aTitle != null">`a_title` = #{aTitle}, </if>
+			<if test="aPlace != null">`a_place` = #{aPlace}, </if>
+			<if test="aContactMobile != null">`a_contact_mobile` = #{aContactMobile}, </if>
+			<if test="aTime != null">`a_time` = #{aTime}, </if>
+			<if test="aImg != null">`a_img` = #{aImg}, </if>
+			<if test="aSignCount != null">`a_sign_count` = #{aSignCount}, </if>
+			<if test="aTotal != null">`a_total` = #{aTotal}, </if>
+			<if test="aStatus != null">`a_status` = #{aStatus}, </if>
+			<if test="aContent != null">`a_content` = #{aContent}, </if>
+			<if test="aSponsor != null">`a_sponsor` = #{aSponsor}, </if>
+			<if test="aCreateTime != null">`a_create_time` = #{aCreateTime}, </if>
+			<if test="aIsChecked != null">`a_is_checked` = #{aIsChecked}, </if>
+			<if test="aUserId != null">`a_user_id` = #{aUserId}, </if>
+			<if test="aPhoto != null">`a_photo` = #{aPhoto}, </if>
+			<if test="aRealname != null">`a_realname` = #{aRealname}, </if>
+			<if test="aMobile != null">`a_mobile` = #{aMobile}, </if>
+			<if test="aNation != null">`a_nation` = #{aNation},</if>
+			<if test="failurereason != null">`failurereason` = #{failurereason}</if>
+		</set>
+		where a_id = #{aId}
+	</update>
+
+	<delete id="delete">
+		delete from t_tdhd_activity where a_id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from t_tdhd_activity where a_id in
+		<foreach item="aId" collection="array" open="(" separator=","
+			close=")">
+			#{aId}
+		</foreach>
+	</delete>
+
+	<select id="queryActivityList" resultType="com.lcworld.dto.TdhdActivityDTO">
+		select * from t_tdhd_activity where a_is_checked =1 and a_status =1
+		order by a_create_time desc
+	</select>
+
+</mapper>

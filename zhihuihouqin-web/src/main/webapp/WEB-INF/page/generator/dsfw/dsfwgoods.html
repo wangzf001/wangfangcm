@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>订水服务-商品</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.keyword" @keyup.enter="query" placeholder="商品名">
+			</div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+	                <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间开始">
+	                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+	            </div>
+				<input type="hidden" class="form-control" id="dtp_input1" v-model="q.createTimeStart" value=""/>
+            </div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime2" data-date-format="yyyy-mm-dd" data-link-field="dtp_input2" >
+                    <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间截止" >
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+				<input type="hidden" class="form-control" id="dtp_input2" v-model="q.createTimeEnd" value=""/>
+            </div>
+	        <script type="text/javascript">
+		       $(function(){
+		    	   $('.form_datetime').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		    	   $('.form_datetime2').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		       });
+	        </script>
+			<a class="btn btn-default" @click="query">查询</a>
+			#if($shiro.hasPermission("dsfwgoods:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("dsfwgoods:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("dsfwgoods:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+			<a class="btn btn-primary" @click="exportExcel"><i class="fa fa-pencil-square-o"></i>&nbsp;导出到Excel</a>
+			<a class="btn btn-primary" id="uploadExcel"><i class="fa fa-plus"></i>&nbsp;导入Excel</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dsfwGoods.name" placeholder="商品名"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">价格</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dsfwGoods.price" placeholder="元"/>
+			    </div>
+			</div>
+			<div class="form-group">
+				   	<div class="col-sm-2 control-label">图片</div>
+				   	<div class="col-sm-2">
+				      <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;上传图片</a>
+				    </div>
+				   	<div class="col-sm-2">
+				      <input type="text" class="form-control" v-model="dsfwGoods.img" placeholder="图片地址"/>
+				    </div>
+				   	<div class="col-sm-3">
+				      <img alt="" :src="dsfwGoods.img" style="width:100px;height:100px"/>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">分类</div>
+				   	<div class="col-sm-10">
+				      <select class="form-control" v-model="dsfwGoods.cid">
+						  <option value="">----分类----</option>
+						  <option v-for="cata in cataList" :value="cata.id">{{cata.skucataname}}</option>
+						</select>
+				    </div>
+				</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+	<div id="menuLayer" style="display:none;padding:10px;">
+	<!-- <div class="grid-btn">
+        &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="finished" value="订单已完成"/>
+	</div> -->
+	  	  <div class="form-group">
+		      <span v-for="mapkey in mapkeylist"><input type="checkbox" v-model="mapkeys" :value="mapkey.value"/>{{mapkey.name}}&nbsp;</span>
+		  </div>
+	</div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/dsfw/dsfwgoods.js?_${date.systemTime}"></script>
+</body>
+</html>

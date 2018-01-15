@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.EnergyImgsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.EnergyImgsEntity" id="energyImgsMap">
+        <result property="id" column="id"/>
+        <result property="imgUrl" column="img_url"/>
+        <result property="sort" column="sort"/>
+        <result property="creatTime" column="creat_time"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.EnergyImgsEntity">
+		select * from t_energy_imgs where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.EnergyImgsEntity">
+		select img.* from t_energy_imgs img
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by img.sort  ASC
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_energy_imgs 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.EnergyImgsEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_energy_imgs
+		(
+			`img_url`, 
+			`sort`, 
+			`creat_time`
+		)
+		values
+		(
+			#{imgUrl}, 
+			#{sort}, 
+			#{creatTime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.EnergyImgsEntity">
+		update t_energy_imgs 
+		<set>
+			<if test="imgUrl != null">`img_url` = #{imgUrl}, </if>
+			<if test="sort != null">`sort` = #{sort}, </if>
+			<if test="creatTime != null">`creat_time` = #{creatTime}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_energy_imgs where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_energy_imgs where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

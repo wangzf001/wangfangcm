@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TDcfwFoodDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TDcfwFoodEntity" id="tDcfwFoodMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="original" column="original"/>
+        <result property="price" column="price"/>
+        <result property="img" column="img"/>
+        <result property="createtime" column="createtime"/>
+        <result property="totalcount" column="totalcount"/>
+        <result property="remain" column="remain"/>
+        <result property="uploaduid" column="uploaduid"/>
+        <result property="uploadname" column="uploadname"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.TDcfwFoodEntity">
+		select * from t_dcfw_food where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.TDcfwFoodEntity">
+		select f.*,u.realname uploadname from t_dcfw_food f LEFT JOIN t_user u ON f.uploaduid = u.id
+		<where>
+			<if test="ids!=null">f.id in 
+				<foreach item="id" collection="ids" open="(" separator="," close=")">
+					#{id}
+				</foreach>
+			</if>
+			<if test="keyword != null and keyword.trim()!=''">
+				f.original LIKE CONCAT('%',#{keyword},'%') OR f.`name` LIKE CONCAT('%',#{keyword},'%')
+			</if>
+			<if test="createTimeStart!=null and createTimeStart.trim()!=''">AND f.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null and createTimeEnd.trim()!=''">AND f.createtime &lt;= #{createTimeEnd}</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_dcfw_food f
+		<where>
+			<if test="keyword != null and keyword.trim()!=''">
+				f.original LIKE CONCAT('%',#{keyword},'%') OR f.`name` LIKE CONCAT('%',#{keyword},'%')
+			</if>
+			<if test="createTimeStart!=null and createTimeStart.trim()!=''">AND f.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null and createTimeEnd.trim()!=''">AND f.createtime &lt;= #{createTimeEnd}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.TDcfwFoodEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_dcfw_food
+		(
+			`name`, 
+			`original`, 
+			`price`, 
+			`img`, 
+			`createtime`, 
+			`totalcount`, 
+			`remain`, 
+			`uploaduid`
+		)
+		values
+		(
+			#{name}, 
+			#{original}, 
+			#{price}, 
+			#{img}, 
+			#{createtime}, 
+			#{totalcount}, 
+			#{remain}, 
+			#{uploaduid}
+		)
+	</insert>
+	<insert id="saveBatch" parameterType="java.util.List">
+       insert into t_dcfw_food
+		(
+			`name`, 
+			`original`, 
+			`price`, 
+			`img`, 
+			`createtime`, 
+			`totalcount`, 
+			`remain`, 
+			`uploaduid`
+		)
+		values
+        <foreach collection="list" item="item" index="index" separator=",">
+       	(
+			#{item.name},
+			#{item.original}, 
+			#{item.price}, 
+			#{item.img}, 
+			#{item.createtime}, 
+			#{item.totalcount}, 
+			#{item.remain}, 
+			#{item.uploaduid}
+		)
+        </foreach>
+    </insert>
+	<update id="update" parameterType="com.lcworld.entity.TDcfwFoodEntity">
+		update t_dcfw_food 
+		<set>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="original != null">`original` = #{original}, </if>
+			<if test="price != null">`price` = #{price}, </if>
+			<if test="img != null">`img` = #{img}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="totalcount != null">`totalcount` = #{totalcount}, </if>
+			<if test="remain != null">`remain` = #{remain}, </if>
+			<if test="uploaduid != null">`uploaduid` = #{uploaduid}</if>
+		</set>
+		where id = #{id}
+	</update>
+	<update id="recoverCount" parameterType="java.util.Map">
+		update t_dcfw_food 
+		<set>
+			`remain` = `remain`+ #{addCount}
+		</set>
+		where id = #{foodid}
+	</update>
+	
+	<delete id="delete">
+		delete from t_dcfw_food where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_dcfw_food where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

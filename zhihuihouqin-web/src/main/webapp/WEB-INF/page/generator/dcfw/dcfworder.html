@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>订餐服务订单</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.ordercode" @keyup.enter="query" placeholder="订单号">
+			</div>
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.realname" @keyup.enter="query" placeholder="真名">
+			</div>
+			<div class="form-group col-sm-3">
+				<input type="text" class="form-control" v-model="q.mobile" @keyup.enter="query" placeholder="电话">
+			</div>
+			<div class="form-group col-sm-3">
+				<select class="form-control" v-model="q.status">
+				  <option value="">----订单状态----</option>
+				  <option value="1">已预约</option>
+				  <option value="3">已完成</option>
+				  <option value="4">已评价</option>
+				  <option value="5">已取消</option>
+				</select>
+			</div>
+			<div class="form-group col-sm-3">
+				<select class="form-control" v-model="q.payStatus">
+				  <option value="">----支付状态----</option>
+				  <option value="0">未付款</option>
+				  <option value="1">已付款</option>
+				</select>
+			</div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+	                <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间开始">
+	                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+	            </div>
+				<input type="hidden" class="form-control" id="dtp_input1" v-model="q.createTimeStart" value=""/>
+            </div>
+			<div class="form-group col-sm-3">
+				<div class="input-group date form_datetime2" data-date-format="yyyy-mm-dd" data-link-field="dtp_input2" >
+                    <input class="form-control" size="16" type="text" value="" readonly placeholder="创建时间截止" >
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+					<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+				<input type="hidden" class="form-control" id="dtp_input2" v-model="q.createTimeEnd" value=""/>
+            </div>
+	        <script type="text/javascript">
+		       $(function(){
+		    	   $('.form_datetime').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		    	   $('.form_datetime2').datetimepicker({
+		    	        language:  'zh-CN',
+		    	        weekStart: 1,
+		    	        todayBtn:  1,
+		    			autoclose: 1,
+		    			todayHighlight: 1,
+		    			startView: 2,
+                            minView:2,
+                            maxView:2,
+		    			forceParse: 0,
+		    	        showMeridian: 1,
+		    	        linkFormat: "yyyy-mm-dd"
+		    	    });
+		       });
+	        </script>
+	        <a class="btn btn-default" @click="query">查询</a>
+            <input type="button" class="btn btn-primary" @click="finished(0)" value="全部打包"/>
+			<!-- #if($shiro.hasPermission("dcfworder:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("dcfworder:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end -->
+			<!-- <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a> -->
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label"></div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.uid" placeholder=""/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label"></div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.ordercode" placeholder=""/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label"></div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.totalprice" placeholder=""/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">1: 已预约，3：已完成，4：待评价，5：已取消</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.status" placeholder="1: 已预约，3：已完成，4：待评价，5：已取消"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">创建时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.createtime" placeholder="创建时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">预留电话</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.mobile" placeholder="预留电话"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">真实姓名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.realname" placeholder="真实姓名"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">过期时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.expireTime" placeholder="过期时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">付款状态0未付款1已付款</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.payStatus" placeholder="付款状态0未付款1已付款"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">取餐时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.getfoodtime" placeholder="取餐时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">支付方式1在线支付</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.payType" placeholder="支付方式1在线支付"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">取消订单ids</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.cancelReasonids" placeholder="取消订单ids"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">原因内容</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="dcfwOrder.reasonContent" placeholder="原因内容"/>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+	<!-- 选择菜单 -->
+	<div id="menuLayer" style="display:none;padding:10px;">
+	     <div v-show="showfinishall" class="grid-btn">
+	        &nbsp;&nbsp;<input type="button" class="btn btn-primary" @click="finished(1)" value="全部打包"/>
+		</div> 
+		 
+		<table id="jqGridOD"></table> 
+	    <div id="jqGridPagerOD"></div>
+	</div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/dcfw/dcfworder.js?_${date.systemTime}"></script>
+</body>
+</html>

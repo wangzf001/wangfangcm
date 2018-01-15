@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>服务人员表</title>
+    #parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            #if($shiro.hasPermission("deliveryman:save"))
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            #end
+            #if($shiro.hasPermission("deliveryman:update"))
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            #end
+            #if($shiro.hasPermission("deliveryman:delete"))
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            #end
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-2 control-label">用户名</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="deliveryman.username" placeholder="用户名"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">用户头像</div>
+                <div class="col-sm-2">
+                    <a class="btn btn-primary" id="upload"><i class="fa fa-plus"></i>&nbsp;上传头像</a>
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="deliveryman.photo" placeholder="头像地址"/>
+                </div>
+                <div class="col-sm-3">
+                    <img alt="" :src="deliveryman.photo" style="width:100px;height:100px"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">手机号</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="deliveryman.mobile" placeholder="手机号"/>
+                </div>
+            </div>
+             <!-- <div class="form-group">
+                <div class="col-sm-2 control-label">密码</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="deliveryman.password" placeholder="密码"/>
+                </div>
+            </div> -->
+            <div class="form-group">
+                <div class="col-sm-2 control-label">真实姓名</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="deliveryman.realname" placeholder="真实姓名"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">配送员类型</div>
+                <div class="col-sm-10">
+                    <select class="form-control" v-model="deliveryman.servicetypeid">
+                        <option value="8">办公用品</option>
+                        <option value="18">订水服务</option>
+                        <option value="7">会议室预定</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">区域id（预留）</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="deliveryman.regionId" placeholder="区域id（预留）"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">是否有效</div>
+                <div class="col-sm-10">
+                    <select class="form-control" v-model="deliveryman.valid">
+                        <option value="1">有效</option>
+                        <option value="0">无效</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/user/deliveryman.js?_${date.systemTime}"></script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.LffwBarberScheduleDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.LffwBarberScheduleEntity" id="lffwBarberScheduleMap">
+        <result property="id" column="id"/>
+        <result property="barberid" column="barberid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="consultperiodid" column="consultperiodid"/>
+        <result property="scheduledate" column="scheduledate"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.LffwBarberScheduleEntity">
+		select * from t_lffw_barber_schedule where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.LffwBarberScheduleEntity">
+		select * from t_lffw_barber_schedule
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_lffw_barber_schedule 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.LffwBarberScheduleEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_lffw_barber_schedule
+		(
+			`barberid`, 
+			`createtime`, 
+			`consultperiodid`, 
+			`scheduledate`, 
+			`status`
+		)
+		values
+		(
+			#{barberid}, 
+			#{createtime}, 
+			#{consultperiodid}, 
+			#{scheduledate}, 
+			#{status}
+		)
+	</insert>
+	
+	<insert id="saveBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+		insert into t_lffw_barber_schedule
+		(
+			`barberid`, 
+			`createtime`, 
+			`consultperiodid`, 
+			`scheduledate`, 
+			`status`
+		)
+		values
+	<foreach collection="list" item="item" index="index"
+            separator=",">
+            (
+            #{item.barberid}, 
+            #{item.createtime}, 
+            #{item.consultperiodid}, 
+            #{item.scheduledate}, 
+            #{item.status}
+        )
+        </foreach>
+		
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.LffwBarberScheduleEntity">
+		update t_lffw_barber_schedule 
+		<set>
+			<if test="barberid != null">`barberid` = #{barberid}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="consultperiodid != null">`consultperiodid` = #{consultperiodid}, </if>
+			<if test="scheduledate != null">`scheduledate` = #{scheduledate}, </if>
+			<if test="status != null">`status` = #{status}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_lffw_barber_schedule where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_lffw_barber_schedule where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="querytimeList" resultType="com.lcworld.dto.LffwBarberScheduleDTO">
+		SELECT
+		    b.id scheduleid,
+		    c.id periodtypeid,
+		    c.name periodtypename,
+		    b.starttime,
+		    b.endtime,
+		    a.status,
+		    a.barberid
+		FROM
+		    t_lffw_barber_schedule a
+		INNER JOIN t_lffw_period b ON a.consultperiodid = b.id
+		INNER JOIN t_lffw_periodtype c ON c.id = b.periodtype
+		WHERE
+		    b.periodtype = #{typeid}
+		AND a.barberid = #{barberid}
+		AND DATE_FORMAT(a.scheduledate, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')      
+    </select>
+    
+    <select id="queryScheduleList" resultType="com.lcworld.dto.LffwBarberScheduleEntityDTO">
+       SELECT
+		    a.createtime,
+		    a.id,
+		    a.scheduledate,
+		    a.`status`,
+		    b.starttime,
+		    b.endtime
+		FROM
+		    t_lffw_barber_schedule a
+		INNER JOIN t_lffw_period b ON a.consultperiodid = b.id
+		WHERE
+		    a.barberid = #{barberid}
+		   <if test="status != null and status != ''" > and a.status = #{status}</if>
+		   <if test="starttime != null and starttime != ''"> and str_to_date(CONCAT(a.scheduledate,b.starttime),'%Y-%m-%d %H:%i') &gt;= str_to_date(#{starttime},'%Y-%m-%d %H:%i')</if>
+		   <if test="endtime != null and endtime != ''"> and str_to_date(CONCAT(a.scheduledate,b.starttime),'%Y-%m-%d %H:%i') &lt;= str_to_date(#{endtime},'%Y-%m-%d %H:%i')</if>
+        order by str_to_date(CONCAT(a.scheduledate,b.starttime),'%Y-%m-%d %H:%i') desc
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryScheduleTotal" resultType="int">
+          SELECT
+            count(*)
+        FROM
+            t_lffw_barber_schedule a
+        INNER JOIN t_lffw_period b ON a.consultperiodid = b.id
+        INNER JOIN t_lffw_periodtype c ON b.periodtype = c.id
+        WHERE
+            a.barberid = #{barberid}
+            
+            <if test="status != null and status != ''" > and a.status = #{status}</if>
+           <if test="starttime != null and starttime != ''"> and str_to_date(CONCAT(a.scheduledate,b.starttime),'%Y-%m-%d %H:%i') &gt;= str_to_date(#{starttime},'%Y-%m-%d %H:%i')</if>
+           <if test="endtime != null and endtime != ''"> and str_to_date(CONCAT(a.scheduledate,b.starttime),'%Y-%m-%d %H:%i') &lt;= str_to_date(#{endtime},'%Y-%m-%d %H:%i')</if>
+    </select>
+
+</mapper>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>账号申诉</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+
+			#if($shiro.hasPermission("tuserappeal:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("tuserappeal:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">账号</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tUserAppeal.userName" placeholder="账号"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">密码</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tUserAppeal.password" placeholder="密码"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">身份证号</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tUserAppeal.idcard" placeholder="身份证号"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">手机号</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tUserAppeal.mobile" placeholder="手机号"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">真实姓名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tUserAppeal.realname" placeholder="真实姓名"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">原由</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tUserAppeal.reason" placeholder="原由"/>
+			    </div>
+			</div>
+			<div class="form-group">
+                <div class="col-sm-2 control-label">失败原因</div>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" v-model="tUserAppeal.failurereason" placeholder="失败原因"/>
+                </div>
+            </div>
+            
+			<div class="form-group">
+			     <div class="col-sm-2 control-label">审核状态</div>
+                <div class="col-sm-10" v-if="tUserAppeal.status == 0"> 
+                     <input  readOnly="true" type="text" class="form-control"  value="待审核"/>
+                </div>
+                <div class="col-sm-10" v-else-if="tUserAppeal.status == 1"> 
+                     <input readOnly="true"  type="text" class="form-control"  value="通过"/>
+                </div>
+                <div class="col-sm-10" v-else-if="tUserAppeal.status == 2"> 
+                     <input readOnly="true" type="text" class="form-control"  value="不通过"/>
+                </div>
+			</div>
+			<div class="form-group">
+                <div class="col-sm-2 control-label">操作</div>
+                <div v-if="tUserAppeal.status == 0" class="col-sm-10">
+                   <input type="button" class="btn btn-primary" @click="updateStatus(1)" value="通过"/>
+                   &nbsp;&nbsp;<input type="button" class="btn btn-success" @click="updateStatus(2)" value="不通过"/>
+                   &nbsp;&nbsp;<input type="button" class="btn btn-info" @click="reload" value="返回"/>
+                </div>
+              
+                <div v-else-if="tUserAppeal.status == 1" class="col-sm-10">
+                   <input type="button" class="btn btn-warning" @click="updateStatus(2)" value="不通过"/>
+                   &nbsp;&nbsp;<input type="button" class="btn btn-info" @click="reload" value="返回"/>
+                </div>
+                <div v-else-if="tUserAppeal.status == 2" class="col-sm-10">
+                   <input type="button" class="btn btn-primary" @click="updateStatus(1)" value="通过"/>
+                    &nbsp;&nbsp;<input type="button" class="btn btn-info" @click="reload" value="返回"/>
+                </div>
+                
+			</div>
+			
+		</form>
+	</div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/user/tuserappeal.js?_${date.systemTime}"></script>
+</body>
+</html>

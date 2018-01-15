@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>理发服务-理发师作品</title>
+#parse("sys/header.html")
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			#if($shiro.hasPermission("lffwbarberworks:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("lffwbarberworks:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("lffwbarberworks:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">列表页图片</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="lffwBarberWorks.smallimg" placeholder="列表页图片"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">详情页图片</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="lffwBarberWorks.detailimg" placeholder="详情页图片"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">简介</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="lffwBarberWorks.brief" placeholder="简介"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">价格</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="lffwBarberWorks.price" placeholder="价格"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">创建时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="lffwBarberWorks.createtime" placeholder="创建时间"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">作品名称</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="lffwBarberWorks.name" placeholder="作品名称"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">理发师id</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="lffwBarberWorks.barberid" placeholder="理发师id"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">显示首页 1: 显示首页，0：不显示</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="lffwBarberWorks.showonindex" placeholder="显示首页 1: 显示首页，0：不显示"/>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="${rc.contextPath}/js/generator/lffw/lffwbarberworks.js?_${date.systemTime}"></script>
+</body>
+</html>

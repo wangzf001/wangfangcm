@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TDcfwOrderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TDcfwOrderEntity" id="tDcfwOrderMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="ordercode" column="ordercode"/>
+        <result property="totalprice" column="totalprice"/>
+        <result property="status" column="status"/>
+        <result property="createtime" column="createtime"/>
+        <result property="mobile" column="mobile"/>
+        <result property="realname" column="realname"/>
+        <result property="getfoodtime" column="getfoodtime"/>
+        <result property="expireTime" column="expire_time"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="payType" column="pay_type"/>
+        <result property="cancelReasonids" column="cancel_reasonids"/>
+        <result property="reasonContent" column="reason_content"/>
+        <result property="takeTime" column="takeTime" />
+        <result property="parentOrdercode" column="parent_ordercode"/>
+        <result property="refundstatus" column="refundstatus"/>
+        <result property="sumtotal" column="sumtotal"/>
+        <result property="sumcount" column="sumcount"/>
+        <result property="undonum" column="undonum"/>
+        <collection property="detailList" javaType="com.lcworld.entity.TDcfwOrderdetailEntity" >
+        	<result property="id" column="odid"/>
+	        <result property="foodid" column="foodid"/>
+	        <result property="count" column="count"/>
+	        <result property="price" column="odPrice"/>
+	        <result property="totalprice" column="totalprice"/>
+	        <result property="foodName" column="foodName"/>
+	        <result property="foodImg" column="foodImg"/>
+	        <result property="foodOriginal" column="foodOriginal"/>
+	        <result property="foodRemain" column="foodRemain"/>
+        </collection>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.TDcfwOrderEntity">
+		select * from t_dcfw_order where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="tDcfwOrderMap">
+		SELECT <include refid="attr"/>
+			,u.realname realname
+			<if test="webQuery == null">
+				,od.*,od.id odid,od.price odPrice,od.totalprice odTotalprice,
+				f.name foodName,f.original foodOriginal,f.img foodImg,f.remain foodRemain
+			</if>
+			<if test="packfood != null and packfood==1">
+				,SUM(od.count) sumcount,SUM(o.totalprice) sumtotal
+			</if>
+			<if test="groupbyuid != null and groupbyuid==1">
+				,(SELECT IFNULL(SUM(1),0) FROM t_dcfw_order o1 WHERE o1.uid = o.uid AND o1.`status`=1 and o1.pay_status = 1) undonum
+			</if>
+		,(SELECT
+				CASE t.periodtype
+			WHEN 1 THEN
+				CONCAT_WS(
+					" ",
+					"上午",
+					CONCAT_WS("-", t.starttime, t.endtime)
+				)
+			ELSE
+				CONCAT_WS(
+					" ",
+					"下午",
+					CONCAT_WS("-", t.starttime, t.endtime)
+				)
+			END
+			FROM
+				t_dcfw_getfoodtime t
+			WHERE
+				t.id = o.getfoodtime) takeTime
+		FROM
+			t_dcfw_order o
+		LEFT JOIN t_dcfw_orderdetail od ON o.id = od.orderid
+		LEFT JOIN t_dcfw_food f ON f.id = od.foodid
+		LEFT JOIN  t_user u ON u.id = o.uid
+		<where>
+			<if test="uid!=null">o.uid = #{uid}</if>
+			<if test="orderStatus!=null">AND o.status = #{orderStatus}</if>
+			<if test="finishStatus!=null">AND o.status in (3,4)</if>
+			<if test="oid!=null">AND o.id = #{oid}</if>
+			<if test="ordercode!=null and ordercode.trim()!=''">AND o.ordercode like concat("%",#{ordercode},"%")</if>
+			<if test="payordercode!=null and payordercode.trim()!=''">AND (o.ordercode=#{payordercode} OR o.parent_ordercode = #{payordercode})</if>
+			<if test="realname!=null and realname.trim()!=''">AND o.realname like concat("%",#{realname},"%")</if>
+			<if test="mobile!=null and mobile.trim()!=''">AND o.mobile like concat("%",#{mobile},"%")</if>
+			<if test="payStatus!=null">AND o.pay_status = #{payStatus}</if>
+			<if test="createTimeStart!=null ">AND o.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null ">AND o.createtime &lt;= #{createTimeEnd}</if>
+			<if test="timeAlarm!=null">AND o.expire_time &gt;= #{timeAlarm}</if>
+		    
+		</where>
+		<if test="groupbyuid != null and groupbyuid==1">
+			GROUP BY o.uid
+		</if>
+		<if test="packfood != null and packfood==1">
+			GROUP BY od.foodid
+		</if>
+		
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by o.createtime desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+ 	SELECT count(1) from (
+		select
+		count(1)
+		from t_dcfw_order o
+		LEFT JOIN t_dcfw_orderdetail od ON o.id = od.orderid
+		<where>
+			<if test="uid!=null">o.uid = #{uid}</if>
+			<if test="orderStatus!=null">AND o.status = #{orderStatus}</if>
+			<if test="oid!=null">AND o.id = #{oid}</if>
+			<if test="ordercode!=null and ordercode.trim()!=''">AND o.ordercode like concat("%",#{ordercode},"%")</if>
+			<if test="realname!=null and realname.trim()!=''">AND o.realname like concat("%",#{realname},"%")</if>
+			<if test="mobile!=null and mobile.trim()!=''">AND o.mobile like concat("%",#{mobile},"%")</if>
+			<if test="payStatus!=null">AND o.pay_status = #{payStatus}</if>
+			<if test="createTimeStart!=null">AND o.createtime &gt;= #{createTimeStart}</if>
+			<if test="createTimeEnd!=null ">AND o.createtime &lt;= #{createTimeEnd}</if>
+		</where>
+		<if test="groupbyuid != null and groupbyuid==1">
+			group by o.uid
+		</if>
+		<if test="packfood != null and packfood==1">
+			group by od.foodid
+		</if>) a
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.TDcfwOrderEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_dcfw_order
+		(
+			`uid`, 
+			`ordercode`, 
+			`totalprice`, 
+			`status`, 
+			`createtime`, 
+			`mobile`, 
+			`realname`, 
+			`getfoodtime`,
+			`expire_time`,
+			`pay_status`,
+			`pay_type`,
+			`cancel_reasonids`,
+			`reason_content`,
+			`parent_ordercode`,
+			`refundstatus`
+		)
+		values
+		(
+			#{uid}, 
+			#{ordercode}, 
+			#{totalprice}, 
+			#{status}, 
+			#{createtime}, 
+			#{mobile}, 
+			#{realname}, 
+			#{getfoodtime},
+			#{expireTime},
+			#{payStatus},
+			#{payType},
+			#{cancelReasonids},
+			#{reasonContent},
+			#{parentOrdercode},
+			#{refundstatus}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.TDcfwOrderEntity">
+		update t_dcfw_order
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="ordercode != null">`ordercode` = #{ordercode}, </if>
+			<if test="totalprice != null">`totalprice` = #{totalprice}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="realname != null">`realname` = #{realname}, </if>
+			<if test="getfoodtime != null">`getfoodtime` = #{getfoodtime},</if>
+			<if test="expireTime != null">`expire_time` = #{expireTime},</if>
+			<if test="payStatus != null">`pay_status` = #{payStatus},</if>
+			<if test="payType != null">`pay_type` = #{payType},</if>
+			<if test="cancelReasonids != null">`cancel_reasonids` = #{cancelReasonids},</if>
+			<if test="reasonContent != null">`reason_content` = #{reasonContent},</if>
+			<if test="parentOrdercode != null">`parent_ordercode` = #{parentOrdercode},</if>
+			<if test="refundstatus != null">`refundstatus` = #{refundstatus}</if>
+		</set>
+		where id = #{id}
+	</update>
+	<update id="cancelOrder" >
+		update t_dcfw_order 
+		<set>
+			`status` = 5
+		</set>
+		where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	<update id="updateOrderBatch" parameterType="java.util.Map">
+		update t_dcfw_order
+		<set>
+			<if test="orderStatus != null">`status` = #{orderStatus}</if>
+		</set>
+		where id in 
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		and `status` = #{orderStatusFormer}
+	</update>
+	<update id="updateOrdersFinish" parameterType="java.util.Map">
+		UPDATE t_dcfw_order
+		SET `status` = 4
+		WHERE
+			id IN (select a.oid from (
+				SELECT
+					o.id oid
+				FROM
+					t_dcfw_order o
+				LEFT JOIN t_dcfw_orderdetail od ON od.orderid = o.id
+				WHERE 1=1
+				<if test="foodid != null">
+					od.foodid = #{foodid}
+				</if>
+				<if test="uid != null">
+    				AND o.uid = #{uid}
+				</if>
+				AND o.`status` = 1
+				AND o.pay_status = 1
+				<if test="createTimeStart!=null and createTimeStart.trim()!=''">AND o.createtime &gt;= #{createTimeStart}</if>
+				<if test="createTimeEnd!=null and createTimeEnd.trim()!=''">AND o.createtime &lt;= #{createTimeEnd}</if>
+			) a)
+	</update>
+	<delete id="delete">
+		delete from t_dcfw_order where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_dcfw_order where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<sql id="attr">
+			o.id,
+			o.uid,
+			o.ordercode,
+			o.totalprice,
+			o.status,
+			o.createtime,
+			o.mobile,
+			o.getfoodtime,
+			o.expire_time,
+			o.pay_status,
+			o.pay_type,
+			o.cancel_reasonids,
+			o.reason_content,
+			o.parent_ordercode,
+			o.refundstatus
+	</sql>
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.UserWallelogDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.UserWallelogEntity" id="userWallelogMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="orderid" column="orderid"/>
+        <result property="ordertype" column="ordertype"/>
+        <result property="detail" column="detail"/>
+        <result property="createtime" column="createtime"/>
+        <result property="money" column="money"/>
+        <result property="ordertypename" column="ordertypename"/>
+        <result property="usetype" column="usetype"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.UserWallelogEntity">
+		select * from t_user_wallet_log where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.UserWallelogEntity">
+		select * from t_user_wallet_log l
+		<where>
+			<if test="uid!=null">l.uid = #{uid}</if>
+			<if test="usetype!=null and usertype!=0">l.usetype = #{usetype}</if>
+		</where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_user_wallet_log l
+		<where>
+			<if test="uid!=null">l.uid = #{uid}</if>
+			<if test="usetype!=null and usertype!=0">l.usetype = #{usetype}</if>
+		</where>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.UserWallelogEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_user_wallet_log
+		(
+			`uid`, 
+			`orderid`, 
+			`ordertype`, 
+			`detail`, 
+			`createtime`, 
+			`money`, 
+			`ordertypename`, 
+			`usetype`
+		)
+		values
+		(
+			#{uid}, 
+			#{orderid}, 
+			#{ordertype}, 
+			#{detail}, 
+			#{createtime}, 
+			#{money}, 
+			#{ordertypename}, 
+			#{usetype}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.UserWallelogEntity">
+		update t_user_wallet_log 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="orderid != null">`orderid` = #{orderid}, </if>
+			<if test="ordertype != null">`ordertype` = #{ordertype}, </if>
+			<if test="detail != null">`detail` = #{detail}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="money != null">`money` = #{money}, </if>
+			<if test="ordertypename != null">`ordertypename` = #{ordertypename}, </if>
+			<if test="usetype != null">`usetype` = #{usetype}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_user_wallet_log where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_user_wallet_log where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

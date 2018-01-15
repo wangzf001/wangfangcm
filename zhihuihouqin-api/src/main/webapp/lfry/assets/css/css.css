@@ -1,0 +1,26 @@
+/* ****************重写weui***************** */
+
+.weui-btn.weui-btn_info{background-color:#2EA7E0;}
+.weui-cells_form input{text-align:right;}
+.weui-cells{font-size:14px;}
+.weui-cell:before{left:0;} 
+.weui-cells__title{margin:0; line-height:46px; color:#2E2E2E; background-color:#EFEFF4;}
+
+
+
+/* ***************自定义*********************** */
+/* 公共组件 */
+.z-erro{}
+.z-erro label{display:block; margin-bottom:2px; text-align:left;}
+
+
+/* 页面相关 */
+html,body{height:100%;}
+/* Sticky Footer */
+.sf-top{min-height:100%; padding-top:0.1px; padding-bottom:76px; box-sizing:border-box;}
+.sf-bottom{margin-top:-76px; padding:15px;}
+#erroWrap{display:none!important;}
+#btnAddFllowInfo{width:100%; color:#858585; background-color:#fff;}
+#btnAddFllowInfo:after{border:1px dashed #858585;}
+#fllowers .weui-cell:first-child:before{display:block;}
+

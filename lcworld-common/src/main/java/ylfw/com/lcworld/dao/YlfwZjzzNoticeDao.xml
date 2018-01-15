@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.YlfwZjzzNoticeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.YlfwZjzzNoticeEntity" id="ylfwZjzzNoticeMap">
+        <result property="id" column="id"/>
+        <result property="utype" column="utype"/>
+        <result property="postid" column="postid"/>
+        <result property="getid" column="getid"/>
+        <result property="content" column="content"/>
+        <result property="createtime" column="createtime"/>
+        <result property="gettype" column="gettype"/>
+        <result property="postreadstatus" column="postreadstatus"/>
+        <result property="getreadstatus" column="getreadstatus"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.YlfwZjzzNoticeEntity">
+		select * from t_ylfw_zjzz_notice where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.YlfwZjzzNoticeEntity">
+		select * from 
+		(
+				SELECT
+					n.*,(
+						CASE utype
+						WHEN 1 THEN
+							getid
+						WHEN 2 THEN
+							postid
+						END
+					) serviceuid
+				FROM
+					t_lffw_notice n
+				<where>
+					<if test="uid!=null">
+						(
+							CASE utype
+							WHEN 1 THEN
+								postid = #{uid}
+							WHEN 2 THEN
+								getid = #{uid}
+							END
+						)
+					</if>
+				</where>
+				ORDER BY
+					createtime DESC
+			) a
+		<if test="uid!=null">
+			GROUP BY
+				a.serviceuid
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_ylfw_zjzz_notice 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.YlfwZjzzNoticeEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_ylfw_zjzz_notice
+		(
+			`utype`, 
+			`postid`, 
+			`getid`, 
+			`content`, 
+			`createtime`, 
+			`gettype`, 
+			`postreadstatus`, 
+			`getreadstatus`
+		)
+		values
+		(
+			#{utype}, 
+			#{postid}, 
+			#{getid}, 
+			#{content}, 
+			#{createtime}, 
+			#{gettype}, 
+			#{postreadstatus}, 
+			#{getreadstatus}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.YlfwZjzzNoticeEntity">
+		update t_ylfw_zjzz_notice 
+		<set>
+			<if test="utype != null">`utype` = #{utype}, </if>
+			<if test="postid != null">`postid` = #{postid}, </if>
+			<if test="getid != null">`getid` = #{getid}, </if>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="gettype != null">`gettype` = #{gettype}, </if>
+			<if test="postreadstatus != null">`postreadstatus` = #{postreadstatus}, </if>
+			<if test="getreadstatus != null">`getreadstatus` = #{getreadstatus}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_ylfw_zjzz_notice where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_ylfw_zjzz_notice where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="queryNoticeList" resultType="com.lcworld.entity.YlfwZjzzNoticeEntity">
+        select * from t_ylfw_zjzz_notice where 1=1 
+        and ((postid=#{uid} and getid = #{doctorid} ) or (postid=#{doctorid} and getid = #{uid} )) 
+        order by createtime desc
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+	<select id="queryNoticeListTotal" resultType="int">
+        select count(*) from t_ylfw_zjzz_notice where 1=1 
+        and ((postid=#{uid} and getid = #{doctorid} ) or (postid=#{doctorid} and getid = #{uid} )) 
+     
+    </select>
+
+</mapper>
