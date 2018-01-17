@@ -18,11 +18,8 @@ import com.lcworld.consts.APPConstant;
 import com.lcworld.consts.FavorConst;
 import com.lcworld.entity.TFavorEntity;
 import com.lcworld.interceptor.TokenCheckInterceptor;
-import com.lcworld.service.BgypfwProductService;
 import com.lcworld.service.ICollectionService;
 import com.lcworld.service.TFavorService;
-import com.lcworld.service.TNoticeService;
-import com.lcworld.service.TYytcMealService;
 import com.lcworld.utils.PageUtils;
 import com.lcworld.utils.Query;
 import com.lcworld.utils.R;
@@ -46,12 +43,6 @@ public class TFavorController {
 	private TFavorService tFavorService;
 	@Autowired
 	private FavorServiceFactory favorServiceFactory;
-	@Autowired
-	private TYytcMealService tYytcMealService;
-	@Autowired
-	private BgypfwProductService bgypfwProductService;
-	@Autowired
-	private TNoticeService tNoticeService;
 	
 	/**
 	 * 点击收藏按钮(添加或删除)

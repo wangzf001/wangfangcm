@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.UserPurchaseLimitDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.lcworld.entity.UserPurchaseLimitEntity"
+		id="userPurchaseLimitMap">
+		<result property="id" column="id" />
+		<result property="uid" column="uid" />
+		<result property="highlimit" column="highlimit" />
+		<result property="remain" column="remain" />
+		<result property="purchasetypeid" column="purchasetypeid" />
+	</resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.UserPurchaseLimitEntity">
+		select * from
+		t_user_purchase_limit where id = #{value}
+	</select>
+
+	<select id="queryList1" resultType="com.lcworld.entity.UserPurchaseLimitEntity">
+		select * from t_user_purchase_limit where 1=1
+		<if test="uid != null and uid != ''">
+			and uid =#{uid}
+		</if>
+		<if test=" purchasetypeid != null and purchasetypeid != ''">
+			and purchasetypeid =#{purchasetypeid}
+		</if>
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.UserPurchaseLimitEntity">
+		SELECT
+		a.mobile,
+		c.`name` positionName,
+		a.realname,
+		e.name officename,
+		d.name departname,
+		f.*,
+		g.name purchasetypename
+
+		FROM
+		t_user a
+		LEFT JOIN
+		t_user_position c ON a.positionid = c.id
+		left join t_depart d on d.id =
+		a.departid
+		left join t_office e on e.id = a.officeid
+		left JOIN
+		t_user_purchase_limit f on f.uid = a.id
+		left JOIN t_purchase_type g on
+		g.id = f.purchasetypeid
+		where 1=1
+		<if test="realname != null and realname != ''">
+			and a.realname =#{realname}
+		</if>
+		<if test="departid != null and departid  != ''">
+			and a.departid =#{departid}
+		</if>
+		<if test="officeid != null and officeid != ''">
+			and a.officeid =#{officeid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and a.mobile =#{mobile}
+		</if>
+		<if test="uid != null and uid != ''">
+			and f.uid =#{uid}
+		</if>
+		<if test=" servicecode != null and servicecode != ''">
+			and f.servicecode =#{servicecode}
+		</if>
+		<if test=" typeid != null and typeid != ''">
+			and g.id =#{typeid}
+		</if>
+		<if test="starttime != null and starttime != ''">
+			and a.createtime &lt;= #{starttime}
+		</if>
+
+		<if test="endtime != null and endtime != ''">
+			and a.createtime &gt;= #{endtime}
+		</if>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		SELECT
+		count(*)
+		FROM
+		t_user a
+		LEFT JOIN t_user_position c ON a.positionid
+		= c.id
+		left join t_depart d on d.id = a.departid
+		left join t_office e on
+		e.id = a.officeid
+		left JOIN t_user_purchase_limit f on f.uid = a.id
+		left JOIN t_purchase_type g on g.id = f.purchasetypeid
+		where 1=1
+		<if test="realname != null and realname != ''">
+			and a.realname =#{realname}
+		</if>
+		<if test="uid != null and uid != ''">
+			and f.uid =#{uid}
+		</if>
+		<if test=" servicecode != null and servicecode != ''">
+			and f.servicecode =#{servicecode}
+		</if>
+		<if test=" typeid != null and typeid != ''">
+			and g.id =#{typeid}
+		</if>
+		<if test="departid != null and departid  != ''">
+			and a.departid =#{departid}
+		</if>
+		<if test="officeid != null and officeid != ''">
+			and a.officeid =#{officeid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and a.mobile =#{mobile}
+		</if>
+		<if test="starttime != null and starttime != ''">
+			and a.createtime &lt;= #{starttime}
+		</if>
+
+		<if test="endtime != null and endtime != ''">
+			and a.createtime &gt;= #{endtime}
+		</if>
+	</select>
+
+	<select id="queryUPList" resultType="com.lcworld.entity.UserPurchaseLimitEntity">
+		SELECT DISTINCT
+		f.*, h.`name` positionName,
+		e. NAME officename,
+		d. NAME
+		departname,
+		a.realname,
+		a.mobile,a.id userid, c.name purchasetypename
+		FROM
+		t_user a
+		INNER JOIN t_base_user_role b ON a.id = b.uid
+		INNER JOIN
+		t_purchase_type c ON c.id = b.roleid
+		LEFT JOIN t_user_position h ON
+		a.positionid = h.id
+		LEFT JOIN t_depart d ON d.id = a.departid
+		LEFT JOIN
+		t_office e ON e.id = a.officeid
+		LEFT JOIN t_user_purchase_limit f ON
+		f.purchasetypeid = c.id
+		AND f.uid = a.id
+		INNER JOIN (
+		SELECT
+		min(rolesort) min,
+		c.departid,
+		c.officeid,
+		roletype
+		FROM
+		sys_user_role a
+		INNER JOIN sys_role b ON a.role_id = b.role_id
+		AND a.user_id = #{uid}
+		AND b.type = 2
+		INNER JOIN sys_user c ON c.user_id = a.user_id
+		GROUP BY
+		b.roletype
+		) M ON (
+		(
+		M.min = 1
+		AND a.departid = M.departid
+		)
+		OR (
+		M.min = 2
+		AND a.departid = M.departid
+		AND a.officeid = M.officeid
+		)
+		AND
+		c.servicecode = M.roletype
+
+		)
+		WHERE
+		1 = 1
+		<if test="realname != null and realname != ''">
+			and a.realname =#{realname}
+		</if>
+		<if test="departid != null and departid  != ''">
+			and a.departid =#{departid}
+		</if>
+		<if test="officeid != null and officeid != ''">
+			and a.officeid =#{officeid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and a.mobile =#{mobile}
+		</if>
+		<if test="starttime != null and starttime != ''">
+			and a.createtime &lt;= #{starttime}
+		</if>
+
+		<if test="endtime != null and endtime != ''">
+			and a.createtime &gt;= #{endtime}
+		</if>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryUPTotal" resultType="int">
+		select count(*) from (
+		SELECT DISTINCT
+		f.*, h.`name` positionName,
+		e.
+		NAME officename,
+		d. NAME departname,
+		a.realname,
+		a.mobile,a.id userid
+		FROM
+		t_user a
+		INNER JOIN t_base_user_role b ON a.id = b.uid
+		INNER JOIN
+		t_purchase_type c ON c.id = b.roleid
+		LEFT JOIN t_user_position h ON
+		a.positionid = h.id
+		LEFT JOIN t_depart d ON d.id = a.departid
+		LEFT JOIN
+		t_office e ON e.id = a.officeid
+		LEFT JOIN t_user_purchase_limit f ON
+		f.purchasetypeid = c.id
+		AND f.uid = a.id
+		INNER JOIN (
+		SELECT
+		min(rolesort) min,
+		c.departid,
+		c.officeid,
+		roletype
+		FROM
+		sys_user_role a
+		INNER JOIN sys_role b ON a.role_id = b.role_id
+		AND a.user_id = #{uid}
+		AND b.type = 2
+		INNER JOIN sys_user c ON c.user_id = a.user_id
+		GROUP BY
+		b.roletype
+		) M ON (
+		(
+		M.min = 1
+		AND a.departid = M.departid
+		)
+		OR (
+		M.min = 2
+		AND a.departid = M.departid
+		AND a.officeid = M.officeid
+		)
+		AND
+		c.servicecode = M.roletype
+
+		)
+		WHERE
+		1 = 1
+		<if test="realname != null and realname != ''">
+			and a.realname =#{realname}
+		</if>
+		<if test="departid != null and departid  != ''">
+			and a.departid =#{departid}
+		</if>
+		<if test="officeid != null and officeid != ''">
+			and a.officeid =#{officeid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and a.mobile =#{mobile}
+		</if>
+		<if test="starttime != null and starttime != ''">
+			and a.createtime &lt;= #{starttime}
+		</if>
+
+		<if test="endtime != null and endtime != ''">
+			and a.createtime &gt;= #{endtime}
+		</if>
+		)M where 1=1
+	</select>
+
+	<insert id="save" parameterType="com.lcworld.entity.UserPurchaseLimitEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into t_user_purchase_limit
+		(
+		`uid`,
+		`highlimit`,
+		`remain`,
+		`purchasetypeid`
+
+
+		)
+		values
+		(
+		#{uid},
+		#{highlimit},
+		#{remain},
+		#{purchasetypeid}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.lcworld.entity.UserPurchaseLimitEntity">
+		update t_user_purchase_limit
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="highlimit != null">`highlimit` = #{highlimit}, </if>
+			<if test="remain != null">`remain` = #{remain},</if>
+			<if test="purchasetypeid != null">`purchasetypeid` = #{purchasetypeid},</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from t_user_purchase_limit where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from t_user_purchase_limit where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="queryUserLimitList" resultType="com.lcworld.entity.UserPurchaseLimitEntity">
+		select * from
+		t_user_purchase_limit
+		where uid = #{uid}
+	</select>
+	
+	<!-- <select id="queryUserLimitList" resultType="com.lcworld.entity.UserPurchaseLimitEntity">
+		select a.* from
+		t_user_purchase_limit a
+		inner join
+		t_purchase_type b on
+		a.purchasetypeid= b.id
+		where 1=1
+		and a.uid = #{uid} and
+		b.servicecode=#{servicecode}
+	</select> -->
+
+	<select id="querylimitList" resultType="com.lcworld.entity.UserPurchaseLimitEntity">
+		SELECT
+		a.id,
+		b.departid,
+		b.officeid,
+		<if test="type==2">
+			k.name officename,
+		</if>
+		b.user_name username,
+		b.realname,
+		c.id purchasetypeid,
+		c.`name` purchasetypename,
+		d.`name` departname,
+		e.`name` positionName,
+		a.highlimit,
+		a.remain,b.id uid
+		FROM
+		t_user_purchase_limit a
+		INNER JOIN t_user b ON a.uid = b.id
+		INNER JOIN t_depart d ON d.id = b.departid
+		<if test="type==2">
+			INNER JOIN t_office k on k.id= b.officeid and b.officeid =
+			#{officeid}
+		</if>
+		INNER JOIN t_user_position e ON e.id = b.positionid
+		INNER JOIN t_base_user_role f ON f.uid = b.id
+		INNER JOIN t_purchase_type c ON c.id = f.roleid
+		WHERE c.id = #{purchasetypeid} and b.departid = #{departid} AND a.purchasetypeid = c.id
+		ORDER BY
+		e.id ASC,
+		a.highlimit DESC
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+
+	</select>
+
+	<select id="querylimitTotal" resultType="int">
+		SELECT
+		count(*)
+		FROM
+		t_user_purchase_limit a
+		INNER JOIN t_user b ON a.uid = b.id
+		INNER JOIN t_depart d ON d.id = b.departid
+		<if test="type==2">
+			INNER JOIN t_office k on k.id= b.officeid and b.officeid =
+			#{officeid}
+		</if>
+		INNER JOIN t_user_position e ON e.id = b.positionid
+		INNER JOIN t_base_user_role f ON f.uid = b.id
+		INNER JOIN t_purchase_type c ON c.id = f.roleid
+		WHERE c.id = #{purchasetypeid} and b.departid = #{departid} AND a.purchasetypeid = c.id
+	</select>
+
+<!-- <select id="querylimitList" resultType="com.lcworld.entity.UserPurchaseLimitEntity">
+		SELECT
+		a.id,
+		b.departid,
+		b.officeid,
+		<if test="type==2">
+			k.name officename,
+		</if>
+		b.user_name username,
+		b.realname,
+		c.id purchasetypeid,
+		c.`name`
+		purchasetypename,
+		d.`name` departname,
+		e.`name` positionName,
+		a.highlimit,
+		a.remain,b.id uid
+		FROM
+		t_user b
+		INNER JOIN t_depart d ON d.id
+		= b.departid and b.departid = #{departid}
+		<if test="type==2">
+			inner join t_office k on k.id= b.officeid and b.officeid =
+			#{officeid}
+		</if>
+		INNER JOIN t_user_position e ON e.id = b.positionid
+		INNER JOIN
+		t_base_user_role f ON f.uid = b.id
+		INNER JOIN t_purchase_type c ON c.id
+		= f.roleid
+		LEFT JOIN t_user_purchase_limit a ON a.uid = b.id
+		AND
+		a.purchasetypeid = c.id
+		WHERE c.id = #{purchasetypeid}
+		ORDER BY
+		e.id ASC,
+		a.highlimit DESC
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+
+	</select>
+
+	<select id="querylimitTotal" resultType="int">
+		SELECT
+		count(*)
+		FROM
+		t_user b
+		INNER JOIN t_depart d ON d.id = b.departid
+		and b.departid = #{departid}
+		<if test="type==2">
+			inner join t_office k on k.id= b.officeid and b.officeid =
+			#{officeid}
+		</if>
+		INNER JOIN t_user_position e ON e.id = b.positionid
+		INNER JOIN
+		t_base_user_role f ON f.uid = b.id
+		INNER JOIN t_purchase_type c ON c.id
+		= f.roleid
+		LEFT JOIN t_user_purchase_limit a ON a.uid = b.id
+		AND
+		a.purchasetypeid = c.id
+		WHERE c.id = #{purchasetypeid}
+	</select> -->
+
+	<delete id="deleteBatchByuid">
+		delete from t_user_purchase_limit where 1=1 and purchasetypeid =
+		#{typeid} and uid in
+		<foreach item="id" collection="uidarray" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<select id="queryUserNoLimitList" resultType="com.lcworld.entity.UserPurchaseLimitEntity">
+		SELECT
+			tu.id uid,
+			tu.user_name,
+			tu.realname,
+			tu.mobile,
+			<if test="type==2">
+				k.name officename,
+			</if>
+			td.`name` departName,
+			tup.`name` postionname,
+			tpt.id purchasetype_id,
+			tpt.`name` purchasetype_name,
+			tpp.purchasecount highlimit,
+			tpp.purchasecount remain
+		FROM
+			t_user tu
+		INNER JOIN t_depart td ON td.id = tu.departid
+		INNER JOIN t_user_position tup ON tup.id = tu.positionid
+		INNER JOIN t_position_purchaselimit tpp ON tpp.positionid = tup.id
+		INNER JOIN t_base_user_role tbur ON tbur.uid = tu.id
+		INNER JOIN t_purchase_type tpt ON tpt.id = tbur.roleid
+		<if test="type==2">
+			INNER JOIN t_office k on k.id= tu.officeid and tu.officeid =
+			#{officeid}
+		</if>
+		<where>
+			tu.authstatus = 2 AND tu.departid = #{departid} AND tpt.id = #{typeId}
+			<if test="typeId != null and typeId != ''">
+				and tu.id NOT IN( select IFNULL(tpl.uid,0) uid from
+				t_user_purchase_limit tpl WHERE uid > 0 AND tpl.purchasetypeid =
+				#{typeId})
+			</if>
+		</where>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	<select id="queryUserNoLimitTotal" resultType="int">
+		SELECT count(a.id) FROM
+		(SELECT
+			tu.id FROM
+			t_user tu
+			INNER JOIN t_depart td ON td.id = tu.departid
+			INNER JOIN t_user_position tup ON tup.id = tu.positionid
+			INNER JOIN t_position_purchaselimit tpp ON tpp.positionid = tup.id
+			INNER JOIN t_base_user_role tbur ON tbur.uid = tu.id
+			INNER JOIN t_purchase_type tpt ON tpt.id = tbur.roleid
+			<if test="type==2">
+				inner join t_office k on k.id= tu.officeid and tu.officeid =
+				#{officeid}
+			</if>
+			<where>
+				tu.authstatus = 2 AND tu.departid = #{departid} AND tpt.id = #{typeId}
+				<if test="typeId != null and typeId != ''">
+					and tu.id NOT IN( select IFNULL(tpl.uid,0) uid from
+					t_user_purchase_limit tpl WHERE uid > 0 AND tpl.purchasetypeid =
+					#{typeId})
+				</if>
+			</where>) a
+	</select>
+	<insert id="saveBatch" parameterType="java.util.List">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into t_user_purchase_limit
+		(
+		`uid`,
+		`highlimit`,
+		`remain`,
+		`purchasetypeid`
+	
+	
+		)
+		values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+			#{item.uid},
+			#{item.highlimit},
+			#{item.remain},
+			#{item.purchasetypeid}
+			)
+		</foreach>
+	</insert>
+</mapper>

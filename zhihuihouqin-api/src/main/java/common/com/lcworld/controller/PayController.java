@@ -29,8 +29,6 @@ import com.lcworld.exception.ZHHQException;
 import com.lcworld.factory.OrderServiceFactory;
 import com.lcworld.service.BaseUserRoleService;
 import com.lcworld.service.IOrderService;
-import com.lcworld.service.LffwVoucherService;
-import com.lcworld.service.PayinfoService;
 import com.lcworld.service.PurchaseAccountService;
 import com.lcworld.service.RefundinfoService;
 import com.lcworld.service.UserWalletService;
@@ -53,8 +51,6 @@ public class PayController {
     @Autowired
     private OrderServiceFactory orderServiceFactory;
     @Autowired
-    private PayinfoService payinfoService;
-    @Autowired
     private RefundinfoService refundinfoService;
     @Autowired
     private UserWalletService userWalletService;
@@ -62,8 +58,6 @@ public class PayController {
     private PurchaseAccountService purchaseAccountService;
     @Autowired
     private BaseUserRoleService baseUserRoleService;
-    @Autowired
-    private LffwVoucherService lffwVoucherService;
     
     /**理发首页（店铺）
      * @param biz={orderid,ordercode,ordertype,paytype,paypass,vouchercount}
@@ -101,9 +95,9 @@ public class PayController {
             }
             if(1 == pay.getMixpay()){
                 order.setMixpay(1);
-                res = payinfoService.savedomixpay(req,order);
+                res = new JSONObject(0);
             }else{
-                res = payinfoService.savedopay(req,order);
+                res = new JSONObject(0);
             }
             result.putAll(res);
             return result;
@@ -161,7 +155,7 @@ public class PayController {
                 param.put("orderCode", out_trade_no);
                 param.put("paytype", types);
                 if("TRADE_SUCCESS".equalsIgnoreCase(trade_status) ){
-                        payinfoService.savepayinfo(payinfoService.createpayinfo(trade_no,out_trade_no,types,total_amount));
+//                        payinfoService.savepayinfo(payinfoService.createpayinfo(trade_no,out_trade_no,types,total_amount));
                         log.info("支付宝支付，交易成功");
                         response.getWriter().write("success");
                 }else{
@@ -233,7 +227,7 @@ public class PayController {
                 param.put("orderCode", out_trade_no);
                 param.put("paytype", types);
                 if ("SUCCESS".equals(result_code) ) {
-                    payinfoService.savepayinfo(payinfoService.createpayinfo(trade_no,out_trade_no,types,total_fee));
+//                    payinfoService.savepayinfo(payinfoService.createpayinfo(trade_no,out_trade_no,types,total_fee));
                     log.info("微信支付，交易成功");
                     resHandler.sendToCFT("SUCCESS");
                    

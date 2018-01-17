@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lcworld.entity.PayinfoEntity;
-import com.lcworld.service.PayinfoService;
 import com.lcworld.utils.PageUtils;
 import com.lcworld.utils.Query;
 import com.lcworld.utils.R;
@@ -28,8 +27,6 @@ import com.lcworld.utils.R;
 @RestController
 @RequestMapping("payinfo")
 public class PayinfoController {
-	@Autowired
-	private PayinfoService payinfoService;
 	
 	/**
 	 * 列表
@@ -40,8 +37,8 @@ public class PayinfoController {
 		//查询列表数据
         Query query = new Query(params);
 
-		List<PayinfoEntity> payinfoList = payinfoService.queryList(query);
-		int total = payinfoService.queryTotal(query);
+		List<PayinfoEntity> payinfoList = null;
+		int total = 1;
 		
 		PageUtils pageUtil = new PageUtils(payinfoList, total, query.getLimit(), query.getPage());
 		
@@ -55,7 +52,7 @@ public class PayinfoController {
 	@RequestMapping("/info/{id}")
 	@RequiresPermissions("payinfo:info")
 	public R info(@PathVariable("id") Integer id){
-		PayinfoEntity payinfo = payinfoService.queryObject(id);
+		PayinfoEntity payinfo = null;
 		
 		return R.ok().put("payinfo", payinfo);
 	}
@@ -66,7 +63,7 @@ public class PayinfoController {
 	@RequestMapping("/save")
 	@RequiresPermissions("payinfo:save")
 	public R save(@RequestBody PayinfoEntity payinfo){
-		payinfoService.save(payinfo);
+		
 		
 		return R.ok();
 	}
@@ -77,7 +74,6 @@ public class PayinfoController {
 	@RequestMapping("/update")
 	@RequiresPermissions("payinfo:update")
 	public R update(@RequestBody PayinfoEntity payinfo){
-		payinfoService.update(payinfo);
 		
 		return R.ok();
 	}
@@ -88,7 +84,6 @@ public class PayinfoController {
 	@RequestMapping("/delete")
 	@RequiresPermissions("payinfo:delete")
 	public R delete(@RequestBody Integer[] ids){
-		payinfoService.deleteBatch(ids);
 		
 		return R.ok();
 	}

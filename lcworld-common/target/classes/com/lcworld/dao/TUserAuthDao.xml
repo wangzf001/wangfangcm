@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TUserAuthDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TUserAuthEntity" id="tUserAuthMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="mobile" column="mobile"/>
+        <result property="idcard" column="idcard"/>
+        <result property="positionid" column="positionid"/>
+        <result property="uid" column="uid"/>
+        <result property="status" column="status"/>
+        <result property="roomnum" column="roomnum"/>
+        <result property="carinfoid" column="carinfoid"/>
+        <result property="officetel" column="officetel"/>
+        <result property="nation" column="nation"/>
+        <result property="reason" column="reason"/> 
+        <result property="buildnum" column="buildnum"/> 
+        <result property="departid" column="departid"/> 
+        <result property="officeid" column="officeid"/> 
+        <result property="sex" column="sex"/> 
+        <result property="birthday" column="birthday"/> 
+        <result property="startworktime" column="startworktime"/> 
+        <result property="ldtime" column="ldtime"/> 
+        <result property="email" column="email"/> 
+    </resultMap>
+
+    <select id="queryObject" resultType="com.lcworld.entity.TUserAuthEntity">
+        select * from t_user_auth where id = #{value}
+    </select>
+
+    <select id="queryList" resultType="com.lcworld.entity.TUserAuthEntity">
+        select * from t_user_auth
+         where 1=1
+        <if test="idcard != null and idcard != ''">
+          and idcard = #{idcard}
+        </if>
+        <if test="uid != null and uid != ''">
+          and uid = #{uid}
+        </if>
+        <if test="status != null and status != ''">
+          and status = #{status}
+        </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryTotal" resultType="int">
+        select count(*) from t_user_auth 
+    </select>
+     
+    <insert id="save" parameterType="com.lcworld.entity.TUserAuthEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into t_user_auth
+        (
+            `name`, 
+            `mobile`, 
+            `idcard`, 
+            `positionid`, 
+            `uid`, 
+            `status`, 
+            `roomnum`, 
+            `carinfoid`, 
+            `officetel`,
+            `nation`,
+            `reason`,
+            `buildnum`,
+            `departid`,
+            `officeid`,
+            `sex`,
+            `birthday`,
+            `startworktime`,
+            `ldtime`,
+            `email`
+        )
+        values
+        (
+            #{name}, 
+            #{mobile}, 
+            #{idcard}, 
+            #{positionid}, 
+            #{uid}, 
+            #{status}, 
+            #{roomnum}, 
+            #{carinfoid}, 
+            #{officetel},
+            #{nation},
+            #{reason},
+            #{buildnum},
+            #{departid},
+            #{officeid},
+            #{sex},
+            #{birthday},
+            #{startworktime},
+            #{ldtime},
+            #{email}
+        )
+    </insert>
+     
+    <update id="update" parameterType="com.lcworld.entity.TUserAuthEntity">
+        update t_user_auth 
+        <set>
+            <if test="name != null">`name` = #{name}, </if>
+            <if test="mobile != null">`mobile` = #{mobile}, </if>
+            <if test="idcard != null">`idcard` = #{idcard}, </if>
+            <if test="positionid != null">`positionid` = #{positionid}, </if>
+            <if test="uid != null">`uid` = #{uid}, </if>
+            <if test="status != null">`status` = #{status}, </if>
+            <if test="roomnum != null">`roomnum` = #{roomnum}, </if>
+            <if test="carinfoid != null">`carinfoid` = #{carinfoid}, </if>
+            <if test="officetel != null">`officetel` = #{officetel},</if>
+            <if test="nation != null">`nation` = #{nation},</if>
+            <if test="reason != null">`reason` = #{reason},</if>
+            <if test="buildnum != null">`buildnum` = #{buildnum},</if>
+            <if test="departid != null">`departid` = #{departid},</if>
+            <if test="officeid != null">`officeid` = #{officeid},</if>
+            <if test="sex != null">`sex` = #{sex},</if>
+            <if test="birthday != null">`birthday` = #{birthday},</if>
+            <if test="startworktime != null">`startworktime` = #{startworktime},</if>
+            <if test="ldtime != null">`ldtime` = #{ldtime},</if>
+            <if test="email != null">`email` = #{email},</if>
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="delete">
+        delete from t_user_auth where id = #{value}
+    </delete>
+    
+    <delete id="deleteBatch">
+        delete from t_user_auth where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+</mapper>

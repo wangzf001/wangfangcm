@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.UserWalletDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.UserWalletEntity" id="userWalletMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="remain" column="remain"/>
+        <result property="paypass" column="paypass"/>
+        <result property="publicRemain" column="public_remain"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.UserWalletEntity">
+		select * from t_user_wallet where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.UserWalletEntity">
+		select wallet.*,user.user_name from t_user_wallet wallet inner join t_user user on user.id = wallet.uid where 1=1 
+		<if test="uid != null">
+		  and wallet.uid = #{uid}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by wallet.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_user_wallet 
+	</select>
+ 	<select id="queryByUid" resultType="com.lcworld.entity.UserWalletEntity" parameterType="Integer">
+		select * from t_user_wallet w where w.uid = #{uid}
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.UserWalletEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_user_wallet
+		(
+			`uid`,
+			`remain`,
+			`paypass`,
+			`public_remain`
+		)
+		values
+		(
+			#{uid}, 
+			#{remain}, 
+			#{paypass},
+			#{publicRemain}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.UserWalletEntity">
+		update t_user_wallet 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="remain != null">`remain` = #{remain}, </if>
+			<if test="paypass != null">`paypass` = #{paypass},</if>
+			<if test="publicRemain != null">`public_remain` = #{publicRemain}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_user_wallet where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_user_wallet where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<update id="updateRemainByUid">
+		update t_user_wallet set remain=remain+#{money} where uid = #{uid}
+	</update>
+
+</mapper>

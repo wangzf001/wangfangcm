@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.BaseUserRoleDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.BaseUserRoleEntity" id="baseUserRoleMap">
+        <result property="id" column="id"/>
+        <result property="roleid" column="roleid"/>
+        <result property="uid" column="uid"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.BaseUserRoleEntity">
+		select * from t_base_user_role where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.BaseUserRoleEntity">
+		select * from t_base_user_role where 1=1
+		<if test="uid != null">
+		  and uid = #{uid}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_base_user_role  where 1=1
+		<if test="uid != null">
+          and uid = #{uid}
+        </if>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.BaseUserRoleEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_base_user_role
+		(
+			`roleid`, 
+			`uid`
+		)
+		values
+		(
+			#{roleid}, 
+			#{uid}
+		)
+	</insert>
+	
+	<insert id="savebench" parameterType="java.util.List" >
+		insert into t_base_user_role
+		(
+			`roleid`, 
+			`uid`
+		)
+		values
+		<foreach collection="list" item="item" index="index"
+            separator=",">
+            (#{item.roleid},#{item.uid})
+        </foreach>
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.BaseUserRoleEntity">
+		update t_base_user_role 
+		<set>
+			<if test="roleid != null">`roleid` = #{roleid}, </if>
+			<if test="uid != null">`uid` = #{uid}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_base_user_role where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_base_user_role where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteByParams">
+        delete from t_base_user_role where uid = #{uid} and roleid in 
+        <foreach item="id" collection="roleids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+	
+	<select id="queryUserRoleList" resultType="com.lcworld.dto.UserFrontRolesDTO">
+        select a.* from t_purchase_type a 
+        INNER JOIN t_base_user_role b on a.id=b.roleid 
+        where 1=1 and uid = #{uid}
+       
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+	
+	<select id="queryUserRoleCount" resultType="java.lang.Integer">
+        select count(*) from t_purchase_type a 
+        INNER JOIN t_base_user_role b on a.id=b.roleid 
+        where 1=1 and uid = #{uid}
+        
+       
+    </select>
+    
+    <select id="queryRoleList" resultType="com.lcworld.entity.BaseUserRoleEntity">
+        select b.* from t_purchase_type a 
+        INNER JOIN t_base_user_role b on a.id=b.roleid 
+        where 1=1 and uid = #{uid}
+        <if test="servicecode != null and servicecode != ''">
+            and a.servicecode = #{servicecode}
+        </if>
+       
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+
+</mapper>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.VisiuserLogDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.VisiuserLogEntity" id="visiuserLogMap">
+        <result property="id" column="id"/>
+        <result property="stamp" column="stamp"/>
+        <result property="status" column="status"/>
+        <result property="vuid" column="vuid"/>
+        <result property="uid" column="uid"/>
+        <result property="realname" column="realname"/>
+        <result property="phonenum" column="phonenum"/>
+		<result property="buildnum" column="buildnum"/>
+		<result property="buildname" column="buildname"/>
+        <result property="roomnum" column="roomnum"/>
+        <result property="visitchecked" column="visitchecked"/>
+        <result property="checked" column="checked"/>
+        <result property="vname" column="vname"/>
+        <result property="vmobile" column="vmobile"/>
+        <result property="vidnum" column="vidnum"/>
+        <result property="vpnum" column="vpnum"/>
+        <result property="visittime" column="visittime"/>
+        <result property="unit" column="unit"/>
+        <result property="notify" column="notify"/>
+        <result property="ordercode" column="ordercode"/>
+        <result property="visitreason" column="visitreason"/>
+        <result property="adminreason" column="adminreason"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.VisiuserLogEntity">
+		select * from t_visit_user_log where id = #{value}
+	</select>
+
+	<select id="queryObjectByCode" resultType="com.lcworld.entity.VisiuserLogEntity">
+		select * from t_visit_user_log where ordercode = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.VisiuserLogEntity">
+		select log.*,b.build_name buildname from t_visit_user_log log LEFT JOIN t_building b ON b.id = log.buildnum where 1=1
+		<if test="uid != null and uid != ''">
+			and log.uid = #{uid}
+		</if>
+		<if test="stamp != null and stamp != ''">
+			and log.stamp = #{stamp}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by log.id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_visit_user_log where 1=1
+		<if test="uid != null and uid != ''">
+			and uid = #{uid}
+		</if>
+		<if test="stamp != null and stamp != ''">
+			and stamp = #{stamp}
+		</if>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.VisiuserLogEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_visit_user_log
+		(
+			`stamp`, 
+			`status`, 
+			`vuid`, 
+			`uid`,
+			`realname`,
+			`phonenum`,
+			`buildnum`,
+			`roomnum`,
+			`visitchecked`,
+			`checked`,
+			`vname`,
+			`vmobile`,
+			`vpnum`,
+			`vidnum`,
+			`visittime`,
+			`unit`,
+			`notify`,
+			`ordercode`,
+			`adminreason`,
+			`visitreason`
+		)
+		values
+		(
+			#{stamp}, 
+			#{status}, 
+			#{vuid}, 
+			#{uid},
+			#{realname},
+			#{phonenum},
+			#{buildnum},
+			#{roomnum},
+			#{visitchecked},
+			#{checked},
+			#{vname},
+			#{vmobile},
+			#{vpnum},
+			#{vidnum},
+			#{visittime},
+			#{unit},
+			#{notify},
+			#{ordercode},
+			#{adminreason},
+			#{visitreason}
+			
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.VisiuserLogEntity">
+		update t_visit_user_log 
+		<set>
+			<if test="stamp != null">`stamp` = #{stamp}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="vuid != null">`vuid` = #{vuid}, </if>
+			<if test="uid != null">`uid` = #{uid},</if>
+			<if test="realname != null">`realname` = #{realname},</if>
+			<if test="phonenum != null">`phonenum` = #{phonenum},</if>
+			<if test="buildnum != null">`buildnum` = #{buildnum}, </if>
+			<if test="roomnum != null">`roomnum` = #{roomnum},</if>
+			<if test="unit != null">`unit` = #{unit},</if>
+			<if test="visittime != null">`visittime` = #{visittime},</if>
+			<if test="vidnum != null">`vidnum` = #{vidnum},</if>
+			<if test="vpnum != null">`vpnum` = #{vpnum},</if>
+			<if test="vmobile != null">`vmobile` = #{vmobile},</if>
+			<if test="vname != null">`vname` = #{vname},</if>
+			<if test="checked != null">`checked` = #{checked},</if>
+			<if test="visitchecked != null">`visitchecked` = #{visitchecked},</if>
+			<if test="notify != null">`notify` = #{notify},</if>
+			<if test="ordercode != null">`ordercode` = #{ordercode},</if>
+			<if test="adminreason != null">`adminreason` = #{adminreason},</if>
+			<if test="visitreason != null">`visitreason` = #{visitreason}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_visit_user_log where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_visit_user_log where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<update id="uncheckBatchbyuvids">
+		update t_visit_user_log set checked =2 ,adminreason= #{reason} where vuid in 
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+
+</mapper>

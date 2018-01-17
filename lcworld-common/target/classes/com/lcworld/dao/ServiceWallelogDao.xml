@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.ServiceWallelogDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.ServiceWallelogEntity" id="serviceWallelogMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="money" column="money"/>
+        <result property="content" column="content"/>
+        <result property="useType" column="use_type"/>
+        <result property="serviceType" column="service_type"/>
+        <result property="creatTime" column="creat_time"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.ServiceWallelogEntity">
+		select * from t_service_wallet_log where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.ServiceWallelogEntity">
+		select * from t_service_wallet_log
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_service_wallet_log 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.ServiceWallelogEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_service_wallet_log
+		(
+			`uid`, 
+			`money`, 
+			`content`, 
+			`use_type`, 
+			`service_type`, 
+			`creat_time`
+		)
+		values
+		(
+			#{uid}, 
+			#{money}, 
+			#{content}, 
+			#{useType}, 
+			#{serviceType}, 
+			#{creatTime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.ServiceWallelogEntity">
+		update t_service_wallet_log 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="money != null">`money` = #{money}, </if>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="useType != null">`use_type` = #{useType}, </if>
+			<if test="serviceType != null">`service_type` = #{serviceType}, </if>
+			<if test="creatTime != null">`creat_time` = #{creatTime}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_service_wallet_log where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_service_wallet_log where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="shouru" resultType="java.lang.Double">
+		SELECT
+			SUM(t.money) walletMoney
+		FROM
+			t_service_wallet_log AS t
+		WHERE
+			t.uid = #{uid}
+		AND t.service_type = #{serviceTypeId}
+		AND t.use_type = #{useType}
+		AND DATE_FORMAT(t.creat_time,'%Y-%m-%d') = DATE_FORMAT(now(),'%Y-%m-%d')<!-- 当月金额 -->
+	</select>
+	
+	<select id="serviceOwnerWalletLog" resultType="com.lcworld.vo.service.owner.ServiceOwnerWalletLog">
+		SELECT
+			t.content,
+			t.use_type,
+			t.money,
+			t.creat_time
+		FROM
+			t_service_wallet_log AS t
+		WHERE
+			t.uid = #{uid}
+		AND t.service_type = #{serviceTypeId}
+		ORDER BY creat_time DESC
+		LIMIT ${index},${limit}
+	</select>
+
+</mapper>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.UserPurchaseLimilogDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.UserPurchaseLimilogEntity" id="userPurchaseLimilogMap">
+        <result property="id" column="id"/>
+        <result property="servicecode" column="servicecode"/>
+        <result property="money" column="money"/>
+        <result property="createtime" column="createtime"/>
+        <result property="uid" column="uid"/>
+        <result property="limitid" column="limitid"/>
+        <result property="usetype" column="usetype"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.UserPurchaseLimilogEntity">
+		select * from t_user_purchase_limit_log where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.UserPurchaseLimilogEntity">
+		select * from t_user_purchase_limit_log
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_user_purchase_limit_log 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.UserPurchaseLimilogEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_user_purchase_limit_log
+		(
+			`servicecode`, 
+			`money`, 
+			`createtime`, 
+			`uid`,
+			`limitid`,
+			`usetype`
+			
+		)
+		values
+		(
+			#{servicecode}, 
+			#{money}, 
+			#{createtime}, 
+			#{uid},
+			#{limitid},
+			#{usetype}
+			
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.UserPurchaseLimilogEntity">
+		update t_user_purchase_limit_log 
+		<set>
+			<if test="servicecode != null">`servicecode` = #{servicecode}, </if>
+			<if test="money != null">`money` = #{money}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="limitid != null">`limitid` = #{limitid},</if>
+			<if test="uid != null">`uid` = #{uid},</if>
+			<if test="usetype != null">`usetype` = #{usetype}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_user_purchase_limit_log where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_user_purchase_limit_log where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

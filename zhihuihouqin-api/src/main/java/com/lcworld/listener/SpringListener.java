@@ -16,8 +16,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
-import com.lcworld.service.TDcfwOrderService;
-import com.lcworld.service.YlfwZjzzOrderService;
 import com.lcworld.test.queue.CancelQueue;
 import com.lcworld.test.queue.OrderQueueSingleton;
 import com.lcworld.test.queue.RemindQueue;
@@ -29,10 +27,6 @@ import com.lcworld.utils.DateUtil;
 @Service
 public class SpringListener implements ApplicationListener<ContextRefreshedEvent > {
 	private Logger log = LoggerFactory.getLogger(SpringListener.class);
-	@Resource
-	private YlfwZjzzOrderService ylfwZjzzOrderService;
-	@Resource
-	private TDcfwOrderService tDcfwOrderService;
 	@Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
 		//spring会加载两次创建两个容器root application context 没有parent，他就是老大.

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.UserCfDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.UserCfEntity" id="userCfMap">
+        <result property="id" column="id"/>
+        <result property="cardNum" column="card_num"/>
+        <result property="entityCardNumber" column="entity_card_number"/>
+        <result property="remainSum" column="remain_sum"/>
+        <result property="subsidySum" column="subsidy_sum"/>
+        <result property="userId" column="user_id"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.UserCfEntity">
+		select * from t_user_cf where id = #{value}
+	</select>
+	<select id="queryByCondition" resultType="com.lcworld.entity.UserCfEntity" parameterType="java.util.Map">
+		select * from t_user_cf c
+		<where>
+			<if test="cardNum!=null">and c.card_num = #{cardNum}</if>
+			<if test="uid!=null">and c.user_id = #{uid}</if>
+		</where>
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.UserCfEntity">
+		select * from t_user_cf
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_user_cf 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.UserCfEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_user_cf
+		(
+			`card_num`, 
+			`entity_card_number`, 
+			`remain_sum`, 
+			`user_id`,
+			`subsidy_sum`
+		)
+		values
+		(
+			#{cardNum}, 
+			#{entityCardNumber}, 
+			#{remainSum}, 
+			#{userId},
+			#{subsidySum}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.UserCfEntity">
+		update t_user_cf 
+		<set>
+			<if test="cardNum != null">`card_num` = #{cardNum}, </if>
+			<if test="entityCardNumber != null">`entity_card_number` = #{entityCardNumber}, </if>
+			<if test="remainSum != null">`remain_sum` = #{remainSum}, </if>
+			<if test="userId != null">`user_id` = #{userId},</if>
+			<if test="subsidySum != null">`subsidy_sum` = #{subsidySum}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_user_cf where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_user_cf where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

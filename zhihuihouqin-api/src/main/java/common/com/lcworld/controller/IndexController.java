@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.lcworld.annotation.IgnoreSign;
 import com.lcworld.annotation.IgnoreToken;
-import com.lcworld.dto.TdhdActivityDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +17,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.lcworld.entity.IndexCarouselEntity;
 import com.lcworld.entity.OrderViewEntity;
 import com.lcworld.entity.ServiceEntity;
-import com.lcworld.entity.TBxwxOrderEntity;
-import com.lcworld.entity.TNoticeEntity;
-import com.lcworld.entity.TdhdActivityEntity;
 import com.lcworld.interceptor.TokenCheckInterceptor;
 import com.lcworld.service.IndexCarouselService;
 import com.lcworld.service.OrderViewService;
 import com.lcworld.service.ServiceService;
-import com.lcworld.service.TBxwxOrderService;
-import com.lcworld.service.TNoticeService;
-import com.lcworld.service.TdhdActivityService;
 import com.lcworld.utils.Query;
 import com.lcworld.utils.R;
 import com.lcworld.utils.ValidateUtil;
@@ -40,12 +33,6 @@ public class IndexController {
     private IndexCarouselService indexCarouselService;
     @Autowired
     private ServiceService serviceService;
-    @Autowired
-    private TNoticeService tNoticeService;
-    @Autowired
-    private TBxwxOrderService tBxwxOrderService;
-    @Autowired
-    private TdhdActivityService tdhdActivityService;
     @Autowired
 	private OrderViewService orderViewService;
     /**
@@ -69,22 +56,16 @@ public class IndexController {
         
         Query query = new Query(params);
         
-        //3、最新公告
-        List<TNoticeEntity> noticeList = tNoticeService.queryList(query);
         
         //4、最新订单
         List<OrderViewEntity> bxwxOrderList =  orderViewService.queryList(query);
         
         //List<TBxwxOrderEntity> bxwxOrderList = tBxwxOrderService.queryList(query);
-        //5、最新活动
-        List<TdhdActivityDTO> activityList = tdhdActivityService.queryDTOList(query);
         
         HashMap<String,Object> resultMap = new HashMap<>();
         resultMap.put("carouselList", imgList);
         resultMap.put("serviceList", serviceList);
-        resultMap.put("noticeList", noticeList);
         resultMap.put("bxwxOrderList", bxwxOrderList);
-        resultMap.put("activityList", activityList);
         
         return R.ok(resultMap);
     }

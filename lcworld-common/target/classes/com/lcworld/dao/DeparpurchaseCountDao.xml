@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.DeparpurchaseCountDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.DeparpurchaseCountEntity" id="deparpurchaseCountMap">
+        <result property="id" column="id"/>
+        <result property="departid" column="departid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="remain" column="remain"/>
+        <result property="paypass" column="paypass"/>
+        <result property="typeid" column="typeid"/>
+        <result property="total" column="total"/>
+        <result property="sourcepaypass" column="sourcepaypass"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.DeparpurchaseCountEntity">
+		select * from t_depart_purchase_count where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.DeparpurchaseCountEntity">
+		SELECT
+			    a.*, b.name departname,c.name purchasetype,c.servicecode
+			FROM
+			    t_depart_purchase_count a 
+			INNER JOIN t_depart b ON a.departid = b.id
+			inner join t_purchase_type c on c.id = a.typeid
+			WHERE
+			    1 = 1
+			     <if test="departid != null and departid != ''">
+            and a.departid = #{departid}
+         </if>
+			     <if test="type != null and type != ''">
+            and a.typeid = #{type}
+         </if>
+			     <if test="typeid != null and typeid != ''">
+            and a.typeid = #{typeid}
+         </if>
+			ORDER BY
+			    id DESC
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_depart_purchase_count a
+		inner join 
+        t_depart b on a.departid= b.id
+        inner join t_purchase_type c on c.id = a.typeid
+         where 1=1
+         <if test="departid != null and departid != ''">
+            and a.departid = #{departid}
+         </if>
+                 <if test="type != null and type != ''">
+            and a.typeid = #{type}
+         </if>
+          <if test="typeid != null and typeid != ''">
+            and a.typeid = #{typeid}
+         </if>
+	</select>
+	
+	<select id="queryDPCList" resultType="com.lcworld.entity.DeparpurchaseCountEntity">
+		SELECT
+    d.*,f.name departname,c.name purchasetype,c.servicecode
+FROM
+    sys_user_role a
+INNER JOIN sys_role b ON a.role_id = b.role_id
+AND b.type = 2
+AND b.rolesort = 1
+INNER JOIN sys_user e ON e.user_id = a.user_id
+INNER JOIN t_depart f on f.id = e.departid
+INNER JOIN t_purchase_type c ON c.servicecode = b.roletype
+INNER JOIN t_depart_purchase_count d ON d.departid = e.departid
+AND d.typeid = c.id
+WHERE
+    a.user_id = #{uid}
+    <if test="departid != null and departid != ''">
+            and e.departid = #{departid}
+         </if>
+                 <if test="type != null and type != ''">
+            and d.typeid = #{type}
+         </if>
+            ORDER BY
+                d.id DESC
+		
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryDPCTotal" resultType="int">
+		  SELECT
+   count(*)
+FROM
+    sys_user_role a
+INNER JOIN sys_role b ON a.role_id = b.role_id
+AND b.type = 2
+AND b.rolesort = 1
+INNER JOIN sys_user e ON e.user_id = a.user_id
+INNER JOIN t_depart f on f.id = e.departid
+INNER JOIN t_purchase_type c ON c.servicecode = b.roletype
+INNER JOIN t_depart_purchase_count d ON d.departid = e.departid
+AND d.typeid = c.id
+WHERE
+    a.user_id = #{uid}
+    <if test="departid != null and departid != ''">
+            and e.departid = #{departid}
+         </if>
+                 <if test="type != null and type != ''">
+            and d.typeid = #{type}
+         </if>
+         
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.DeparpurchaseCountEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_depart_purchase_count
+		(
+			`departid`, 
+			`createtime`, 
+			`remain`, 
+			`paypass`, 
+			`typeid`, 
+			`total`,
+			`sourcepaypass`,
+			`createuid`
+		)
+		values
+		(
+			#{departid}, 
+			#{createtime}, 
+			#{remain}, 
+			#{paypass}, 
+			#{typeid}, 
+			#{total},
+			#{sourcepaypass},
+			#{createuid}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.DeparpurchaseCountEntity">
+		update t_depart_purchase_count 
+		<set>
+			<if test="departid != null">`departid` = #{departid}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="remain != null">`remain` = #{remain}, </if>
+			<if test="paypass != null">`paypass` = #{paypass}, </if>
+			<if test="typeid != null">`typeid` = #{typeid}, </if>
+			<if test="total != null">`total` = #{total},</if>
+			<if test="sourcepaypass != null">`sourcepaypass` = #{sourcepaypass},</if>
+			<if test="createuid != null">`createuid` = #{createuid}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_depart_purchase_count where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_depart_purchase_count where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="queryFDPCList" resultType="com.lcworld.entity.DeparpurchaseCountEntity">
+	   SELECT
+		    DISTINCT d.*
+		FROM
+		    t_user a
+		INNER JOIN t_base_user_role b ON a.id = b.uid
+		INNER JOIN t_purchase_type c ON c.id = b.roleid
+		AND c.servicecode = #{servicecode}
+		INNER JOIN t_depart_purchase_count d ON c.id = d.typeid
+		AND d.departid = a.departid
+		WHERE
+		    a.id = #{uid}
+	   
+	</select>
+	
+	<select id="getPubPurchaseList" resultType="com.lcworld.dto.PurchaseDTO">
+	SELECT
+                a.typeid type,ifnull(d.remain,0) money, c.name typename,a.id
+            FROM
+                t_depart_purchase_count a 
+            inner join t_purchase_type c on c.id = a.typeid
+            left join t_user_purchase_limit d on d.purchasetypeid = c.id and d.uid = #{uid}
+            WHERE
+                1 = 1
+                 <if test="departid != null and departid != ''">
+            and a.departid = #{departid}
+         </if>
+                 <if test="type != null and type != ''">
+            and a.typeid = #{type}
+         </if>
+                 <if test="typeid != null and typeid != ''">
+            and a.typeid = #{typeid}
+         </if>
+                 <if test="servicecode != null and servicecode != ''">
+            and c.servicecode = #{servicecode}
+         </if>
+            ORDER BY
+                a.id DESC
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+	</select>
+	
+	
+</mapper>

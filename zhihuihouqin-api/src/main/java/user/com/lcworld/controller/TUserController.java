@@ -2,21 +2,14 @@ package com.lcworld.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.event.UndoableEditListener;
-
 import com.lcworld.entity.*;
 import com.lcworld.service.*;
 import com.lcworld.utils.*;
 import com.lcworld.validator.Assert;
-import org.apache.commons.lang.StringUtils;
-import org.aspectj.weaver.IUnwovenClassFile;
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,17 +18,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.zxing.Result;
 import com.lcworld.annotation.IgnoreSign;
 import com.lcworld.annotation.IgnoreToken;
 import com.lcworld.consts.APPConstant;
 import com.lcworld.consts.RedisConst;
-import com.lcworld.dto.LffwOrderDTO;
 import com.lcworld.dto.PurchaseDTO;
 import com.lcworld.exception.ZHHQException;
 import com.lcworld.interceptor.TokenCheckInterceptor;
 import com.lcworld.vo.TUserAuthVO;
-import com.sun.org.apache.xerces.internal.xs.datatypes.ByteList;
 
 @RestController
 @RequestMapping("appuser/user")
@@ -46,10 +36,6 @@ public class TUserController {
     @Autowired
     private TokenService tokenService;
     @Autowired
-    private RedisUtil redisUtil;
-    @Autowired
-    private TVisitUserService tVisitUserService;
-    @Autowired
     private TUserAppealService tUserAppealService;
     @Autowired
     private TUserAuthService tUserAuthService;
@@ -57,8 +43,6 @@ public class TUserController {
     private TCarCartypeService tCarCartypeService;
     @Autowired
     private TUserPositionService tUserPositionService;
-    @Autowired
-    private BaseUserRoleService baseUserRoleService;
     @Autowired
     private UserCaptchaService userCaptchaService;
     @Autowired
@@ -70,11 +54,7 @@ public class TUserController {
     @Autowired
     private PurchaseAccountService purchaseAccountService;
     @Autowired
-    private PurchaseTypeService purchaseTypeService;
-    @Autowired
     private InneruserService inneruserService;
-    @Autowired
-    private ServiceService serviceService;
     @Autowired
     private VisiuserService visitUserService;
     @Autowired

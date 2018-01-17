@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.InneruserDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.InneruserEntity" id="inneruserMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="mobile" column="mobile"/>
+        <result property="position" column="position"/>
+        <result property="depart" column="depart"/>
+        <result property="deadline" column="deadline"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.InneruserEntity">
+		select * from t_inneruser where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.InneruserEntity">
+		select * from t_inneruser where 1=1 
+		<if test="userName != null and userName != ''">
+		  and mobile = #{userName}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_inneruser 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.InneruserEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_inneruser
+		(
+			`name`, 
+			`mobile`, 
+			`position`, 
+			`depart`,
+			`deadline`
+		)
+		values
+		(
+			#{name}, 
+			#{mobile}, 
+			#{position}, 
+			#{depart},
+			#{deadline}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.InneruserEntity">
+		update t_inneruser 
+		<set>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="position != null">`position` = #{position}, </if>
+			<if test="depart != null">`depart` = #{depart},</if>
+			<if test="deadline != null">`deadline` = #{deadline}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_inneruser where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_inneruser where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

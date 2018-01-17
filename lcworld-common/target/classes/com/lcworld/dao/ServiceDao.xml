@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.ServiceDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.ServiceEntity" id="serviceMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="smallimg" column="smallimg"/>
+        <result property="topphoto" column="topphoto"/>
+        <result property="detailphoto" column="detailphoto"/>
+        <result property="servicetypeid" column="servicetypeid"/>
+        <result property="mobile" column="mobile"/>
+        <result property="price" column="price"/>
+        <result property="ghprice" column="ghprice"/>
+        <result property="place" column="place"/>
+        <result property="businesshour" column="businesshour"/>
+        <result property="tradename" column="tradename"/>
+        <result property="sign" column="sign"/>
+        <result property="ghprice" column="ghprice"/>
+        <result property="dcfwgzcfixedprice" column="dcfwgzcfixedprice"/>
+        <result property="dcfwgzcprice" column="dcfwgzcprice"/>
+        <result property="dcfwtokenplace" column="dcfwtokenplace"/>
+        <result property="dcfwtokenordertime" column="dcfwtokenordertime"/>
+        <result property="remind" column="remind"/>
+        <result property="hasservice" column="hasservice"/>
+    </resultMap>
+
+    <select id="queryObject" resultType="com.lcworld.entity.ServiceEntity">
+        select * from t_service where id = #{value}
+    </select>
+
+	<select id="queryObjectByName" resultType="com.lcworld.entity.ServiceEntity">
+        select * from t_service s
+        <if test="uid != null">
+            LEFT JOIN t_service_userservice su ON su.serviceid = s.id
+        </if>
+        <where>
+        LOCATE(#{keyword},name)>0
+	        <if test="uid != null">
+              and su.uid = #{uid}
+          </if>
+        </where>
+    </select>
+
+    <select id="queryList" resultType="com.lcworld.entity.ServiceEntity">
+        select * from t_service s 
+        <if test="uid != null">
+            LEFT JOIN t_service_userservice su ON su.serviceid = s.id
+        </if>
+      <where>
+          s.sign is not null AND s.sign != ''
+          <if test="sign != null and sign > 0">
+              and s.sign =#{sign}
+          </if>
+          <if test="keyword != null and keyword.trim()!=''">
+              and (s.sign = #{keyword} or s.name like concat('%',#{keyword},'%'))
+          </if>
+          <if test="uid != null">
+              and su.uid = #{uid}
+          </if>
+          <if test="hasservice != null">
+              and s.hasservice = #{hasservice}
+          </if>
+      </where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <when test="uid != null">
+                order by su.`order`
+            </when>
+            <otherwise>
+                order by s.id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+    <select id="queryTotal" resultType="int">
+        select count(*) from t_service s where 1=1  and s.sign is not null
+        <if test="keyword != null and keyword.trim()!=''">
+            and (s.sign = #{keyword} or s.name like concat('%',#{keyword},'%'))
+        </if>
+    </select>
+     
+    <insert id="save" parameterType="com.lcworld.entity.ServiceEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into t_service
+        (
+            `name`, 
+            `smallimg`, 
+            `topphoto`, 
+            `detailphoto`, 
+            `servicetypeid`, 
+            `mobile`, 
+            `price`, 
+            `place`, 
+            `businesshour`, 
+            `tradename`, 
+            `sign`,
+            `ghprice`,
+            `dcfwgzcfixedprice`,
+            `dcfwgzcprice`,
+            `dcfwtokenplace`,
+            `dcfwtokenordertime`,
+            `remind`,
+            `hasservice`
+        )
+        values
+        (
+            #{name}, 
+            #{smallimg}, 
+            #{topphoto}, 
+            #{detailphoto}, 
+            #{servicetypeid}, 
+            #{mobile}, 
+            #{price}, 
+            #{place}, 
+            #{businesshour}, 
+            #{tradename}, 
+            #{sign},
+            #{ghprice},
+            #{dcfwgzcfixedprice},
+            #{dcfwgzcprice},
+            #{dcfwtokenplace},
+            #{dcfwtokenordertime},
+            #{remind},
+            #{hasservice}
+        )
+    </insert>
+    <insert id="addUserService" parameterType="java.util.Map">
+        INSERT INTO t_service_userservice 
+        (
+            `uid`,
+            `serviceid`,
+            `order`
+        )
+        VALUES
+        <foreach item="serviceid" collection="serviceidList" separator="," index="idx" >
+            (#{uid},#{serviceid},#{idx})
+        </foreach>
+    </insert>
+     
+    <update id="update" parameterType="com.lcworld.entity.ServiceEntity">
+        update t_service 
+        <set>
+            <if test="name != null">`name` = #{name}, </if>
+            <if test="smallimg != null">`smallimg` = #{smallimg}, </if>
+            <if test="topphoto != null">`topphoto` = #{topphoto}, </if>
+            <if test="detailphoto != null">`detailphoto` = #{detailphoto}, </if>
+            <if test="servicetypeid != null">`servicetypeid` = #{servicetypeid}, </if>
+            <if test="mobile != null">`mobile` = #{mobile}, </if>
+            <if test="price != null">`price` = #{price}, </if>
+            <if test="place != null">`place` = #{place}, </if>
+            <if test="businesshour != null">`businesshour` = #{businesshour}, </if>
+            <if test="tradename != null">`tradename` = #{tradename}, </if>
+            <if test="sign != null">`sign` = #{sign},</if>
+            <if test="dcfwgzcfixedprice != null">`dcfwgzcfixedprice` = #{dcfwgzcfixedprice},</if>
+            <if test="ghprice != null">`ghprice` = #{ghprice},</if>
+            <if test="dcfwgzcprice != null">`dcfwgzcprice` = #{dcfwgzcprice},</if>
+            <if test="dcfwtokenplace != null">`dcfwtokenplace` = #{dcfwtokenplace},</if>
+            <if test="dcfwtokenordertime != null">`dcfwtokenordertime` = #{dcfwtokenordertime},</if>
+            <if test="remind != null">`remind` = #{remind},</if>
+            <if test="hasservice != null">`hasservice` = #{hasservice}</if>
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="delete">
+        delete from t_service where id = #{value}
+    </delete>
+    <delete id="deleteAllUserservice" parameterType="java.util.Map">
+        DELETE FROM t_service_userservice WHERE uid = #{uid}
+    </delete>
+    
+    <delete id="deleteBatch">
+        delete from t_service where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+        <select id="queryAllSysRolesByUid" resultType="com.lcworld.entity.ServiceEntity">
+            SELECT
+                distinct c.*
+            FROM
+                sys_user_role a
+            INNER JOIN sys_role b ON a.role_id = b.role_id
+            INNER JOIN t_service c ON c.sign = b.roletype
+            WHERE 1=1 and c.sign is not null
+             <if test="keyword != null and keyword.trim()!=''">
+            and (c.sign = #{keyword} or c.name like concat('%',#{keyword},'%'))
+        </if>
+            <if test="uid != null and uid != 1">
+                and a.user_id = #{uid}
+            </if>
+                
+        <if test="sign != null and sign > 0">
+            and c.sign =#{sign}
+        </if>
+          order by c.id desc
+      
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+        <select id="queryAllSysRoles" resultType="com.lcworld.entity.ServiceEntity">
+            select * from t_service 
+            WHERE 1=1 and sign is not null
+         
+        <if test="keyword != null and keyword.trim()!=''">
+            and (sign = #{keyword} or name like concat('%',#{keyword},'%'))
+        </if>
+         order by id desc
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    
+        <select id="queryBackList" resultType="com.lcworld.entity.ServiceEntity">
+            select * from t_service 
+            WHERE 1=1
+            
+          order by id desc
+      
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+        <select id="queryAllSysRolesByUidtotal" resultType="int">
+            select count(*) from (
+             SELECT
+                distinct c.sign,c.name
+            FROM
+                sys_user_role a
+            INNER JOIN sys_role b ON a.role_id = b.role_id
+            INNER JOIN t_service c ON c.sign = b.roletype
+            WHERE 1=1 and c.sign is not null
+            <if test="uid != null and uid != 1">
+                and a.user_id = #{uid}
+            </if>
+           <if test="keyword != null and keyword.trim()!=''">
+            and (c.sign = #{keyword} or c.name like concat('%',#{keyword},'%'))
+        </if>
+                
+        <if test="sign != null and sign > 0">
+            and c.sign =#{sign}
+        </if>
+            )M where 1=1
+            
+          
+    </select>
+    
+
+</mapper>

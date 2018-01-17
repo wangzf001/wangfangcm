@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.TbServiceTokenDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.TbServiceTokenEntity" id="tbServiceTokenMap">
+        <result property="userId" column="user_id"/>
+        <result property="token" column="token"/>
+        <result property="expireTime" column="expire_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="servicetypeid" column="servicetypeid"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.TbServiceTokenEntity">
+		select * from tb_service_token where user_id = #{value}
+	</select>
+	<select id="queryByCondition" resultType="com.lcworld.entity.TbServiceTokenEntity" parameterType="java.util.Map">
+		select * from tb_service_token where user_id = #{userid} and servicetypeid = #{servicetypeid}
+	</select>
+	<select id="queryByToken" resultType="com.lcworld.entity.TbServiceTokenEntity">
+		select * from tb_service_token where token = #{token}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.TbServiceTokenEntity">
+		select * from tb_service_token
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by user_id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_service_token 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.TbServiceTokenEntity">
+		insert into tb_service_token
+		(
+			`user_id`, 
+			`token`, 
+			`expire_time`, 
+			`update_time`, 
+			`servicetypeid`
+		)
+		values
+		(
+			#{userId}, 
+			#{token}, 
+			#{expireTime}, 
+			#{updateTime}, 
+			#{servicetypeid}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.TbServiceTokenEntity">
+		update tb_service_token 
+		<set>
+			<if test="token != null">`token` = #{token}, </if>
+			<if test="expireTime != null">`expire_time` = #{expireTime}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime}, </if>
+			<if test="servicetypeid != null">`servicetypeid` = #{servicetypeid}</if>
+		</set>
+		where user_id = #{userId} and `servicetypeid` = #{servicetypeid}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_service_token where user_id = #{value}
+	</delete>
+	<delete id="delByUid">
+        delete from tb_service_token where user_id = #{0} and servicetypeid = #{1}
+    </delete>
+	<delete id="deleteBatch">
+		delete from tb_service_token where user_id in 
+		<foreach item="userId" collection="array" open="(" separator="," close=")">
+			#{userId}
+		</foreach>
+	</delete>
+
+</mapper>

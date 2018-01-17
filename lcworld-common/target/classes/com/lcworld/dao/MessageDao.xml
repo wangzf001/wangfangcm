@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.MessageDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.MessageEntity" id="messageMap">
+        <result property="id" column="id"/>
+        <result property="messagetitle" column="messagetitle"/>
+        <result property="content" column="content"/>
+        <result property="detailId" column="detail_id"/>
+        <result property="createtime" column="createtime"/>
+        <result property="uid" column="uid"/>
+        <result property="isRead" column="is_read"/>
+        <result property="isDel" column="is_del"/>
+        <result property="messagetype" column="messagetype"/>
+    </resultMap>
+
+    <select id="queryObject" resultType="com.lcworld.entity.MessageEntity">
+		select * from t_message where id = #{value}
+	</select>
+
+    <select id="queryList" resultType="com.lcworld.entity.MessageEntity">
+        SELECT * FROM t_message
+        <where>
+            <if test="uid != null and uid != ''">
+                AND uid = #{uid}
+            </if>
+            <if test="messagetype != null and messagetype != ''">
+                AND messagetype = #{messagetype}
+            </if>
+        </where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by createtime desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+
+    <select id="queryList_" resultType="com.lcworld.entity.MessageEntity">
+        SELECT
+        m.*,um.`read`
+        FROM
+        t_message m
+        LEFT JOIN t_user_message um ON um.message_id = m.id
+        <where>
+            <if test="uid!=null">um.uid = #{uid}</if>
+            <if test="messagetype!=null">AND m.messagetype = #{messagetype}</if>
+        </where>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by m.createtime desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+        select count(*) from t_message m
+        LEFT JOIN t_user_message um ON um.message_id = m.id
+        <where>
+            <if test="uid!=null">um.uid = #{uid}</if>
+            <if test="messagetype!=null">AND m.messagetype = #{messagetype}</if>
+        </where>
+    </select>
+    <select id="queryMessagePage" resultType="com.lcworld.entity.MessageEntity" parameterType="java.util.Map">
+		<!-- SELECT *,COUNT(a.id) newCount FROM (SELECT
+			m.*,um.`read`
+		FROM
+			t_message m
+		LEFT JOIN t_user_message um ON um.message_id = m.id
+		WHERE
+		um.uid = #{uid} and um.`read` = 0
+		ORDER BY createtime DESC) a
+		GROUP BY a.messagetype -->
+		SELECT
+			t.*,tu.`read`
+		FROM
+			t_message t
+		JOIN t_user_message tu on t.id = tu.message_id
+		WHERE
+			t.id IN (
+				SELECT
+					MAX(t.id)
+				FROM
+					t_message t
+				JOIN t_user_message tu ON t.id = tu.message_id
+				AND tu.uid = #{uid}
+				GROUP BY
+					t.messagetype
+			)
+		ORDER BY t.createtime DESC
+	</select>
+    <select id="queryMessageDetail" resultType="com.lcworld.entity.MessageEntity" parameterType="java.util.Map">
+		SELECT
+			m.*,um.`read`
+		FROM
+			t_message m
+		LEFT JOIN t_user_message um ON um.message_id = m.id
+		WHERE m.id = #{id} and um.uid = #{uid}
+	</select>
+
+    <insert id="save" parameterType="com.lcworld.entity.MessageEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_message
+		(
+			`messagetitle`,
+			`content`,
+			`detail_id`,
+			`createtime`,
+			`uid`,
+			`is_read`,
+			`is_del`,
+			`messagetype`
+		)
+		values
+		(
+			#{messagetitle},
+			#{content},
+			#{detailId},
+			#{createtime},
+			#{uid},
+			#{isRead},
+			#{isDel},
+			#{messagetype}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.lcworld.entity.MessageEntity">
+        update t_message
+        <set>
+            <if test="messagetitle != null">`messagetitle` = #{messagetitle},</if>
+            <if test="content != null">`content` = #{content},</if>
+            <if test="detailId != null">`detail_id` = #{detailId},</if>
+            <if test="createtime != null">`createtime` = #{createtime},</if>
+            <if test="uid != null">`uid` = #{uid},</if>
+            <if test="isRead != null">`is_read` = #{isRead},</if>
+            <if test="isDel != null">`is_del` = #{isDel},</if>
+            <if test="messagetype != null">`messagetype` = #{messagetype}</if>
+        </set>
+        where id = #{id}
+    </update>
+    <update id="updateReadStatus" parameterType="java.util.Map">
+        update t_user_message
+        <set>
+            <if test="read != null">`read` = #{read}</if>
+        </set>
+        <where>
+            message_id = #{id}
+            and uid = #{uid}
+        </where>
+    </update>
+
+    <delete id="delete">
+		delete from t_message where id = #{value}
+	</delete>
+
+    <delete id="deleteBatch">
+        delete from t_message where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+	<select id="queryListByInfo" resultType="com.lcworld.entity.MessageEntity">
+        SELECT
+        * from
+        t_message
+        <where>
+            <if test="messagetype!=null">AND messagetype = #{messagetype}</if>
+        </where>
+        order by createtime desc
+		limit #{index}, #{limit}
+    </select>
+</mapper>

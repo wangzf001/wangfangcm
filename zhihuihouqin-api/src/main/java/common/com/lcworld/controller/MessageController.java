@@ -23,7 +23,6 @@ import com.lcworld.entity.PayinfoEntity;
 import com.lcworld.entity.TalkVo;
 import com.lcworld.interceptor.TokenCheckInterceptor;
 import com.lcworld.service.MessageService;
-import com.lcworld.service.PayinfoService;
 import com.lcworld.service.TalkService;
 import com.lcworld.utils.PageUtils;
 import com.lcworld.utils.Query;
@@ -45,8 +44,6 @@ public class MessageController {
 	private MessageService messageService;
 	@Autowired
 	private TalkService talkService;
-	@Autowired
-	private PayinfoService payinfoService;
 
 	@Autowired
 	private TbMessageOrderUserService messageOrderUserService;
@@ -91,7 +88,7 @@ public class MessageController {
 		query.put("messagetype",messageType);
 		resultObject.put("messagetype",messageType);
 		if(messageType == 3){
-			resultObject.put("total",payinfoService.queryTotal(query));
+			resultObject.put("total",1);
 		}else if (messageType == 6){
 			resultObject.put("total",messageOrderUserService.queryTotal(query));
 		}else {
@@ -123,7 +120,7 @@ public class MessageController {
         Integer messagetype = params.getInteger("messagetype");
         Query query = new Query(params);
         if (ValidateUtil.isValid(messagetype)&&messagetype.intValue()==3) {
-        	List<PayinfoEntity> payInfoList = payinfoService.queryList(query);
+        	List<PayinfoEntity> payInfoList = null;
 			return R.ok().put("data", payInfoList);
 		}else if (ValidateUtil.isValid(messagetype)&&messagetype.intValue()==6) {
 			List<TbMessageOrderUserEntity> payInfoList = messageOrderUserService.queryList(query);

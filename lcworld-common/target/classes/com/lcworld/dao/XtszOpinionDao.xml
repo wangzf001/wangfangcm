@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.XtszOpinionDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.XtszOpinionEntity" id="xtszOpinionMap">
+        <result property="oid" column="oid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="uid" column="uid"/>
+        <result property="content" column="content"/>
+        <result property="mobile" column="mobile"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.XtszOpinionEntity">
+		select * from t_xtsz_opinion where oid = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.XtszOpinionEntity">
+		select * from t_xtsz_opinion
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by oid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_xtsz_opinion 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.XtszOpinionEntity" useGeneratedKeys="true" keyProperty="oid">
+		insert into t_xtsz_opinion
+		(
+			`createtime`, 
+			`uid`, 
+			`content`, 
+			`mobile`, 
+			`type`
+		)
+		values
+		(
+			#{createtime}, 
+			#{uid}, 
+			#{content}, 
+			#{mobile}, 
+			#{type}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.XtszOpinionEntity">
+		update t_xtsz_opinion 
+		<set>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="content != null">`content` = #{content}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="type != null">`type` = #{type}</if>
+		</set>
+		where oid = #{oid}
+	</update>
+	
+	<delete id="delete">
+		delete from t_xtsz_opinion where oid = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_xtsz_opinion where oid in 
+		<foreach item="oid" collection="array" open="(" separator="," close=")">
+			#{oid}
+		</foreach>
+	</delete>
+
+</mapper>

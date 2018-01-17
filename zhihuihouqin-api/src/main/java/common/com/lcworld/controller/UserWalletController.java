@@ -22,8 +22,6 @@ import com.lcworld.annotation.IgnoreSign;
 import com.lcworld.annotation.IgnoreToken;
 import com.lcworld.consts.APPConstant;
 import com.lcworld.dto.PurchaseDTO;
-import com.lcworld.entity.DsfwCategoryEntity;
-import com.lcworld.entity.LffwVoucherEntity;
 import com.lcworld.entity.UserDepositEntity;
 import com.lcworld.entity.UserWallelogEntity;
 import com.lcworld.entity.UserWalleorderEntity;
@@ -31,9 +29,6 @@ import com.lcworld.entity.UserWalletEntity;
 import com.lcworld.factory.OrderServiceFactory;
 import com.lcworld.interceptor.TokenCheckInterceptor;
 import com.lcworld.service.BaseUserRoleService;
-import com.lcworld.service.DsfwCategoryService;
-import com.lcworld.service.LffwVoucherService;
-import com.lcworld.service.PayinfoService;
 import com.lcworld.service.PurchaseAccountService;
 import com.lcworld.service.PurchaseTypeService;
 import com.lcworld.service.UserCaptchaService;
@@ -58,8 +53,7 @@ public class UserWalletController {
     private Logger log = LoggerFactory.getLogger(UserWalletController.class);
     @Autowired
     private OrderServiceFactory orderServiceFactory;
-    @Autowired
-    private PayinfoService payinfoService;
+
     @Autowired
     private UserWalletService userWalletService;
     @Autowired
@@ -75,11 +69,7 @@ public class UserWalletController {
     @Autowired
     private BaseUserRoleService baseUserRoleService;
     @Autowired
-    private LffwVoucherService lffwVoucherService;
-    @Autowired
     private UserDepositService userDepositService;
-    @Autowired
-    private DsfwCategoryService dsfwCategoryService;
     
     /**
      * 查询用户钱包信息
@@ -108,27 +98,8 @@ public class UserWalletController {
 			userWalletService.save(wallet);
         }
         
-        //用户理发券
-        LffwVoucherEntity voucher = lffwVoucherService.queryByUid(params.getInteger("uid"));
-        
         HashMap<String,Object> result = new HashMap<>();
         result.put("walletRemain", wallet.getRemain());
-        if (ValidateUtil.isValid(voucher)) {
-        	result.put("voucherNum", voucher.getRemain());
-		}else{
-			result.put("voucherNum", 0);
-		}
-        result.put("payPasswordState", wallet.getPaypass()!=null?1:0);
-        
-        List<PurchaseDTO> pubPurchaseList = purchaseAccountService.getPubPurchaseList(params.getInteger("uid"), params.getString("serviceType"));
-        BigDecimal publicRemain = new BigDecimal(0);
-        if (ValidateUtil.isValid(pubPurchaseList)) {
-        	for (PurchaseDTO p : pubPurchaseList) {
-        		publicRemain = publicRemain.add(p.getMoney());
-			}
-		}
-        result.put("publicRemain", publicRemain);
-        result.put("hasBuyAuth", pubPurchaseList.size()==0?0:1);
         return R.ok(result);
     }
     /**

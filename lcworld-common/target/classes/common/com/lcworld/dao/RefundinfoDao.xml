@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.RefundinfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.RefundinfoEntity" id="refundinfoMap">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="orderid" column="orderid"/>
+        <result property="refundtype" column="refundtype"/>
+        <result property="ordertype" column="ordertype"/>
+        <result property="status" column="status"/>
+        <result property="refundmoney" column="refundmoney"/>
+        <result property="ordercode" column="ordercode"/>
+        <result property="refundordercode" column="refundordercode"/>
+        <result property="createtime" column="createtime"/>
+        <result property="vouchercount" column="vouchercount"/>
+        <result property="voucherprice" column="voucherprice"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.RefundinfoEntity">
+		select * from t_refundinfo where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.RefundinfoEntity">
+		select * from t_refundinfo
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_refundinfo 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.RefundinfoEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_refundinfo
+		(
+			`uid`, 
+			`orderid`, 
+			`refundtype`, 
+			`ordertype`, 
+			`status`, 
+			`refundmoney`, 
+			`ordercode`, 
+			`refundordercode`, 
+			`createtime`, 
+			`vouchercount`, 
+			`voucherprice`
+		)
+		values
+		(
+			#{uid}, 
+			#{orderid}, 
+			#{refundtype}, 
+			#{ordertype}, 
+			#{status}, 
+			#{refundmoney}, 
+			#{ordercode}, 
+			#{refundordercode}, 
+			#{createtime}, 
+			#{vouchercount}, 
+			#{voucherprice}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.RefundinfoEntity">
+		update t_refundinfo 
+		<set>
+			<if test="uid != null">`uid` = #{uid}, </if>
+			<if test="orderid != null">`orderid` = #{orderid}, </if>
+			<if test="refundtype != null">`refundtype` = #{refundtype}, </if>
+			<if test="ordertype != null">`ordertype` = #{ordertype}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="refundmoney != null">`refundmoney` = #{refundmoney}, </if>
+			<if test="ordercode != null">`ordercode` = #{ordercode}, </if>
+			<if test="refundordercode != null">`refundordercode` = #{refundordercode}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="vouchercount != null">`vouchercount` = #{vouchercount}, </if>
+			<if test="voucherprice != null">`voucherprice` = #{voucherprice}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_refundinfo where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_refundinfo where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

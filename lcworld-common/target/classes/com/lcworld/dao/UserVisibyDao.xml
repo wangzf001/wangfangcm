@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.UserVisibyDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.UserVisibyEntity" id="userVisibyMap">
+        <result property="name" column="name"/>
+        <result property="idcard" column="idcard"/>
+        <result property="visituid" column="visituid"/>
+        <result property="id" column="id"/>
+        <result property="vlid" column="vlid"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.UserVisibyEntity">
+		select * from t_user_visit_by where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.UserVisibyEntity">
+		select * from t_user_visit_by where 1=1 
+		<if test="vuid != null and vuid != ''">
+			and visituid =#{vuid}
+		</if>
+		<if test="vlid != null and vlid != ''">
+			and vlid =#{vlid}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_user_visit_by where 1=1
+		<if test="vuid != null and vuid != ''">
+			and visituid =#{vuid}
+		</if>
+		<if test="vlid != null and vlid != ''">
+			and vlid =#{vlid}
+		</if>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.UserVisibyEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_user_visit_by
+		(
+			`name`, 
+			`idcard`, 
+			`visituid`,
+			`vlid`
+		)
+		values
+		(
+			#{name}, 
+			#{idcard}, 
+			#{visituid},
+			#{vlid}
+		)
+	</insert>
+	 
+	<insert id="savebench" parameterType="com.lcworld.entity.UserVisibyEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_user_visit_by
+		(
+			`name`, 
+			`idcard`, 
+			`visituid`,
+			`vlid`
+		)
+		values
+		  <foreach collection="list" item="item" index="index"
+            separator=",">
+            (
+			#{item.name}, 
+			#{item.idcard}, 
+			#{item.visituid},
+			#{item.vlid}
+		)
+        </foreach>
+		 
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.UserVisibyEntity">
+		update t_user_visit_by 
+		<set>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="idcard != null">`idcard` = #{idcard}, </if>
+			<if test="visituid != null">`visituid` = #{visituid}, </if>
+			<if test="vlid != null">`vlid` = #{vlid} </if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_user_visit_by where id = #{value}
+	</delete>
+	
+	<delete id="deleteBypid">
+		delete from t_user_visit_by where visituid = #{value}
+	</delete>
+	
+	<delete id="deleteByvlid">
+		delete from t_user_visit_by where vlid = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_user_visit_by where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

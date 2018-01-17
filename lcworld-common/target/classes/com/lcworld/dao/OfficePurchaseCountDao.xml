@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.OfficePurchaseCountDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.OfficePurchaseCountEntity" id="officePurchaseCountMap">
+        <result property="id" column="id"/>
+        <result property="officeid" column="officeid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="remain" column="remain"/>
+        <result property="paypass" column="paypass"/>
+        <result property="typeid" column="typeid"/>
+        <result property="total" column="total"/>
+        <result property="sourcepaypass" column="sourcepaypass"/>
+        <result property="departid" column="departid"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.OfficePurchaseCountEntity">
+		select * from t_office_purchase_count where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.OfficePurchaseCountEntity">
+		select a.*,b.name departname,c.name officename,d.name typename from t_office_purchase_count a 
+		inner join t_office c on c.id = a.officeid
+		inner join t_depart b on c.departid= b.id 
+		inner join t_purchase_type d on d.id = a.typeid
+		where 1=1
+		<if test="departid != null and departid != ''">
+		  and c.departid = #{departid}
+		</if>
+		<if test="officeid != null and officeid != ''">
+		  and a.officeid = #{officeid}
+		</if>
+		<if test="typeid != null and typeid != ''">
+		  and a.typeid = #{typeid}
+		</if>
+		 order by a.id desc
+       
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_office_purchase_count  a
+		inner join t_office c on c.id = a.officeid
+		inner join t_purchase_type d on d.id = a.typeid
+        inner join t_depart b on c.departid= b.id where 1=1
+		<if test="departid != null and departid != ''">
+          and c.departid = #{departid}
+        </if>
+        <if test="officeid != null and officeid != ''">
+          and a.officeid = #{officeid}
+        </if>
+        <if test="typeid != null and typeid != ''">
+          and a.typeid = #{typeid}
+        </if>
+		
+	</select>
+	<select id="queryOPCList" resultType="com.lcworld.entity.OfficePurchaseCountEntity">
+		SELECT
+		    d.*,f.name departname,g.name officename,c.name typename
+		FROM
+		    sys_user_role a
+		INNER JOIN sys_role b ON a.role_id = b.role_id
+		AND b.type = 2
+		AND b.rolesort &lt;= 2
+		INNER JOIN sys_user e ON e.user_id = a.user_id
+		INNER JOIN t_depart f ON f.id = e.departid
+		INNER JOIN t_office g ON g.id = e.officeid
+		INNER JOIN t_purchase_type c ON c.servicecode = b.roletype
+		INNER JOIN t_office_purchase_count d ON d.officeid = e.officeid
+		AND d.typeid = c.id
+		WHERE
+		    a.user_id = #{uid}
+		<if test="departid != null and departid != ''">
+		  and e.departid = #{departid}
+		</if>
+		<if test="officeid != null and officeid != ''">
+		  and e.officeid = #{officeid}
+		</if>
+       order by d.id desc
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryOPCTotal" resultType="int">
+	   SELECT
+            count(*)
+        FROM
+            sys_user_role a
+        INNER JOIN sys_role b ON a.role_id = b.role_id
+        AND b.type = 2
+        AND b.rolesort &lt;= 2
+        INNER JOIN sys_user e ON e.user_id = a.user_id
+        INNER JOIN t_depart f ON f.id = e.departid
+        INNER JOIN t_office g ON g.id = e.officeid
+        INNER JOIN t_purchase_type c ON c.servicecode = b.roletype
+        INNER JOIN t_office_purchase_count d ON d.officeid = e.officeid
+        AND d.typeid = c.id
+        WHERE
+            a.user_id = #{uid}
+        <if test="departid != null and departid != ''">
+          and e.departid = #{departid}
+        </if>
+        <if test="officeid != null and officeid != ''">
+          and e.officeid = #{officeid}
+        </if>
+		
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.OfficePurchaseCountEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_office_purchase_count
+		(
+			`officeid`, 
+			`createtime`, 
+			`remain`, 
+			`paypass`, 
+			`typeid`, 
+			`total`,
+			`sourcepaypass`,
+			`departid`,
+			`createuid`
+		)
+		values
+		(
+			#{officeid}, 
+			#{createtime}, 
+			#{remain}, 
+			#{paypass}, 
+			#{typeid}, 
+			#{total},
+			#{sourcepaypass},
+			#{departid},
+			#{createuid}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.OfficePurchaseCountEntity">
+		update t_office_purchase_count 
+		<set>
+			<if test="officeid != null">`officeid` = #{officeid}, </if>
+			<if test="createtime != null">`createtime` = #{createtime}, </if>
+			<if test="remain != null">`remain` = #{remain}, </if>
+			<if test="paypass != null">`paypass` = #{paypass}, </if>
+			<if test="typeid != null">`typeid` = #{typeid}, </if>
+			<if test="total != null">`total` = #{total},</if>
+			<if test="sourcepaypass != null">`sourcepaypass` = #{sourcepaypass},</if>
+			<if test="departid != null">`departid` = #{departid},</if>
+			<if test="createuid != null">`createuid` = #{createuid}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_office_purchase_count where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_office_purchase_count where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="queryFOPCList" resultType="com.lcworld.entity.OfficePurchaseCountEntity">
+	   SELECT
+		    DISTINCT d.*
+		FROM
+		    t_user a
+		INNER JOIN t_base_user_role b ON a.id = b.uid
+		INNER JOIN t_purchase_type c ON c.id = b.roleid
+		AND c.servicecode = #{servicecode}
+		INNER JOIN t_office_purchase_count d ON c.id = d.typeid
+		AND d.departid = a.departid and d.officeid = a.officeid
+		WHERE
+		    a.id = #{uid}
+	</select>
+	
+	<!-- <select id="queryFOPCList" resultType="com.lcworld.entity.OfficePurchaseCountEntity">
+	   SELECT
+		    DISTINCT d.*
+		FROM
+		    t_user a
+		INNER JOIN t_base_user_role b ON a.id = b.uid
+		INNER JOIN t_purchase_type c ON c.id = b.roleid
+		AND c.servicecode = #{servicecode}
+		INNER JOIN t_office_purchase_count d ON c.id = d.typeid
+		AND d.departid = a.departid and d.officeid = a.officeid
+		WHERE
+		    a.id = #{uid}
+	</select> -->
+	
+	   <!-- <select id="getPubPurchaseList" resultType="com.lcworld.dto.PurchaseDTO">
+    SELECT
+                a.typeid type,ifnull(d.remain,0) money, c.name typename,a.id
+            FROM
+                t_office_purchase_count a 
+            inner join t_purchase_type c on c.id = a.typeid
+              left join t_user_purchase_limit d on d.purchasetypeid = c.id and d.uid = #{uid}
+            WHERE
+                1 = 1
+                 <if test="departid != null and departid != ''">
+            and a.departid = #{departid}
+         </if>
+                 <if test="officeid != null and officeid != ''">
+            and a.officeid = #{officeid}
+         </if>
+                 <if test="type != null and type != ''">
+            and a.typeid = #{type}
+         </if>
+                 <if test="typeid != null and typeid != ''">
+            and a.typeid = #{typeid}
+         </if>
+                 <if test="servicecode != null and servicecode != ''">
+            and c.servicecode = #{servicecode}
+         </if>
+            ORDER BY
+                a.id DESC
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select> -->
+    
+    <select id="getPubPurchaseList" resultType="com.lcworld.dto.PurchaseDTO">
+    SELECT remain AS money FROM
+    t_user_purchase_limit WHERE  uid = #{uid}
+    </select>
+</mapper>

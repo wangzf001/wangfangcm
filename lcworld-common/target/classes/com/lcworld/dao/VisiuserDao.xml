@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.VisiuserDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.VisiuserEntity" id="visiuserMap">
+        <result property="id" column="id"/>
+        <result property="vname" column="vname"/>
+        <result property="vmobile" column="vmobile"/>
+        <result property="buildnum" column="buildnum"/>
+        <result property="buildName" column="build_name"/>
+        <result property="roomnum" column="roomnum"/>
+        <result property="reason" column="reason"/>
+        <result property="expertarrivaltime" column="expertarrivaltime"/>
+        <result property="vperiod" column="vperiod"/>
+        <result property="vpnum" column="vpnum"/>
+        <result property="uid" column="uid"/>
+        <result property="checked" column="checked"/>
+        <result property="vidnum" column="vidnum"/>
+        <result property="phonenum" column="phonenum"/>
+        <result property="expertleavetime" column="expertleavetime"/>
+        <result property="valid" column="valid"/>
+        <result property="realname" column="realname"/>
+        <result property="unit" column="unit"/>
+        <result property="visittime" column="visittime"/>
+        <result property="createtime" column="createtime"/>
+        <result property="status" column="status"/>
+        <result property="ordercode" column="ordercode"/>
+        <result property="checked" column="checked"/>
+        <result property="notify" column="notify"/>
+        <result property="adminreason" column="adminreason"/>
+        <result property="visitreason" column="visitreason"/>
+        <result property="visitchecked" column="visitchecked"/>
+         <collection property="byuserlist" javaType="com.lcworld.entity.UserVisibyEntity" >
+        	  <id property="id" column="byid"/>
+            <result property="visituid" column="visituid"/>
+            <result property="idcard" column="idcard"/>
+            <result property="name" column="name"/>
+        </collection>
+     
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.VisiuserEntity">
+		select * from t_visit_user where id = #{value}
+	</select>
+	
+	<select id="queryObjectByOid" resultMap="visiuserMap">
+	   select a.*,e.id byid,e.name,e.idcard,e.visituid,e.vlid,build.build_name from t_visit_user a
+	   left join t_user_visit_by e  on e.visituid = a.id left join t_building build on build.id = a.buildnum
+	   where isdel = 0  and  a.id = #{id}
+	</select>
+
+	<select id="queryVisitLogById" resultMap="visiuserMap">
+		select a.id,a.vname,a.vmobile,a.buildnum,build.build_name,a.roomnum,'' reason,a.vpnum,a.uid,FROM_UNIXTIME(a.stamp/1000,'%Y-%m-%d %h:%i:%s') expertarrivaltime,FROM_UNIXTIME(a.stamp/1000,'%Y-%m-%d %h:%i:%s') expertleavetime,
+			a.checked,a.vidnum,a.phonenum,a.realname,a.unit,a.visittime,FROM_UNIXTIME(a.stamp/1000,'%Y-%m-%d %h:%i:%s') createtime,a.`status`,a.ordercode,
+			0 vperiod,'' valid,a.notify,a.adminreason,a.visitreason,a.visitchecked,
+			e.id byid,e.name,e.idcard,e.visituid,e.vlid from t_visit_user_log a
+		left join t_user_visit_by e  on e.vlid = a.id left join t_building build on build.id = a.buildnum
+		where a.id = #{id}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.VisiuserEntity">
+		select a.*,c.name departname,d.name officename ,e.* from t_visit_user a
+			left JOIN t_user b on a.uid = b.id
+			left join t_depart c on b.departid = c.id
+			left JOIN t_office d on d.id = b.officeid
+			left join t_user_visit_by e  on e.visituid = a.id 
+			where 1=1 
+			<!-- 安保人员 -->
+			<if test="rylx != null and (rylx == 2 or rylx == 3) ">
+			     and a.status = 1 and visitchecked=1
+			</if>
+			<if test="realname != null and realname != ''">
+				and a.realname = #{realname}
+			</if>
+			order by a.createtime DESC
+       
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_visit_user a
+		where 1=1 
+            <!-- 安保人员 -->
+            <if test="rylx != null and (rylx == 2 or rylx == 3) ">
+                 and a.status = 1  and visitchecked=1
+            </if>
+            <if test="realname != null and realname != ''">
+				and a.realname = #{realname}
+			</if>
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.VisiuserEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into t_visit_user
+		(
+			`roomnum`, 
+			`buildnum`,
+			`reason`, 
+			`expertarrivaltime`, 
+			`expertleavetime`, 
+			`uid`,
+			`unit`,
+			`visittime`,
+			`createtime`,
+			`status`,
+			`vname`,
+			`vmobile`,
+			`vidnum`,
+			`phonenum`,
+			`vpnum`,
+			`cancelreason`,
+			`isdel`,
+			`ordercode`,
+			`realname`,
+			`notify`,
+			`visitchecked`,
+			`adminreason`,
+			`visitreason`
+		)
+		values
+		(
+			#{roomnum},
+			#{buildnum},
+			#{reason}, 
+			#{expertarrivaltime}, 
+			#{expertleavetime}, 
+			#{uid},
+			#{unit},
+			#{visittime},
+			#{createtime},
+			#{status},
+			#{vname},
+			#{vmobile},
+			#{vidnum},
+			#{phonenum},
+			#{vpnum},
+			#{cancelreason},
+			#{isdel},
+			#{ordercode},
+			#{realname},
+			#{notify},
+			#{visitchecked},
+			#{adminreason},
+			#{visitreason}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.VisiuserEntity">
+		update t_visit_user 
+		<set>
+			<if test="phonenum != null">`phonenum` = #{phonenum}, </if>
+			<if test="roomnum != null">`roomnum` = #{roomnum}, </if>
+			<if test="buildnum != null">`buildnum` = #{buildnum}, </if>
+			<if test="reason != null">`reason` = #{reason}, </if>
+			<if test="expertarrivaltime != null">`expertarrivaltime` = #{expertarrivaltime}, </if>
+			<if test="expertleavetime != null">`expertleavetime` = #{expertleavetime}, </if>
+			<if test="uid != null">`uid` = #{uid},</if>
+			<if test="unit != null">`unit` = #{unit},</if>
+			<if test="visittime != null">`visittime` = #{visittime},</if>
+			<if test="createtime != null">`createtime` = #{createtime},</if>
+			<if test="status != null">`status` = #{status},</if>
+			<if test="vname != null">`vname` = #{vname},</if>
+			<if test="vmobile != null">`vmobile` = #{vmobile},</if>
+			<if test="vidnum != null">`vidnum` = #{vidnum},</if>
+			<if test="vpnum != null">`vpnum` = #{vpnum},</if>
+			<if test="cancelreason != null">`cancelreason` = #{cancelreason},</if>
+			<if test="isdel != null">`isdel` = #{isdel},</if>
+			<if test="ordercode != null">`ordercode` = #{ordercode},</if>
+			<if test="realname != null">`realname` = #{realname},</if>
+			<if test="notify != null">`notify` = #{notify},</if>
+			<if test="visitchecked != null">`visitchecked` = #{visitchecked},</if>
+			<if test="adminreason != null">`adminreason` = #{adminreason},</if>
+			<if test="visitreason != null">`visitreason` = #{visitreason}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_visit_user where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_visit_user where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<update id="checkBatch">
+		update t_visit_user set checked =1  where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	<update id="uncheckBatch">
+		update t_visit_user set checked =2 ,adminreason= #{reason} where id in 
+		<foreach item="id" collection="ids" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+		<select id="queryOrderList" resultMap="visiuserMap">
+	   select a.*,e.id byid,e.*,build.build_name from t_visit_user a 
+	   left join t_user_visit_by e  on e.visituid = a.id left join t_building build on build.id = a.buildnum
+	   where isdel = 0 
+	   
+	   <if test="uid != null and uid != ''">
+	       and  a.uid = #{uid}
+	   </if>
+	 <if test="statuslist != null and statuslist.size > 0">
+          and a.status in 
+           <foreach item="id" collection="statuslist" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        </if>
+	   order by a.createtime desc 
+	   <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+	   
+	</select>
+	
+		<select id="queryvuserList" resultMap="visiuserMap">
+	   select a.*,e.id byid,e.*,build.build_name from t_visit_user_log a
+	   left join t_user_visit_by e  on e.vlid = a.id left join t_building build on build.id = a.buildnum
+	   where 1=1 and a.vuid = -1
+	   
+	   <if test="uid != null and uid != ''">
+	       and  a.uid = #{uid}
+	   </if>
+			AND a.checked = 0 AND a.visitchecked NOT IN (1,2)
+			order by a.visittime asc
+	   <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+	   
+	</select>
+	
+
+</mapper>
