@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.lcworld.consts.APPConstant;
 import com.lcworld.dao.TPraiseDao;
-import com.lcworld.dao.TYytcMealDao;
 import com.lcworld.entity.TPraiseEntity;
-import com.lcworld.entity.TYytcMealEntity;
 import com.lcworld.service.TPraiseService;
 import com.lcworld.utils.util.ValidateUtil;
 
@@ -21,8 +19,7 @@ import com.lcworld.utils.util.ValidateUtil;
 public class TPraiseServiceImpl implements TPraiseService {
 	@Autowired
 	private TPraiseDao tPraiseDao;
-	@Autowired
-	private TYytcMealDao tYytcMealDao;
+
 	@Override
 	public TPraiseEntity queryObject(Integer upId){
 		return tPraiseDao.queryObject(upId);
@@ -86,11 +83,6 @@ public class TPraiseServiceImpl implements TPraiseService {
 		int amount = addOrDel == 0?-1:1;
 		switch (favortype.intValue()) {
 		case 10:
-			TYytcMealEntity meal = tYytcMealDao.queryObject(entityid);
-			if (meal!=null) {
-				meal.setMPraiseNum(meal.getMPraiseNum()+amount);
-				tYytcMealDao.update(meal);
-			}
 			break;
 
 		default:

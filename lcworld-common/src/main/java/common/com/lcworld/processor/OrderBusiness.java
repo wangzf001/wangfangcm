@@ -3,7 +3,6 @@ package com.lcworld.processor;
 import javax.servlet.http.HttpServletRequest;
 
 import com.alibaba.fastjson.JSONObject;
-import com.lcworld.service.impl.PayinfoServiceImpl;
 import com.lcworld.vo.PayOrderVo;
 
 /**订单业务处理
@@ -22,13 +21,13 @@ public class OrderBusiness {
         this.processorchedule = processorchedule;
     }
     
-    public JSONObject  excute(PayinfoServiceImpl payinfoServiceImpl){
+    public JSONObject  excute(Object payinfoServiceImpl){
         JSONObject res = new JSONObject();
         res.put("errCode", 0);
         try {
             processorchedule.before(order, exist);
             
-            res = payinfoServiceImpl.savedopay(req, order);
+            res = new JSONObject();
             
             processorchedule.after(order, exist);
         } catch (Exception e) {

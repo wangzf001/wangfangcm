@@ -21,7 +21,6 @@ import com.lcworld.factory.PurchaseCountServiceFactory;
 import com.lcworld.service.IOrderService;
 import com.lcworld.service.IPurchaseCountService;
 import com.lcworld.service.OfficePurchaseCountService;
-import com.lcworld.service.PayinfoService;
 import com.lcworld.service.PurchaseAccountService;
 import com.lcworld.service.RefundinfoService;
 import com.lcworld.service.UserPurchaseLimitService;
@@ -50,8 +49,6 @@ public class RefundinfoServiceImpl implements RefundinfoService {
     private PurchaseAccountService purchaseAccountService;
     @Autowired
     private OfficePurchaseCountService officePurchaseCountService;
-    @Autowired
-    private PayinfoService payinfoService;
     @Autowired
     private UserPurchaseLimitService userPurchaseLimitService;
 	@Override
@@ -93,7 +90,7 @@ public class RefundinfoServiceImpl implements RefundinfoService {
 	public R savedorefund(RefundinfoEntity refund){
 		Map<String, Object> map = new HashMap<>();
    		map.put("orderCode", refund.getOrdercode());
-   		List<PayinfoEntity> list = payinfoService.queryList(map);
+   		List<PayinfoEntity> list = null;
    		if (ValidateUtil.isValid(list)) {
 			PayinfoEntity payinfo = list.get(0);
 			refund.setTransactioncode(payinfo.getTransactionId());

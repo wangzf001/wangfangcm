@@ -67,7 +67,7 @@ public class ServiceEntity implements Serializable {
 	//每周可预订天数
 	private List<Integer> orderweek = new ArrayList<>();
 	//借用了办公用品的多图接口
-	private List<BgypfwProductimgEntity> imgEntityList = new ArrayList<>();
+	private List<Object> imgEntityList = new ArrayList<>();
 	
 	
 	public String getAppname() {
@@ -106,15 +106,15 @@ public class ServiceEntity implements Serializable {
 	public void setRemind(String remind) {
 		this.remind = remind;
 	}
-	public List<BgypfwProductimgEntity> getImgEntityList() {
+	public List<Object> getImgEntityList() {
 		return imgEntityList;
 	}
-	public void setImgEntityList(List<BgypfwProductimgEntity> imgEntityList) {
+	public void setImgEntityList(List<Object> imgEntityList) {
 		this.imgEntityList = imgEntityList;
 		if (ValidateUtil.isValid(imgEntityList)) {
 			String imgs = "";
 			for (int i = 0; i < imgEntityList.size(); i++) {
-				String img = imgEntityList.get(i).getImg();
+				String img = "";
 				if (i==imgEntityList.size()-1) {
 					imgs += img;
 				}else{
@@ -200,9 +200,7 @@ public class ServiceEntity implements Serializable {
 			this.imgEntityList.clear();
 			String[] split = topphoto.split(",");
 			for (int i = 0; i < split.length; i++) {
-				BgypfwProductimgEntity imgEntity = new BgypfwProductimgEntity();
-				imgEntity.setImg(split[i]);
-				imgEntity.setSort(i+1);
+				Object imgEntity = new Object();
 				this.imgEntityList.add(imgEntity);
 			}
 		}

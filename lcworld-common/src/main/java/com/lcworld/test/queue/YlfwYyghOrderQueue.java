@@ -4,11 +4,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.lcworld.entity.BgypfwOrderEntity;
-import com.lcworld.entity.TDcfwOrderEntity;
-import com.lcworld.entity.YlfwYyghOrderEntity;
 
-public class YlfwYyghOrderQueue extends ConcurrentLinkedQueue<YlfwYyghOrderEntity> {
+public class YlfwYyghOrderQueue extends ConcurrentLinkedQueue<Object> {
 
 	/**
 	 * 
@@ -18,10 +15,10 @@ public class YlfwYyghOrderQueue extends ConcurrentLinkedQueue<YlfwYyghOrderEntit
 		if (id==null||id<=0) {
 			return null;
 		}
-		Iterator<YlfwYyghOrderEntity> iterator = this.iterator();
+		Iterator<Object> iterator = this.iterator();
 		while (iterator.hasNext()) {
-			YlfwYyghOrderEntity order = iterator.next();
-			if (id.equals(order.getId())) {
+			Object order = iterator.next();
+			if (id.equals(1)) {
 				return order;
 			}
 		}

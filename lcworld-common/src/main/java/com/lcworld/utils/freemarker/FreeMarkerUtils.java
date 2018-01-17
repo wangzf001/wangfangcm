@@ -16,8 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
-import com.lcworld.entity.TYytcIngredientEntity;
-import com.lcworld.entity.TYytcMealEntity;
+
 import com.lcworld.utils.util.ValidateUtil;
 
 import freemarker.ext.beans.BeansWrapper;
@@ -111,21 +110,7 @@ public class FreeMarkerUtils {
 		return url;
 	}
 	public static void main(String[] args) {
-		TYytcMealEntity meal = new TYytcMealEntity();
-		meal.setMTitle("咕咾肉");
-		List<TYytcIngredientEntity> list = meal.getIngredientList();
-		TYytcIngredientEntity i = new TYytcIngredientEntity();
-		TYytcIngredientEntity i1 = new TYytcIngredientEntity();
-		TYytcIngredientEntity i2 = new TYytcIngredientEntity();
-		TYytcIngredientEntity i3 = new TYytcIngredientEntity();
-		i.setINameNum("肉100g");
-		i1.setINameNum("蒜100g");
-		i2.setINameNum("葱100g");
-		i3.setINameNum("葱姜100g");
-		list.add(i);
-		list.add(i2);
-		list.add(i3);
-		list.add(i1);
+		Object meal = new Object();
 //		String generateHTML = generateHTML("test.ftl", "test.html", meal);
 //		System.out.println(generateHTML);
 	}

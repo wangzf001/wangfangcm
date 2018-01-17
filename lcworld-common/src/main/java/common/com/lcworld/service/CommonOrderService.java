@@ -3,7 +3,6 @@ package com.lcworld.service;
 import java.util.List;
 import java.util.Map;
 
-import com.lcworld.dto.BxwxOrderDTO;
 import com.lcworld.utils.R;
 
 public interface CommonOrderService {
@@ -17,11 +16,6 @@ public interface CommonOrderService {
      * @param orderVo
      */
     void deleteOrder (String ordercode);
-    /**
-     * 订单详情
-     * @param orderVo
-     */
-    BxwxOrderDTO orderDetail(String ordercode);
     /**
      * 完成订单
      * @param orderVo

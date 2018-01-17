@@ -1,23 +1,11 @@
 package com.lcworld.consts;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.lcworld.utils.wxutil.MD5Util;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
-
-import com.lcworld.service.BgypfwOrderService;
-import com.lcworld.service.DcfwGzcOrderService;
-import com.lcworld.service.DsfwOrderService;
-import com.lcworld.service.LffwOrderService;
-import com.lcworld.service.TBxwxOrderService;
-import com.lcworld.service.TDcfwOrderService;
-import com.lcworld.service.TGxdfwOrderService;
-import com.lcworld.service.TsjyfwOrderService;
-import com.lcworld.service.YlfwYyghOrderService;
-import com.lcworld.service.YlfwZjzzOrderService;
 
 /**
  * api常量
@@ -118,16 +106,6 @@ public class APPConstant {
         
         //oss
         DualHashBidiMap ordertypeServiceMap = new DualHashBidiMap();
-        ordertypeServiceMap.put(TYPE_BXFW,captureName(TBxwxOrderService.class.getSimpleName()));
-        ordertypeServiceMap.put(TYPE_TSJYFW,captureName(TsjyfwOrderService.class.getSimpleName()));
-        ordertypeServiceMap.put(TYPE_LFFW_YYLF,captureName(LffwOrderService.class.getSimpleName()));
-        ordertypeServiceMap.put(TYPE_BGYPFW,captureName(BgypfwOrderService.class.getSimpleName()));
-        ordertypeServiceMap.put(TYPE_DCFW,captureName(TDcfwOrderService.class.getSimpleName()));
-        ordertypeServiceMap.put(TYPE_DCFW_GZC,captureName(DcfwGzcOrderService.class.getSimpleName()));
-        ordertypeServiceMap.put(TYPE_GXDFW,captureName(TGxdfwOrderService.class.getSimpleName()));
-        ordertypeServiceMap.put(TYPE_YLFW_GH,captureName(YlfwYyghOrderService.class.getSimpleName()));
-        ordertypeServiceMap.put(TYPE_YLFW_ZJZZ,captureName(YlfwZjzzOrderService.class.getSimpleName()));
-        ordertypeServiceMap.put(TYPE_DSFW,captureName(DsfwOrderService.class.getSimpleName()));
         APPConstant.ordertypeServiceMap = ordertypeServiceMap;
         
         //purchaseAcount
@@ -173,7 +151,7 @@ public class APPConstant {
     }
 
     public static void main(String[] args) {
-		System.out.println(captureName(TDcfwOrderService.class.getSimpleName()));
+		System.out.println(captureName("**************************"));
 	}
     public static String captureName(String name) {
     	        char[] cs=name.toCharArray();

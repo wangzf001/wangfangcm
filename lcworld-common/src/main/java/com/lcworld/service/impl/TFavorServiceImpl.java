@@ -12,16 +12,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lcworld.consts.APPConstant;
 import com.lcworld.consts.FavorConst;
-import com.lcworld.dao.BgypfwProductDao;
 import com.lcworld.dao.TFavorDao;
-import com.lcworld.dao.TNoticeDao;
-import com.lcworld.dao.TYytcMealDao;
-import com.lcworld.dao.TsjyfwBookDao;
-import com.lcworld.entity.BgypfwProductEntity;
 import com.lcworld.entity.TFavorEntity;
-import com.lcworld.entity.TNoticeEntity;
-import com.lcworld.entity.TYytcMealEntity;
-import com.lcworld.entity.TsjyfwBookEntity;
 import com.lcworld.service.TFavorService;
 import com.lcworld.utils.R;
 import com.lcworld.utils.util.ValidateUtil;
@@ -32,14 +24,6 @@ import com.lcworld.utils.util.ValidateUtil;
 public class TFavorServiceImpl implements TFavorService {
 	@Autowired
 	private TFavorDao tFavorDao;
-	@Autowired
-	private TYytcMealDao tYytcMealDao;
-	@Autowired
-	private BgypfwProductDao bgypfwProductDao;
-	@Autowired
-	private TNoticeDao tNoticeDao;
-	@Autowired
-	private TsjyfwBookDao TsjyfwBookDao;
 	
 	@Override
 	public TFavorEntity queryObject(Integer id){
@@ -105,35 +89,6 @@ public class TFavorServiceImpl implements TFavorService {
 	private void changeFavorNumOf(Integer favortype, Integer entityid, int addOrDel) {
 		int amount = addOrDel == 0?-1:1;
 		switch (favortype.intValue()) {
-		case FavorConst.FAVORTYPE_NUTRITIOUS_MEALS:
-			TYytcMealEntity meal = tYytcMealDao.queryObject(entityid);
-			if (ValidateUtil.isValid(meal)) {
-				meal.setMFavorNum(meal.getMFavorNum()+amount);
-				tYytcMealDao.update(meal);
-			}
-			break;
-		case FavorConst.FAVORTYPE_BGYP_PRODUCT:
-			BgypfwProductEntity product = bgypfwProductDao.queryObject(entityid);
-			if (ValidateUtil.isValid(product)) {
-				product.setFavorNum(product.getFavorNum()+amount);
-				bgypfwProductDao.update(product);
-			}
-			break;
-		case FavorConst.FAVORTYPE_XXGG:
-			TNoticeEntity notice = tNoticeDao.queryObject(entityid);
-			if (ValidateUtil.isValid(notice)) {
-				notice.setFavorNum(notice.getFavorNum()+amount);
-				tNoticeDao.update(notice);
-			}
-			break;
-			
-		case FavorConst.FAVORTYPE_BOOK:
-		     TsjyfwBookEntity book = TsjyfwBookDao.queryObject(entityid);
-		    if (ValidateUtil.isValid(book)) {
-		        book.setFavorcount(book.getFavorcount()+1);
-		        TsjyfwBookDao.update(book);
-		    }
-		    break;
 		    
 		default:
 			break;
