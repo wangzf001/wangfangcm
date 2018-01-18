@@ -87,10 +87,7 @@
              <ref bean="threadPoolTaskExecutor" />
         </property>
     </bean>
-   
-    
-    
-    
+
     <!-- 配置定时任务-->
     <bean id="remindTask"
         class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
@@ -128,44 +125,6 @@
         </property>
     </bean>
 
-    <!-- 配置节能减排定时任务-->
-    <bean id="energyTask"
-          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <property name="targetObject">
-            <ref bean="energy" />
-        </property>
-        <property name="concurrent" value="false" />
-        <property name="targetMethod">
-            <value>getEnergyCost</value>
-        </property>
-    </bean>
-    <!-- 任务启动类 -->
-    <bean id="energy" class="com.lcworld.task.EnergyTask"></bean>
-    <!-- 配置定时任务时间-->
-    <bean id="energyTaskTriggers"
-          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail">
-            <ref bean="energyTask" />
-        </property>
-        <!-- cron表达式 每天上午1点更新数据-->
-        <property name="cronExpression">
-            <value>0 59 23 * * ?</value>
-        </property>
-    </bean>
-    <!-- scheduler factory 开启定时任务-->
-    <bean id="energySchedulerFactory" lazy-init="false" autowire="no"
-          class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-        <property name="triggers">
-            <list>
-                <ref bean="energyTaskTriggers" />
-            </list>
-        </property>
-        <property name="taskExecutor">
-            <ref bean="threadPoolTaskExecutor" />
-        </property>
-    </bean>
-    
-    
     <bean id="threadPoolTaskExecutor" scope="singleton"
       class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
       <!-- 核心线程数，默认为1 -->

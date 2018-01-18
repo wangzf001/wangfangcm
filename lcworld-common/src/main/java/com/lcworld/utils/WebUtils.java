@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.lcworld.entity.UserCaptchaEntity;
+
 import com.lcworld.exception.ZHHQException;
 
 /**

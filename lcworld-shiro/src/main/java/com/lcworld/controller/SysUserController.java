@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.lcworld.entity.ServiceEntity;
-import com.lcworld.entity.TbMessageOrderWebEntity;
 import com.lcworld.service.ServiceService;
-import com.lcworld.service.TbMessageOrderWebService;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,8 +50,6 @@ public class SysUserController extends AbstractController {
 	private SysUserService sysUserService;
 	@Autowired
 	private SysUserRoleService sysUserRoleService;
-	@Autowired
-	private TbMessageOrderWebService tbMessageOrderWebService;
 	@Autowired
 	private ServiceService serviceService;
 
@@ -373,10 +369,10 @@ public class SysUserController extends AbstractController {
 		//根据用户类型，获取服务消息列表
 		List<String> serviceList = serviceService.getServiceTypeList(getUser().getUserId());
 		params.put("serverTypeIds",serviceList);
-		List<TbMessageOrderWebEntity> tbMessageOrderWebList = tbMessageOrderWebService.queryList(query);
-		int total = tbMessageOrderWebService.queryTotal(query);
+//		List<TbMessageOrderWebEntity> tbMessageOrderWebList = tbMessageOrderWebService.queryList(query);
+//		int total = tbMessageOrderWebService.queryTotal(query);
 
-		PageUtils pageUtil = new PageUtils(tbMessageOrderWebList, total, query.getLimit(), query.getPage());
+		PageUtils pageUtil = null;//new PageUtils(tbMessageOrderWebList, total, query.getLimit(), query.getPage());
 
 		return R.ok().put("page", pageUtil);
 	}

@@ -18,14 +18,12 @@ import com.lcworld.consts.APPConstant;
 import com.lcworld.consts.FavorConst;
 import com.lcworld.entity.TFavorEntity;
 import com.lcworld.interceptor.TokenCheckInterceptor;
-import com.lcworld.service.ICollectionService;
 import com.lcworld.service.TFavorService;
 import com.lcworld.utils.PageUtils;
 import com.lcworld.utils.Query;
 import com.lcworld.utils.R;
 import com.lcworld.utils.ValidateUtil;
 
-import com.lcworld.factory.FavorServiceFactory;
 
 
 /**
@@ -41,8 +39,6 @@ public class TFavorController {
 	private Logger log = LoggerFactory.getLogger(TFavorController.class);
 	@Autowired
 	private TFavorService tFavorService;
-	@Autowired
-	private FavorServiceFactory favorServiceFactory;
 	
 	/**
 	 * 点击收藏按钮(添加或删除)
@@ -103,8 +99,8 @@ public class TFavorController {
 		map.put("favoruid", params.getInteger("uid"));
 		map.put("favortype", type);
 		Query query = new Query(map);
-		ICollectionService<?> service = favorServiceFactory.getService(type);
-		List<?> list = service.queryFavorList(query);
+		//ICollectionService<?> service = favorServiceFactory.getService(type);
+		List<?> list = null;//service.queryFavorList(query);
 		return R.ok().put("list", list);
 	}
 //	/**

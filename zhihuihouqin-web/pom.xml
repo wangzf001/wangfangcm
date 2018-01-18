@@ -41,11 +41,6 @@
             <artifactId>lcworld-api</artifactId>
             <version>${lcworld-version}</version>
         </dependency> -->
-     <dependency>
-     	<groupId>com.lcworld</groupId>
-     	<artifactId>lcworld-schedule</artifactId>
-     	<version>1.0.0</version>
-     </dependency>
 	</dependencies>
 	<build>
 		<finalName>zhihuihouqin-web</finalName>

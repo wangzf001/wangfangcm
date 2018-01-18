@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lcworld.dao.WfAdInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lcworld.entity.WfAdInfoEntity" id="wfAdInfoMap">
+        <result property="id" column="id"/>
+        <result property="adtitle" column="adTitle"/>
+        <result property="addesc" column="adDesc"/>
+        <result property="imgurl" column="imgUrl"/>
+        <result property="adstatus" column="adStatus"/>
+        <result property="adstarttime" column="adStartTime"/>
+        <result property="adendtime" column="adEndTime"/>
+        <result property="adtype" column="adType"/>
+        <result property="h5url" column="h5Url"/>
+        <result property="courseid" column="courseId"/>
+        <result property="ordernum" column="orderNum"/>
+    </resultMap>
+
+	<select id="queryObject" resultType="com.lcworld.entity.WfAdInfoEntity">
+		select * from wf_ad_info where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.lcworld.entity.WfAdInfoEntity">
+		select * from wf_ad_info
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from wf_ad_info 
+	</select>
+	 
+	<insert id="save" parameterType="com.lcworld.entity.WfAdInfoEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into wf_ad_info
+		(
+			`adTitle`, 
+			`adDesc`, 
+			`imgUrl`, 
+			`adStatus`, 
+			`adStartTime`, 
+			`adEndTime`, 
+			`adType`, 
+			`h5Url`, 
+			`courseId`, 
+			`orderNum`
+		)
+		values
+		(
+			#{adtitle}, 
+			#{addesc}, 
+			#{imgurl}, 
+			#{adstatus}, 
+			#{adstarttime}, 
+			#{adendtime}, 
+			#{adtype}, 
+			#{h5url}, 
+			#{courseid}, 
+			#{ordernum}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.lcworld.entity.WfAdInfoEntity">
+		update wf_ad_info 
+		<set>
+			<if test="adtitle != null">`adTitle` = #{adtitle}, </if>
+			<if test="addesc != null">`adDesc` = #{addesc}, </if>
+			<if test="imgurl != null">`imgUrl` = #{imgurl}, </if>
+			<if test="adstatus != null">`adStatus` = #{adstatus}, </if>
+			<if test="adstarttime != null">`adStartTime` = #{adstarttime}, </if>
+			<if test="adendtime != null">`adEndTime` = #{adendtime}, </if>
+			<if test="adtype != null">`adType` = #{adtype}, </if>
+			<if test="h5url != null">`h5Url` = #{h5url}, </if>
+			<if test="courseid != null">`courseId` = #{courseid}, </if>
+			<if test="ordernum != null">`orderNum` = #{ordernum}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from wf_ad_info where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from wf_ad_info where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

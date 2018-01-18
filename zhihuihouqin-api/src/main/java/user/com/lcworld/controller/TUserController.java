@@ -50,22 +50,9 @@ public class TUserController {
     @Autowired
     private DepartService departService;
     @Autowired
-    private OfficeService officeService;
-    @Autowired
-    private PurchaseAccountService purchaseAccountService;
-    @Autowired
     private InneruserService inneruserService;
     @Autowired
-    private VisiuserService visitUserService;
-    @Autowired
     private VisiuserLogService visiuserLogService;
-    @Autowired
-    private UserVisibyService userVisibyService;
-    @Autowired
-    private TalkService talkService;
-
-    @Autowired
-    private BuildingService buildingService;
 
     /**
      * 用户登录
@@ -512,23 +499,6 @@ public class TUserController {
     }
 
 
-    /**
-     * 添加来访记录
-     *
-     * @param req
-     * @return
-     * @throws ParseException
-     */
-    @RequestMapping("/addVisitLog")
-    public R addVisitLog(HttpServletRequest req) throws ParseException {
-        String biz = req.getParameter("biz");
-        log.debug(DateUtils.format(new Date(),DateUtils.DATE_TIME_PATTERN)+"--被访人添加来访记录  biz:" + biz);
-        Integer uid = WebUtils.getUid(req);
-        VisiuserEntity visitUser = FastJSONUtils.getObject(biz, VisiuserEntity.class);
-        visitUser.setUid(uid);
-        visitUserService.savevisituser(visitUser);
-        return R.ok();
-    }
 
     /**
      * 获取来访人员填写地址
@@ -607,154 +577,6 @@ public class TUserController {
 
 
     /**
-     * 添加来访记录
-     *
-     * @param visitUser
-     * @return
-     * @throws ParseException
-     */
-    @RequestMapping("/addforeignuser")
-    @IgnoreSign
-    @IgnoreToken
-    public R addforeignuser(@RequestBody VisiuserEntity visitUser) throws ParseException {
-        log.debug(DateUtils.format(new Date(),DateUtils.DATE_TIME_PATTERN)+"--来访人添加来访记录  visitUser:" + JSONObject.toJSONString(visitUser));
-        try {
-            visitUser.setVisittime(DateUtil.parse(visitUser.getVisittimeStr(), "yyyy-MM-dd HH:mm"));
-            visitUserService.updateVisitUserlog(visitUser);
-        } catch (Exception e) {
-            if (e instanceof ZHHQException) {
-                return R.error(((ZHHQException) e).getMsg());
-            } else {
-                return R.error("服务异常，请联系管理员");
-            }
-        }
-        return R.ok();
-    }
-
-
-    /**
-     * 来访人补充信息
-     *
-     * @param req
-     * @return
-     * @throws ParseException
-     */
-
-    @IgnoreSign
-    @IgnoreToken
-    @GetMapping("/getvisitinfo")
-    public ModelAndView getvisitinfo(HttpServletRequest req, @RequestParam Integer uid, @RequestParam String stamp) throws ParseException {
-        ModelAndView result = new ModelAndView();
-        JSONObject obj = new JSONObject();
-        obj.put("uid", uid);
-        obj.put("stamp", stamp);
-        VisiuserEntity visitUser = new VisiuserEntity();
-        visitUser.setBuildingEntityList(buildingService.queryList(new JSONObject()));
-        List<VisiuserLogEntity> loglist = visiuserLogService.queryList(obj);
-        if (ValidateUtil.isValid(loglist)) {
-            VisiuserLogEntity l = loglist.get(0);
-            if (ValidateUtil.isValid(l.getVmobile())) {
-                visitUser.setChecked(l.getChecked());
-                visitUser.setVisitchecked(l.getVisitchecked());
-                visitUser.setNotify(l.getNotify());
-                visitUser.setOperatetype(1);
-                visitUser.setRealname(l.getRealname());
-                visitUser.setStamp(l.getStamp());
-                visitUser.setVidnum(l.getVidnum());
-                visitUser.setVisittime(l.getVisittime());
-                visitUser.setVisittimeStr(DateUtil.format(visitUser.getVisittime(), "yyyy-MM-dd HH:mm"));
-                visitUser.setUid(l.getUid());
-                visitUser.setUnit(l.getUnit());
-                visitUser.setVmobile(l.getVmobile());
-                visitUser.setVname(l.getVname());
-                visitUser.setVpnum(l.getVpnum().toString());
-                visitUser.setId(l.getVuid());
-                visitUser.setVlid(l.getId());
-                visitUser.setVisitreason(l.getVisitreason());
-                visitUser.setAdminreason(l.getAdminreason());
-                visitUser.setBuildnum(l.getBuildnum());
-                JSONObject params = new JSONObject();
-                params.put("vlid", l.getId());
-                List<UserVisibyEntity> bylist = userVisibyService.queryList(params);
-                visitUser.setByuserlist(bylist);
-                visitUser.setOperatetype(1);
-            } else {
-
-                visitUser.setRealname(l.getRealname());
-                visitUser.setStamp(stamp);
-                visitUser.setUid(uid);
-                visitUser.setOperatetype(0);
-            }
-            result.setViewName("lfry.jsp");
-            result.addObject("visitUser", visitUser);
-        } else {
-            result.setViewName("error.jsp");
-            result.addObject("msg", "您无权访问");
-        }
-        return result;
-
-    }
-
-    /**
-     * 来访人员订单详情
-     *
-     * @param request
-     * @return
-     * @throws ParseException
-     */
-    @IgnoreToken
-    @IgnoreSign
-    @RequestMapping("/visitDetail")
-    public R visitDetail(HttpServletRequest request) throws ParseException {
-        R result = new R();
-        String biz = request.getParameter("biz");
-        log.debug(biz);
-        JSONObject params = FastJSONUtils.getJSONObject(biz);
-        Integer id = params.getInteger("oid");
-        Integer type = params.getInteger("type");
-        VisiuserEntity visiuserEntity = null;
-        if (type == 10) {
-            visiuserEntity = visitUserService.queryVisitLogById(id);
-        } else {
-            visiuserEntity = visitUserService.queryObjectByOid(id);
-        }
-        result.put("visitOrder", visiuserEntity);
-        return result;
-    }
-
-
-    /**
-     * 来访列表
-     *
-     * @param request
-     * @return
-     * @throws ParseException
-     */
-    @RequestMapping("/orderlist")
-    public R orderlist(HttpServletRequest request) throws ParseException {
-        R result = new R();
-        String biz = request.getParameter("biz");
-        log.debug(biz);
-        Integer uid = WebUtils.getUid(request);
-        JSONObject params = FastJSONUtils.getJSONObject(biz);
-        params.put("statuslist", addTypeParams(params));
-        params.put("uid", uid);
-        Query q = new Query(params);
-        talkService.setreaded(params.getInteger("noticeid"));
-        int type = params.getInteger("type").intValue();
-        List<Map<String, Object>> list = null;
-        if (10 == type) {
-            list = visitUserService.queryvuserList(q);
-
-        } else {
-            list = visitUserService.queryOrderList(q);
-        }
-        result.put("orderlist", list);
-        return result;
-    }
-
-
-    /**
      * 校验验证码
      *
      * @param req
@@ -794,66 +616,6 @@ public class TUserController {
             }
         }
         return R.error(1007, "未发送验证码");
-    }
-
-    /**
-     * 来访人审核
-     *
-     * @param req
-     * @return
-     */
-    @RequestMapping("/check")
-    public R check(HttpServletRequest req) {
-        String biz = req.getParameter("biz");
-        //查询列表数据
-        JSONObject params = JSONObject.parseObject(biz);
-        //参数
-        Integer orderid = params.getInteger("orderid");
-        //参数校验
-        Assert.isBlank(String.valueOf(orderid),"orderid不能为空");
-        String reason = params.getString("reason");
-        Integer check = params.getInteger("check");
-        //参数校验
-        Assert.isBlank(String.valueOf(check),"check不能为空");
-        //添加uid到params
-        Object uid = req.getAttribute(TokenCheckInterceptor.LOGIN_USER_KEY);
-        if (ValidateUtil.isValid(uid)) {
-            params.put("uid", uid);
-        } else {
-            //return R.error(1,"未登录");
-        }
-        VisiuserLogEntity vlog = visiuserLogService.queryObject(orderid);
-        vlog.setVisitchecked(check);
-        if(check != 1){
-            vlog.setVisitreason(reason);
-        }else {
-            VisiuserEntity visiuserEntity = new VisiuserEntity();
-            visiuserEntity.setVname(vlog.getVname());
-            visiuserEntity.setVmobile(vlog.getVmobile());
-            visiuserEntity.setBuildnum(vlog.getBuildnum());
-            visiuserEntity.setRoomnum(vlog.getRoomnum());
-            visiuserEntity.setReason(vlog.getVisitreason());
-            visiuserEntity.setExpertarrivaltime(visiuserEntity.getExpertarrivaltime());
-            visiuserEntity.setVperiod(1);
-            visiuserEntity.setVpnum(String.valueOf(vlog.getVpnum()));
-            visiuserEntity.setUid(vlog.getUid());
-            visiuserEntity.setChecked(vlog.getChecked());
-            visiuserEntity.setVidnum(vlog.getVidnum());
-            visiuserEntity.setPhonenum(vlog.getPhonenum());
-            visiuserEntity.setValid(1);
-            visiuserEntity.setRealname(vlog.getRealname());
-            visiuserEntity.setVisittime(vlog.getVisittime());
-            visiuserEntity.setCreatetime(new Date());
-            visiuserEntity.setStatus(1);
-            visiuserEntity.setIsdel(0);
-            visiuserEntity.setVisitchecked(vlog.getVisitchecked());
-            String orderCode = OrderCodeGenerator.createOrderCode(APPConstant.TYPE_VISIT_USER);
-            visiuserEntity.setOrdercode(orderCode);
-            vlog.setOrdercode(orderCode);
-            visitUserService.save(visiuserEntity);
-        }
-        visiuserLogService.update(vlog);
-        return R.ok();
     }
 
     /**
@@ -904,8 +666,8 @@ public class TUserController {
         }
         TUserEntity user = tUserService.queryObject(params.getInteger("uid"));
         HashMap<String, Object> userMap = new HashMap<>();
-        List<PurchaseDTO> pubPurchaseList = purchaseAccountService.getPubPurchaseList(params.getInteger("uid"), null);
-        userMap.put("hasBuyAuth", pubPurchaseList.size() == 0 ? 0 : 1);
+        //List<PurchaseDTO> pubPurchaseList = purchaseAccountService.getPubPurchaseList(params.getInteger("uid"), null);
+        userMap.put("hasBuyAuth", 1);
         userMap.put("photo", user.getPhoto() == null ? "" : user.getPhoto());
         userMap.put("nickname", user.getNickname() == null ? "" : user.getNickname());
         userMap.put("mobile", user.getMobile());
@@ -915,11 +677,11 @@ public class TUserController {
         userMap.put("position", user.getPosition());
         DepartEntity depart = departService.queryObject(user.getDepartid());
         userMap.put("depart", ValidateUtil.isValid(depart) ? depart.getName() : "");
-        OfficeEntity office = officeService.queryObject(user.getOfficeid());
-        userMap.put("office", ValidateUtil.isValid(office) ? office.getName() : "");
-        BuildingEntity build = buildingService.queryObject(Integer.valueOf(user.getBuildnum()));
+       // OfficeEntity office = officeService.queryObject(user.getOfficeid());
+        userMap.put("office",  "");
+        //BuildingEntity build = buildingService.queryObject(Integer.valueOf(user.getBuildnum()));
         userMap.put("buildnum", user.getBuildnum());
-        userMap.put("buildName", build != null ? build.getBuildName() : user.getBuildnum());
+        userMap.put("buildName", 1);
         userMap.put("authStatus", user.getAuthStatus() == null ? 0 : user.getAuthStatus());
         userMap.put("id", user.getId());
         userMap.put("realname", user.getRealname() == null ? "" : user.getRealname());
@@ -997,8 +759,8 @@ public class TUserController {
         //查询列表数据
         String biz = req.getParameter("biz");
         JSONObject obj = FastJSONUtils.getJSONObject(biz);
-        List<OfficeEntity> officelist = officeService.queryList(obj);
-        return R.ok().put("officelist", officelist);
+        //List<OfficeEntity> officelist = officeService.queryList(obj);
+        return R.ok().put("officelist", 1);
     }
 
     /**
@@ -1098,8 +860,8 @@ public class TUserController {
     	JSONObject params = JSONObject.parseObject(biz);
         Query query = new Query(params);*/
 
-        List<BuildingEntity> buildingList = buildingService.queryList(new HashMap<String, Object>());
-        return R.ok().put("data", buildingList);
+        //List<BuildingEntity> buildingList = buildingService.queryList(new HashMap<String, Object>());
+        return R.ok().put("data", 1);
     }
 
     private List<Integer> addTypeParams(JSONObject params) {

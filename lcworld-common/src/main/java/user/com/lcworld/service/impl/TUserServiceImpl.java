@@ -11,12 +11,8 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.lcworld.dao.TUserDao;
-import com.lcworld.dao.UserWallelogDao;
-import com.lcworld.dao.UserWalletDao;
 import com.lcworld.dto.UserDTO;
 import com.lcworld.entity.TUserEntity;
-import com.lcworld.entity.UserWallelogEntity;
-import com.lcworld.entity.UserWalletEntity;
 import com.lcworld.service.TUserService;
 import com.lcworld.utils.Query;
 import com.lcworld.utils.ValidateUtil;
@@ -27,8 +23,6 @@ import com.lcworld.utils.ValidateUtil;
 public class TUserServiceImpl implements TUserService {
 	@Autowired
 	private TUserDao tUserDao;
-	@Autowired
-	private UserWalletDao userWalletDao;
 	
 	@Override
 	public TUserEntity queryObject(Integer id){
@@ -111,17 +105,6 @@ public class TUserServiceImpl implements TUserService {
         return thirdNum;
     }
 
-    @Override
-    public void saveUser(TUserEntity tuser) {
-        save(tuser);
-        //save walllet 
-        UserWalletEntity w = new UserWalletEntity();
-        w.setUid(tuser.getId());
-        w.setRemain(new BigDecimal(0));
-        w.setPublicRemain(new BigDecimal(0));
-        userWalletDao.save(w);
-        
-    }
 
     @Override
     public List<UserDTO> queryUserList(Query query) {
@@ -152,6 +135,12 @@ public class TUserServiceImpl implements TUserService {
     public TUserEntity queryByAvaliableUid(int uid) {
         return tUserDao.queryByAvaliableUid(uid);
     }
+
+	@Override
+	public void saveUser(TUserEntity tuser) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	
 }
