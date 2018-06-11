@@ -43,8 +43,7 @@ public class SignCheckInterceptor extends HandlerInterceptorAdapter {
 		
 	}
 
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-			throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)  throws Exception {
 
 		{
 			String requestUri = request.getRequestURI();
@@ -112,7 +111,7 @@ public class SignCheckInterceptor extends HandlerInterceptorAdapter {
 	}
 	
 	public static void main(String[] args) throws UnsupportedEncodingException {
-		String signString = URLEncoder.encode("{messagetype:3}", "UTF-8") + "1503642755" + SECRETKEY;
+		String signString = URLEncoder.encode("{}", "UTF-8") + "1503642755" + SECRETKEY;
 		String serverSign = DigestUtils.md5Hex(signString);
 		System.out.println(serverSign);
 	}

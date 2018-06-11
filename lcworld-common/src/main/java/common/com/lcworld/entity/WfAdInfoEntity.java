@@ -78,6 +78,7 @@ public class WfAdInfoEntity implements Serializable {
 	 * 设置：广告图片地址
 	 */
 	public void setImgurl(String imgurl) {
+		//http://wangfang.oss-cn-qingdao.aliyuncs.com/wf_course/imgPath/5bd087d55fd64fe9a31b3c90f39610e8.jpg
 		this.imgurl = imgurl;
 	}
 	/**

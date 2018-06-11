@@ -32,5 +32,7 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/json.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/ueditor-1.1.2.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/CCP_REST_SMS_SDK_JAVA_v2.6.3r.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/httpclient.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
